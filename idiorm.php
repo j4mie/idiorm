@@ -39,6 +39,7 @@
         private $where = array();
 
         private $data = array();
+        private $dirty_fields = array();
 
         // Are we updating or inserting?
         private $update_or_insert = self::UPDATE;
@@ -78,7 +79,7 @@
             $this->data = $data;
         }
 
-        public function create($data) {
+        public function create() {
             $this->update_or_insert = self::INSERT;
             return $this;
         }
@@ -127,7 +128,7 @@
                         $where[self::OPERATOR],
                         '?'
                     ));
-                    $this->values[] = $first[self::VALUE];
+                    $this->values[] = $where[self::VALUE];
                 }
             }
 
@@ -141,8 +142,7 @@
 
             if ($this->find_type == self::FIND_ONE) {
                 $result = $statement->fetch(PDO::FETCH_ASSOC);
-                $this->data = $result;
-                return $this;
+                return $result ? self::hydrate($this->table_name, $result) : $result;
             } else {
                 $instances = array();
                 while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
@@ -161,6 +161,62 @@
                 $quoted_values[] = '"' . $value . '"';
             }
             return vsprintf($sql, $quoted_values);
+        }
+
+        public function get($key) {
+            return isset($this->data[$key]) ? $this->data[$key] : null;
+        }
+
+        private function get_id_column_name() {
+            if (isset(self::$config['id_column_overrides'][$this->table_name])) {
+                return self::$config['id_column_overrides'][$this->table_name];
+            } else {
+                return self::$config['id_column'];
+            }
+        }
+
+        public function id() {
+            return $this->get($this->get_id_column_name());
+        }
+
+        public function set($key, $value) {
+            $this->data[$key] = $value;
+            $this->dirty_fields[$key] = $value;
+        }
+
+        public function save() {
+            $query = array();
+            $values = array_values($this->dirty_fields);
+
+            if ($this->update_or_insert == self::UPDATE) {
+                $query[] = "UPDATE";
+                $query[] = $this->table_name;
+                $query[] = "SET";
+                $field_list = array();
+                foreach ($this->dirty_fields as $key => $value) {
+                    $field_list[] = "$key = ?";
+                }
+                $query[] = join(", ", $field_list);
+                $query[] = "WHERE";
+                $query[] = $this->get_id_column_name();
+                $query[] = "= ?";
+                $values[] = $this->id();
+            } else {
+                $query[] = "INSERT INTO";
+                $query[] = $this->table_name;
+                $query[] = "(" . join(", ", array_keys($this->dirty_fields)) . ")";
+                $query[] = "VALUES";
+                $placeholders = array();
+                for ($i=0; $i<count($this->dirty_fields); $i++) {
+                    $placeholders[] = "?";
+                }
+                $query[] = "(" . join(", ", $placeholders) . ")";
+
+            }
+
+            $query = join(" ", $query);
+            $statement = self::$db->prepare($query);
+            $statement->execute($values);
         }
     }
 
