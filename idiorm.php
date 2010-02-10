@@ -204,8 +204,14 @@
          * in your chain, when you call run() you will receive
          * a single instance of the ORM class, or false if no
          * rows were returned.
+         * As a shortcut, you may supply an ID as a parameter
+         * to this method. This will perform a primary key
+         * lookup on the table.
          */
-        public function find_one() {
+        public function find_one($id=null) {
+            if(!is_null($id)) {
+                $this->where($this->get_id_column_name(), $id);
+            }
             $this->find_type = self::FIND_ONE;
             return $this->run();
         }
