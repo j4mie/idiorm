@@ -207,7 +207,7 @@
          */
         public function find_one() {
             $this->find_type = self::FIND_ONE;
-            return $this;
+            return $this->run();
         }
 
         /**
@@ -219,7 +219,7 @@
          */
         public function find_many() {
             $this->find_type = self::FIND_MANY;
-            return $this;
+            return $this->run();
         }
 
          /**
@@ -294,12 +294,12 @@
 
         /**
          * Execute the SELECT query that has been built up by chaining methods
-         * on this class. This should usually be the last method in your chain.
+         * on this class. This method is called by find_one() and find_many().
          * If find_one() has been called, this will return a single instance of
          * the class or false. If find_many() has been called, this will return
          * an array of instances of the class.
          */
-        public function run() {
+        private function run() {
             self::setup_db();
             $statement = self::$db->prepare($this->build_select());
             $statement->execute($this->values);
