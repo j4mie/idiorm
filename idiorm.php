@@ -45,8 +45,13 @@
         // ----------------------- //
 
         // Select WHERE operators
+        // These are "public" API and should
+        // be used (if needed) as the third
+        // argument to the where() method.
         const EQUALS = '=';
         const LIKE = 'LIKE';
+
+        // The rest are "private" API.
 
         // Find types
         const FIND_ONE = 0;
@@ -384,26 +389,31 @@
                 $query[] = "UPDATE";
                 $query[] = $this->table_name;
                 $query[] = "SET";
+
                 $field_list = array();
                 foreach ($this->dirty_fields as $key => $value) {
                     $field_list[] = "$key = ?";
                 }
                 $query[] = join(", ", $field_list);
+
                 $query[] = "WHERE";
                 $query[] = $this->get_id_column_name();
                 $query[] = "= ?";
                 $values[] = $this->id();
+
             } else {
+
                 $query[] = "INSERT INTO";
                 $query[] = $this->table_name;
                 $query[] = "(" . join(", ", array_keys($this->dirty_fields)) . ")";
                 $query[] = "VALUES";
+
                 $placeholders = array();
                 for ($i=0; $i<count($this->dirty_fields); $i++) {
                     $placeholders[] = "?";
                 }
-                $query[] = "(" . join(", ", $placeholders) . ")";
 
+                $query[] = "(" . join(", ", $placeholders) . ")";
             }
 
             $query = join(" ", $query);
