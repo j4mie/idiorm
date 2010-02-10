@@ -417,6 +417,7 @@
             }
 
             $query = join(" ", $query);
+            self::setup_db();
             $statement = self::$db->prepare($query);
             return $statement->execute($values);
         }
