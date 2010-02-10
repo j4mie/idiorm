@@ -75,6 +75,7 @@
             'connection_string' => 'sqlite://:memory:',
             'id_column' => 'id',
             'id_column_overrides' => array(),
+            'error_mode' => PDO::ERRMODE_EXCEPTION,
         );
 
         // Database connection, instance of the PDO class
@@ -143,8 +144,7 @@
          */
         private static function setup_db() {
             self::$db = new PDO(self::$config['connection_string']);
-            self::$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
+            self::$db->setAttribute(PDO::ATTR_ERRMODE, self::$config['error_mode']);
         }
 
         /**
@@ -418,8 +418,7 @@
 
             $query = join(" ", $query);
             $statement = self::$db->prepare($query);
-            $statement->execute($values);
-            return true;
+            return $statement->execute($values);
         }
     }
 
