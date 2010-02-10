@@ -427,5 +427,16 @@
             $statement = self::$db->prepare($query);
             return $statement->execute($values);
         }
+
+        // --------------------- //
+        // --- MAGIC METHODS --- //
+        // --------------------- //
+        public function __get($key) {
+            return $this->get($key);
+        }
+
+        public function __set($key, $value) {
+            $this->set($key, $value);
+        }
     }
 
