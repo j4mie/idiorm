@@ -442,6 +442,7 @@
                 $values[] = $this->id();
 
             } else {
+                $query[] = "INSERT INTO"; 
                 $query[] = $this->table_name;
                 $query[] = "(" . join(", ", array_keys($this->dirty_fields)) . ")";
                 $query[] = "VALUES";
@@ -466,6 +467,22 @@
             }
 
             return $success;
+        }
+
+        /**
+         * Delete this record from the database
+         */
+        public function delete() {
+            $query = array();
+            $query[] = "DELETE FROM";
+            $query[] = $this->table_name;
+            $query[] = "WHERE";
+            $query[] = $this->get_id_column_name();
+            $query[] = "= ?";
+            $query = join(" ", $query);
+            self::setup_db();
+            $statement = self::$db->prepare($query);
+            return $statement->execute(array($this->id()));
         }
 
         // --------------------- //
