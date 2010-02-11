@@ -448,7 +448,8 @@
                 $query[] = "VALUES";
 
                 $placeholders = array();
-                for ($i=0; $i<count($this->dirty_fields); $i++) {
+                $dirty_field_count = count($this->dirty_fields);
+                for ($i = 0; $i < $dirty_field_count; $i++) {
                     $placeholders[] = "?";
                 }
 
