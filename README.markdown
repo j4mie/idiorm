@@ -1,7 +1,27 @@
 Idiorm
 ======
 
+** Version 0.1 - Alpha **
+
 An lightweight nearly-zero-configuration object-relational mapper and fluent query builder for PHP5.
+
+Features
+--------
+
+* Makes simple queries and simple CRUD operations completely painless.
+* Gets out of the way when more complex SQL is required.
+* Built on top of [PDO](http://php.net/pdo).
+* Uses [prepared statements](http://uk.php.net/manual/en/pdo.prepared-statements.php) throughout to protect against [SQL injection](http://en.wikipedia.org/wiki/SQL_injection) attacks.
+* Requires no model classes, no XML configuration and no code generation: works out of the box, given only a connection string.
+* Database agnostic (untested).
+
+TODO
+----
+
+* Implement raw queries.
+* Improve documentation.
+* Proper testing.
+* More features.
 
 Philosophy
 ----------
