@@ -13,6 +13,7 @@ Features
 * Built on top of [PDO](http://php.net/pdo).
 * Uses [prepared statements](http://uk.php.net/manual/en/pdo.prepared-statements.php) throughout to protect against [SQL injection](http://en.wikipedia.org/wiki/SQL_injection) attacks.
 * Requires no model classes, no XML configuration and no code generation: works out of the box, given only a connection string.
+* Consists of just one class called `ORM`. Minimal global namespace pollution.
 * Database agnostic (untested).
 
 TODO
@@ -49,11 +50,11 @@ Then, pass a *Data Source Name* connection string to the `configure` method of t
 
 ### Querying ###
 
-Idiorm provides a [*fluent interface*](http://en.wikipedia.org/wiki/Fluent_interface) to enable simple queries to be built without writing a single character of SQL. If you've used [jQuery](http://jquery.com) at all, you'll be familiar with the concept of a fluent interface. It just means that you can *chain* methods calls together, one after another. This can make your code more readable, as the method calls strung together in order can start to look a bit like a sentence.
+Idiorm provides a [*fluent interface*](http://en.wikipedia.org/wiki/Fluent_interface) to enable simple queries to be built without writing a single character of SQL. If you've used [jQuery](http://jquery.com) at all, you'll be familiar with the concept of a fluent interface. It just means that you can *chain* method calls together, one after another. This can make your code more readable, as the method calls strung together in order can start to look a bit like a sentence.
 
 All Idiorm queries start with a call to the `for_table` static method on the ORM class. This tells the ORM which table to use when making the query. Method calls which add parameters to the query are then strung together. Finally, the chain is finished by calling either `find_one()` or `find_many()`, which executes the query and returns the result.
 
-Let's start with a simple example. Let's say we have a table called `person` which contains the columns `id` (the primary key of the record - Idiorm assumes the primary key column is called `id` but this is configurable, see below), `name`, `age` and `gender`.
+Let's start with a simple example. Say we have a table called `person` which contains the columns `id` (the primary key of the record - Idiorm assumes the primary key column is called `id` but this is configurable, see below [TODO]), `name`, `age` and `gender`.
 
 #### Single records ####
 
@@ -65,7 +66,7 @@ To find a single record where the `name` column has the value "Fred Bloggs":
 
 This roughly translates into the following SQL: `SELECT * FROM person WHERE name = "Fred Bloggs"`
 
-To find a single record by ID, you can pass the ID directly to the `find_one()` method:
+To find a single record by ID, you can pass the ID directly to the `find_one` method:
 
     ORM::for_table('person')->find_one(5);
 
@@ -83,9 +84,9 @@ To find all records where the `gender` is `female`:
 
 #### WHERE clauses ####
 
-The `where` method on the ORM class adds a single `WHERE` clause to your query. The method may be called (chained) multiple times to add more than one WHERE clause. All the WHERE clauses will be ANDed together when the query is run. Support for ORing WHERE clauses is not currently present; if a query requires an OR clause you should use the `where_raw` or `raw_select` [TODO].
+The `where` method on the ORM class adds a single `WHERE` clause to your query. The method may be called (chained) multiple times to add more than one WHERE clause. All the WHERE clauses will be ANDed together when the query is run. Support for ORing WHERE clauses is not currently present; if a query requires an OR clause you should use the `where_raw` or `raw_select` methods (see below). [TODO]
 
-By default, calling `where` with two parameters will combine them using an equals operator. For example, calling `where('name', 'Fred')` will result in the clause `WHERE name = "Fred"`. However, the `where` method takes an optional third parameter which specifies the type of operator to use. To specify this operator, constants are provided on the ORM class. Currently, the supported operators are: `ORM::EQUALS` and `ORM::LIKE`.
+By default, calling `where` with two parameters (the column name and the value) will combine them using an equals operator (`=`). For example, calling `where('name', 'Fred')` will result in the clause `WHERE name = "Fred"`. However, the `where` method takes an optional third parameter which specifies the type of operator to use. Constants for each operator are provided on the ORM class. Currently, the supported operators are: `ORM::EQUALS` and `ORM::LIKE`.
 
 #### LIMIT and OFFSET ####
 
@@ -95,17 +96,17 @@ The `limit` and `offset` methods map pretty closely to their SQL equivalents.
 
 ### Getting data from objects ###
 
-Once you've got a record (or set of records) back from a query, you can access its properties (the values stored in the columns in its corresponding table) in two ways: by using the `get` method on the object, or simply by accessing the property on the object directly. The following two forms are identical:
+Once you've got a set of records (objects) back from a query, you can access properties on those objects (the values stored in the columns in its corresponding table) in two ways: by using the `get` method, or simply by accessing the property on the object directly:
 
     $person = ORM::for_table('person')->find_one(5);
 
     // The following two forms are equivalent
-    echo $person->get('name');
-    echo $person->name;
+    $name = $person->get('name');
+    $name = $person->name;
 
 ### Updating records ###
 
-To update the database, change one or more of the properties of the object, then call the `save` method to commit the changes to the database. Again, you can change the values of the object's properties in one of two ways:
+To update the database, change one or more of the properties of the object, then call the `save` method to commit the changes to the database. Again, you can change the values of the object's properties either by using the `set` method or by setting the value of the property directly:
 
     $person = ORM::for_table('person')->find_one(5);
 
