@@ -442,8 +442,6 @@
                 $values[] = $this->id();
 
             } else {
-
-                $query[] = "INSERT INTO";
                 $query[] = $this->table_name;
                 $query[] = "(" . join(", ", array_keys($this->dirty_fields)) . ")";
                 $query[] = "VALUES";
@@ -459,7 +457,15 @@
             $query = join(" ", $query);
             self::setup_db();
             $statement = self::$db->prepare($query);
-            return $statement->execute($values);
+            $success = $statement->execute($values);
+
+            // If we've just inserted a new record, set the ID of this object
+            if ($this->update_or_insert == self::INSERT) {
+                $this->update_or_insert == self::UPDATE;
+                $this->data[$this->get_id_column_name()] = self::$db->lastInsertId();
+            }
+
+            return $success;
         }
 
         // --------------------- //
