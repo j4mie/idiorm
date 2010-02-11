@@ -60,7 +60,7 @@ Let's start with a simple example. Say we have a table called `person` which con
 
 #### Single records ####
 
-Any method chain that ends in `find_one` will return either a *single* instance of the ORM class representing the database row you requested, or `false` if no matching record was found.
+Any method chain that ends in `find_one()` will return either a *single* instance of the ORM class representing the database row you requested, or `false` if no matching record was found.
 
 To find a single record where the `name` column has the value "Fred Bloggs":
 
