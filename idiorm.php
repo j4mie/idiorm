@@ -12,7 +12,7 @@
      *
      * BSD Licensed.
      *
-     * Copyright (c) 2009, Jamie Matthews
+     * Copyright (c) 2010, Jamie Matthews
      * All rights reserved.
      *
      * Redistribution and use in source and binary forms, with or without
