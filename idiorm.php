@@ -97,6 +97,12 @@
         // Array of WHERE clauses
         private $where = array();
 
+        // LIMIT
+        private $limit = null;
+
+        // OFFSET
+        private $offset = null;
+
         // The data for a hydrated instance of the class
         private $data = array();
 
@@ -267,6 +273,22 @@
         }
 
         /**
+         * Add a LIMIT to the query
+         */
+        public function limit($limit) {
+            $this->limit = $limit;
+            return $this;
+        }
+
+        /**
+         * Add an OFFSET to the query
+         */
+        public function offset($offset) {
+            $this->offset = $offset;
+            return $this;
+        }
+
+        /**
          * Build a SELECT statement based on the clauses that have
          * been passed to this instance by chaining method calls.
          */
@@ -293,6 +315,18 @@
                     ));
                     $this->values[] = $where[self::VALUE];
                 }
+            }
+
+            // Add LIMIT if present
+            if (!is_null($this->limit)) {
+                $query[] = "LIMIT ?";
+                $this->values[] = $this->limit;
+            }
+
+            // Add OFFSET if present
+            if (!is_null($this->offset)) {
+                $query[] = "OFFSET ?";
+                $this->values[] = $this->offset;
             }
 
             return join(" ", $query);

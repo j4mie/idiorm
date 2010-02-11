@@ -66,3 +66,34 @@ To find all records where the `gender` is `female`:
 The `where` method on the ORM class adds a single `WHERE` clause to your query. The method may be called (chained) multiple times to add more than one WHERE clause. All the WHERE clauses will be ANDed together when the query is run. Support for ORing WHERE clauses is not currently present; if a query requires an OR clause you should use the `where_raw` or `raw_query`, see below.
 
 By default, calling `where` with two parameters will combine them using an equals operator. For example, calling `where('name', 'Fred')` will result in the clause `WHERE name = "Fred"`. However, the `where` method takes an optional third parameter which specifies the type of operator to use. To specify this operator, constants are provided on the ORM class. Currently, the supported operators are: `ORM::EQUALS` and `ORM::LIKE`.
+
+#### LIMIT and OFFSET ####
+
+The `limit` and `offset` methods map pretty closely to their SQL equivalents.
+
+    ORM::for_table('person')->where('gender', 'female')->limit(5)->offset(10)->find_many();
+
+### Getting data from objects ###
+
+Once you've got a record (or set of records) back from a query, you can access its properties (the values stored in the columns in its corresponding table) in two ways: by using the `get` method on the object, or simply by accessing the property on the object directly. The following two forms are identical:
+
+    $person = ORM::for_table('person')->find_one(5);
+
+    if ($person) {
+        echo $person->get('name');
+        echo $person->name;
+    }
+
+### Updating records ###
+
+To update the database, change one or more of the properties of the object, then call the `save` method to commit the changes to the database. Again, you can change the values of the object's properties in one of two ways:
+
+    $person = ORM::for_table('person')->find_one(5);
+
+    if ($person) {
+        $person->set('name', 'Bob Smith');
+        $person->age = 20;
+        $person->save();
+    }
+
+Once you've got an object back from the database, how do you 
