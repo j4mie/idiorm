@@ -61,10 +61,18 @@
         const UPDATE = 0;
         const INSERT = 1;
 
+        // Order by
+        const ASC = 'ASC';
+        const DESC = 'DESC';
+
+        // Order by array keys
+        const ORDER_BY_COLUMN_NAME = 0;
+        const ORDER_BY_ORDERING = 1;
+
         // Where clauses array keys
-        const COLUMN_NAME = 0;
-        const VALUE = 1;
-        const OPERATOR = 2;
+        const WHERE_COLUMN_NAME = 0;
+        const WHERE_VALUE = 1;
+        const WHERE_OPERATOR = 2;
 
         // ------------------------ //
         // --- CLASS PROPERTIES --- //
@@ -102,6 +110,9 @@
 
         // OFFSET
         private $offset = null;
+
+        // ORDER BY
+        private $order_by = array();
 
         // The data for a hydrated instance of the class
         private $data = array();
@@ -265,9 +276,9 @@
          */
         public function where($column_name, $value, $operator=self::EQUALS) {
             $this->where[] = array(
-                self::COLUMN_NAME => $column_name,
-                self::VALUE => $value,
-                self::OPERATOR => $operator
+                self::WHERE_COLUMN_NAME => $column_name,
+                self::WHERE_VALUE => $value,
+                self::WHERE_OPERATOR => $operator
             );
             return $this;
         }
@@ -289,6 +300,31 @@
         }
 
         /**
+         * Add an ORDER BY clause to the query
+         */
+        private function add_order_by($column_name, $ordering) {
+            $this->order_by[] = array(
+                self::ORDER_BY_COLUMN_NAME => $column_name,
+                self::ORDER_BY_ORDERING => $ordering,
+            );
+            return $this;
+        }
+
+        /**
+         * Add an ORDER BY column DESC clause
+         */
+        public function order_by_desc($column_name) {
+            return $this->add_order_by($column_name, self::DESC);
+        }
+
+        /**
+         * Add an ORDER BY column ASC clause
+         */
+        public function order_by_asc($column_name) {
+            return $this->add_order_by($column_name, self::ASC);
+        }
+
+        /**
          * Build a SELECT statement based on the clauses that have
          * been passed to this instance by chaining method calls.
          */
@@ -300,20 +336,20 @@
                 $query[] = "WHERE";
                 $first = array_shift($this->where);
                 $query[] = join(" ", array(
-                    $first[self::COLUMN_NAME],
-                    $first[self::OPERATOR],
+                    $first[self::WHERE_COLUMN_NAME],
+                    $first[self::WHERE_OPERATOR],
                     '?'
                 ));
-                $this->values[] = $first[self::VALUE];
+                $this->values[] = $first[self::WHERE_VALUE];
 
                 while($where = array_shift($this->where)) {
                     $query[] = "AND";
                     $query[] = join(" ", array(
-                        $where[self::COLUMN_NAME],
-                        $where[self::OPERATOR],
+                        $where[self::WHERE_COLUMN_NAME],
+                        $where[self::WHERE_OPERATOR],
                         '?'
                     ));
-                    $this->values[] = $where[self::VALUE];
+                    $this->values[] = $where[self::WHERE_VALUE];
                 }
             }
 
@@ -327,6 +363,17 @@
             if (!is_null($this->offset)) {
                 $query[] = "OFFSET ?";
                 $this->values[] = $this->offset;
+            }
+
+            // Add ORDER BY clause(s)
+            $order_by = array();
+            foreach ($this->order_by as $order) {
+                $order_by[] = $order[self::ORDER_BY_COLUMN_NAME] . ' ' . $order[self::ORDER_BY_ORDERING];
+            }
+
+            if (count($order_by) != 0) {
+                $query[] = "ORDER BY";
+                $query[] = join(", ", $order_by);
             }
 
             return join(" ", $query);

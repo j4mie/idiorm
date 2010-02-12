@@ -96,6 +96,12 @@ The `limit` and `offset` methods map pretty closely to their SQL equivalents.
 
     ORM::for_table('person')->where('gender', 'female')->limit(5)->offset(10)->find_many();
 
+#### ORDER BY ####
+
+Two methods are provided to add `ORDER BY` clauses to your query. These are `order_by_desc` and `order_by_asc`, each of which takes a column name to sort by.
+
+    ORM::for_table('person')->order_by_asc('gender')->order_by_desc('name')->find_many();
+
 ### Getting data from objects ###
 
 Once you've got a set of records (objects) back from a query, you can access properties on those objects (the values stored in the columns in its corresponding table) in two ways: by using the `get` method, or simply by accessing the property on the object directly:
