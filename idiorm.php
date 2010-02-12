@@ -368,7 +368,8 @@
             // Add ORDER BY clause(s)
             $order_by = array();
             foreach ($this->order_by as $order) {
-                $order_by[] = $order[self::ORDER_BY_COLUMN_NAME] . ' ' . $order[self::ORDER_BY_ORDERING];
+                $order_by[] = "? " . $order[self::ORDER_BY_ORDERING];
+                $this->values[] = $order[self::ORDER_BY_COLUMN_NAME];
             }
 
             if (count($order_by) != 0) {
