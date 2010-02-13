@@ -1,5 +1,10 @@
 <?php
-    // Basic testing for Idiorm
+    /*
+     * Basic testing for Idiorm
+     *
+     * Checks that the generated SQL is correct
+     *
+     */
 
     require_once "../idiorm.php";
     require_once "test_classes.php";
@@ -67,8 +72,6 @@
     $widget->delete();
     $expected = 'DELETE FROM widget WHERE id = "1"';
     Tester::check_equal("Delete data", $expected);
-
-
 
     Tester::report();
 ?>

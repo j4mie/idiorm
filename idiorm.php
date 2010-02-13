@@ -405,24 +405,6 @@
         }
 
         /**
-         * For debugging only. Returns a string representation of the query
-         * that would be executed by calling run() on the current instance of the
-         * class. Because PDO works using prepared statements, this can provide
-         * only a rough representation of the query, but this will usually be enough
-         * to check that your query has been build as expected.
-         */
-        public function as_sql() {
-            $sql = $this->build_select();
-            $sql = str_replace("?", "%s", $sql);
-
-            $quoted_values = array();
-            foreach ($this->values as $value) {
-                $quoted_values[] = '"' . $value . '"';
-            }
-            return vsprintf($sql, $quoted_values);
-        }
-
-        /**
          * Return the value of a property of this object (database row)
          * or null if not present.
          */
