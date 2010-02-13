@@ -52,7 +52,7 @@ Then, pass a *Data Source Name* connection string to the `configure` method of t
 
 Idiorm provides a [*fluent interface*](http://en.wikipedia.org/wiki/Fluent_interface) to enable simple queries to be built without writing a single character of SQL. If you've used [jQuery](http://jquery.com) at all, you'll be familiar with the concept of a fluent interface. It just means that you can *chain* method calls together, one after another. This can make your code more readable, as the method calls strung together in order can start to look a bit like a sentence.
 
-All Idiorm queries start with a call to the `for_table` static method on the ORM class. This tells the ORM which table to use when making the query. Method calls are then chained together to add clauses to the query. Finally, the chain is finished by calling either `find_one()` or `find_many()`, which executes the query and returns the result.
+All Idiorm queries start with a call to the `for_table` static method on the ORM class. This tells the ORM which table to use when making the query. Method calls which are then strung together. Finally, the chain is finished by calling either `find_one()` or `find_many()`, which executes the query and returns the result.
 
 Let's start with a simple example. Say we have a table called `person` which contains the columns `id` (the primary key of the record - Idiorm assumes the primary key column is called `id` but this is configurable, see below), `name`, `age` and `gender`.
 
@@ -82,7 +82,7 @@ To find all records where the `gender` is `female`:
 
     $females = ORM::for_table('person')->where('gender', 'female')->find_many();
 
-#### `WHERE` clauses ####
+#### WHERE clauses ####
 
 The `where` method on the ORM class adds a single `WHERE` clause to your query. The method may be called (chained) multiple times to add more than one `WHERE` clause. All the `WHERE` clauses will be `AND`ed together when the query is run. Support for `OR`ing `WHERE` clauses is not currently present; if a query requires an `OR` operator you should use the `where_raw` or `raw_select` methods (see below).
 
