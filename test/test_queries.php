@@ -30,6 +30,10 @@
     $expected = 'SELECT * FROM widget WHERE name = "Fred" AND age = "10"';
     Tester::check_equal("Multiple WHERE clauses", $expected);
 
+    ORM::for_table('widget')->where_like('name', '%Fred%')->find_one();
+    $expected = 'SELECT * FROM widget WHERE name LIKE "%Fred%"';
+    Tester::check_equal("where_like method", $expected);
+
     ORM::for_table('widget')->limit(5)->find_one();
     $expected = 'SELECT * FROM widget LIMIT "5"';
     Tester::check_equal("LIMIT clause", $expected);

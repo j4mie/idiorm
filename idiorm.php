@@ -45,13 +45,8 @@
         // ----------------------- //
 
         // Select WHERE operators
-        // These are "public" API and should
-        // be used (if needed) as the third
-        // argument to the where() method.
         const EQUALS = '=';
         const LIKE = 'LIKE';
-
-        // The rest are "private" API.
 
         // Find types
         const FIND_ONE = 0;
@@ -305,6 +300,10 @@
          * parameter to this method may be used to indicate other
          * operators such as LIKE. Class constants should be used to
          * provide this operator.
+         *
+         * Note: the $operator argument is now really private API. The
+         * where_* methods below should be used instead to add different
+         * types of WHERE clause.
          */
         public function where($column_name, $value, $operator=self::EQUALS) {
             $this->where[] = array(
@@ -314,6 +313,14 @@
             );
             return $this;
         }
+
+        /**
+         * Add a WHERE ... LIKE clause to your query.
+         */
+        public function where_like($column_name, $value) {
+            return $this->where($column_name, $value, self::LIKE);
+        }
+
 
         /**
          * Add a raw WHERE clause to the query. The clause should
