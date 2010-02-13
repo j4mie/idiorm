@@ -160,8 +160,10 @@
          * Set up the database connection used by the class.
          */
         private static function setup_db() {
-            self::$db = new PDO(self::$config['connection_string']);
-            self::$db->setAttribute(PDO::ATTR_ERRMODE, self::$config['error_mode']);
+            if (!is_object(self::$db)) {
+                self::$db = new PDO(self::$config['connection_string']);
+                self::$db->setAttribute(PDO::ATTR_ERRMODE, self::$config['error_mode']);
+            }
         }
 
         /**
@@ -179,9 +181,7 @@
          * required outside the class.
          */
         public static function get_db() {
-            if (!is_object(self::$db)) {
-                self::setup_db();
-            }
+            self::setup_db();
             return self::$db;
         }
 
