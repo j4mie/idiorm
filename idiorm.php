@@ -105,6 +105,15 @@
         // Array of WHERE clauses
         private $where = array();
 
+        // Is the WHERE clause raw?
+        private $where_is_raw = false;
+
+        // Raw WHERE clause
+        private $raw_where_clause = '';
+
+        // Raw WHERE parameters
+        private $raw_where_parameters = array();
+
         // LIMIT
         private $limit = null;
 
@@ -284,6 +293,18 @@
         }
 
         /**
+         * Add a raw WHERE clause to the query. The clause should
+         * contain question mark placeholders, which will be bound
+         * to the parameters supplied in the second argument.
+         */
+        public function where_raw($clause, $parameters) {
+            $this->where_is_raw = true;
+            $this->raw_where_clause = $clause;
+            $this->raw_where_parameters = $parameters;
+            return $this;
+        }
+
+        /**
          * Add a LIMIT to the query
          */
         public function limit($limit) {
@@ -332,7 +353,11 @@
             $query = array();
             $query[] = 'SELECT * FROM ' . $this->table_name;
 
-            if (count($this->where) > 0) {
+            if ($this->where_is_raw) { // Raw WHERE clause
+                $query[] = "WHERE";
+                $query[] = $this->raw_where_clause;
+                $this->values = array_merge($this->values, $this->raw_where_parameters);
+            } else if (count($this->where) > 0) { // Standard WHERE clauses
                 $query[] = "WHERE";
                 $first = array_shift($this->where);
                 $query[] = join(" ", array(

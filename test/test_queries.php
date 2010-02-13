@@ -54,6 +54,10 @@
     $expected = 'SELECT * FROM widget WHERE name = "Fred" LIMIT "5" OFFSET "5" ORDER BY "name" ASC';
     Tester::check_equal("Complex query", $expected);
 
+    ORM::for_table('widget')->where_raw('name = ? AND (age = ? OR age = ?)', array('Fred', 5, 10))->find_many();
+    $expected = 'SELECT * FROM widget WHERE name = "Fred" AND (age = "5" OR age = "10")';
+    Tester::check_equal("Raw WHERE clause", $expected);
+
     $widget = ORM::for_table('widget')->create();
     $widget->name = "Fred";
     $widget->age = 10;
