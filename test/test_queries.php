@@ -73,5 +73,27 @@
     $expected = 'DELETE FROM widget WHERE id = "1"';
     Tester::check_equal("Delete data", $expected);
 
+    ORM::configure('id_column', 'primary_key');
+    ORM::for_table('widget')->find_one(5);
+    $expected = 'SELECT * FROM widget WHERE primary_key = "5"';
+    Tester::check_equal("Setting: id_column", $expected);
+
+    ORM::configure('id_column_overrides', array(
+        'widget' => 'widget_id',
+        'widget_handle' => 'widget_handle_id',
+    ));
+
+    ORM::for_table('widget')->find_one(5);
+    $expected = 'SELECT * FROM widget WHERE widget_id = "5"';
+    Tester::check_equal("Setting: id_column_overrides, first test", $expected);
+
+    ORM::for_table('widget_handle')->find_one(5);
+    $expected = 'SELECT * FROM widget_handle WHERE widget_handle_id = "5"';
+    Tester::check_equal("Setting: id_column_overrides, second test", $expected);
+
+    ORM::for_table('widget_nozzle')->find_one(5);
+    $expected = 'SELECT * FROM widget_nozzle WHERE primary_key = "5"';
+    Tester::check_equal("Setting: id_column_overrides, third test", $expected);
+
     Tester::report();
 ?>
