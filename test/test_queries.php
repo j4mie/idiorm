@@ -58,6 +58,10 @@
     $expected = 'SELECT * FROM widget WHERE name = "Fred" AND (age = "5" OR age = "10")';
     Tester::check_equal("Raw WHERE clause", $expected);
 
+    ORM::for_table('widget')->raw_query('SELECT w.* FROM widget w WHERE name = ? AND age = ?', array('Fred', 5))->find_many();
+    $expected = 'SELECT w.* FROM widget w WHERE name = "Fred" AND age = "5"';
+    Tester::check_equal("Raw query", $expected);
+
     $widget = ORM::for_table('widget')->create();
     $widget->name = "Fred";
     $widget->age = 10;

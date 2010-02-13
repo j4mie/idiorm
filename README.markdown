@@ -21,9 +21,7 @@ Features
 TODO
 ----
 
-* Implement raw queries.
 * Improve documentation.
-* Proper testing.
 * More features.
 
 Philosophy
@@ -111,6 +109,16 @@ The `limit` and `offset` methods map pretty closely to their SQL equivalents.
 Two methods are provided to add `ORDER BY` clauses to your query. These are `order_by_desc` and `order_by_asc`, each of which takes a column name to sort by.
 
     ORM::for_table('person')->order_by_asc('gender')->order_by_desc('name')->find_many();
+
+#### Raw queries ####
+
+If you need to perform more complex queries, you can completely specify the query to execute by using the `raw_query` method. This method takes a string and an array of parameters. The string should contain placeholders, either in question mark or named placeholder syntax, which will be used to bind the parameters to the query.
+
+    ORM::for_table('person')->raw_query('SELECT p.* FROM person p JOIN role r ON p.role_id = r.id WHERE r.name = :role', array('role' => 'janitor')->find_many();
+
+The ORM class instance(s) returned will contain data for all the columns returned by the query. Note that you still must call `for_table` to bind the instances to a particular table, even though there is nothing to stop you from specifying a completely different table in the query. This is because if you wish to later called `save`, the ORM will need to know which table to update.
+
+Note that using `raw_query` is advanced and possibly dangerous, and Idiorm does not make any attempt to protect you from making errors when using this method. If you find yourself calling `raw_query` often, you may have misunderstood the purpose of using an ORM, or your application may be too complex for Idiorm. Consider using a more full-featured database abstraction system.
 
 ### Getting data from objects ###
 

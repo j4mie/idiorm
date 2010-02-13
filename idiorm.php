@@ -102,6 +102,15 @@
         // Values to be bound to the query
         private $values = array();
 
+        // Is this a raw query?
+        private $is_raw_query = false;
+
+        // The raw query
+        private $raw_query = '';
+
+        // The raw query parameters
+        private $raw_parameters = array();
+
         // Array of WHERE clauses
         private $where = array();
 
@@ -275,6 +284,20 @@
         }
 
         /**
+         * Perform a raw query. The query should contain placeholders,
+         * in either named or question mark style, and the parameters
+         * should be an array of values which will be bound to the
+         * placeholders in the query. If this method is called, all
+         * other query building methods will be ignored.
+         */
+        public function raw_query($query, $parameters) {
+            $this->is_raw_query = true;
+            $this->raw_query = $query;
+            $this->raw_parameters = $parameters;
+            return $this;
+        }
+
+        /**
          * Add a WHERE clause to your query. Each time this is called
          * in the chain, an additional WHERE will be added, and these
          * will be ANDed together when the final query is built.
@@ -350,6 +373,12 @@
          * been passed to this instance by chaining method calls.
          */
         private function build_select() {
+
+            if ($this->is_raw_query) {
+                $this->values = $this->raw_parameters;
+                return $this->raw_query;
+            }
+
             $query = array();
             $query[] = 'SELECT * FROM ' . $this->table_name;
 
