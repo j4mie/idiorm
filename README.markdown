@@ -22,6 +22,7 @@ TODO
 ----
 
 * Improve documentation.
+* Extra `where_(*)` methods.
 * More features.
 
 Philosophy
