@@ -52,7 +52,7 @@ Then, pass a *Data Source Name* connection string to the `configure` method of t
 
 Idiorm provides a [*fluent interface*](http://en.wikipedia.org/wiki/Fluent_interface) to enable simple queries to be built without writing a single character of SQL. If you've used [jQuery](http://jquery.com) at all, you'll be familiar with the concept of a fluent interface. It just means that you can *chain* method calls together, one after another. This can make your code more readable, as the method calls strung together in order can start to look a bit like a sentence.
 
-All Idiorm queries start with a call to the `for_table` static method on the ORM class. This tells the ORM which table to use when making the query. Method calls which add parameters to the query are then strung together. Finally, the chain is finished by calling either `find_one()` or `find_many()`, which executes the query and returns the result.
+All Idiorm queries start with a call to the `for_table` static method on the ORM class. This tells the ORM which table to use when making the query. Method calls are then chained together to add clauses to the query. Finally, the chain is finished by calling either `find_one()` or `find_many()`, which executes the query and returns the result.
 
 Let's start with a simple example. Say we have a table called `person` which contains the columns `id` (the primary key of the record - Idiorm assumes the primary key column is called `id` but this is configurable, see below), `name`, `age` and `gender`.
 
@@ -82,9 +82,9 @@ To find all records where the `gender` is `female`:
 
     $females = ORM::for_table('person')->where('gender', 'female')->find_many();
 
-#### WHERE clauses ####
+#### `WHERE` clauses ####
 
-The `where` method on the ORM class adds a single `WHERE` clause to your query. The method may be called (chained) multiple times to add more than one WHERE clause. All the WHERE clauses will be ANDed together when the query is run. Support for ORing WHERE clauses is not currently present; if a query requires an OR clause you should use the `where_raw` or `raw_select` methods (see below).
+The `where` method on the ORM class adds a single `WHERE` clause to your query. The method may be called (chained) multiple times to add more than one `WHERE` clause. All the `WHERE` clauses will be `AND`ed together when the query is run. Support for `OR`ing `WHERE` clauses is not currently present; if a query requires an `OR` operator you should use the `where_raw` or `raw_select` methods (see below).
 
 By default, calling `where` with two parameters (the column name and the value) will combine them using an equals operator (`=`). For example, calling `where('name', 'Fred')` will result in the clause `WHERE name = "Fred"`. To use other types of operator, you can use one of the alternate `where_*` methods below.
 
@@ -96,9 +96,9 @@ To add a `WHERE ... LIKE` clause, use:
 
 #### Raw WHERE clauses ####
 
-If you require a more complex query, you can use the `where_raw` method to specify the SQL fragment exactly. This method takes two parameter: the string to add to the query, and an array of parameters which will be bound to the string. The string should contain question marks to represent the values to be bound, and the parameter array should contain the values to be substituted into the string in the correct order.
+If you require a more complex query, you can use the `where_raw` method to specify the SQL fragment exactly. This method takes two arguments: the string to add to the query, and an array of parameters which will be bound to the string. The string should contain question marks to represent the values to be bound, and the parameter array should contain the values to be substituted into the string in the correct order.
 
-This method may be chained with other methods such as `offset`, `limit` and `order_by_(*)`, but it may NOT be chained with other calls to `where`. If other `where` clauses are added, they will simply be ignored in the resulting query.
+This method may be chained with other methods such as `offset`, `limit` and `order_by_(*)`, but it may NOT be chained with other calls to `where`. If other `where` calls are present in the method chain, they will simply be ignored in the resulting query.
 
     $people = ORM::for_table('person')->where_raw('name = ? AND (age = ? OR age = ?)', array('Fred', 5, 10))->order_by_asc('name')->find_many();
 
@@ -187,7 +187,7 @@ The default setting is `PDO::ERRMODE_EXCEPTION`. For full details of the error m
 
 #### ID Column ####
 
-By default, the ORM assumes that all your tables have a primary key column called `id`. There are two ways to override this: at the class level (for all tables), or on a table-by-table basis.
+By default, the ORM assumes that all your tables have a primary key column called `id`. There are two ways to override this: for all tables in the database, or on a per-table basis.
 
 Setting: `id_column`
 
@@ -197,7 +197,7 @@ This setting is used to configure the name of the primary key column for all tab
 
 Setting: `id_column_overrides`
 
-This setting is used to override the primary key column name on a table-by-table basis. It takes an associative array mapping table names to column names. If, for example, your ID column names include the name of the table, you can use the following configuration:
+This setting is used to specify the primary key column name for each table separately. It takes an associative array mapping table names to column names. If, for example, your ID column names include the name of the table, you can use the following configuration:
 
     ORM::configure('id_column_overrides', array(
         'person' => 'person_id',
