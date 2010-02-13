@@ -230,8 +230,7 @@
 
         /**
          * Tell the ORM that you are expecting a single result
-         * back from your query. If this method has been called
-         * in your chain, when you call run() you will receive
+         * back from your query, and execute it. Will return
          * a single instance of the ORM class, or false if no
          * rows were returned.
          * As a shortcut, you may supply an ID as a parameter
@@ -248,8 +247,7 @@
 
         /**
          * Tell the ORM that you are expecting multiple results
-         * from your query. If this method has been called in your
-         * chain, when you call run() you will receive an array
+         * from your query, and execute it. Will return an array
          * of instances of the ORM class, or an empty array if
          * no rows were returned.
          */
