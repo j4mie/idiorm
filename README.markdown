@@ -145,3 +145,37 @@ To delete an object from the database, simply call its `delete` method.
     $person = ORM::for_table('person')->find_one(5);
     $person->delete();
 
+### Configuration ###
+
+Other than setting the DSN string for the database connection (see above), the `configure` method can be used to set some other simple options on the ORM class. Modifying settings involves passing a key/value pair to the `configure` method, representing the setting you wish to modify and the value you wish to set it to.
+
+    ORM::configure('setting_name', 'value_for_setting');
+
+#### PDO Error Mode ####
+
+Setting: `error_mode`
+
+This can be used to set the `PDO::ATTR_ERRMODE` setting on the database connection class used by Idiorm. It should be passed one of the class constants defined by PDO. For example:
+
+    ORM::configure('error_mode', PDO::ERRMODE_WARNING');
+
+The default setting is `PDO::ERRMODE_EXCEPTION`. For full details of the error modes available, see [the PDO documentation](http://uk2.php.net/manual/en/pdo.setattribute.php).
+
+#### ID Column ####
+
+By default, the ORM assumes that all your tables have a primary key column called `id`. There are two ways to override this: at the class level (for all tables), or on a table-by-table basis.
+
+Setting: `id_column`
+
+This setting is used to configure the name of the primary key column for all tables. If your ID column is called `primary_key`, use:
+
+    ORM::configure('id_column', 'primary_key');
+
+Setting: `id_column_overrides`
+
+This setting is used to override the primary key column name on a table-by-table basis. It takes an associative array mapping table names to column names. If, for example, your ID column names include the name of the table, you can use the following configuration:
+
+    ORM::configure('id_column_overrides', array(
+        'person' => 'person_id',
+        'role' => 'role_id',
+    ));
