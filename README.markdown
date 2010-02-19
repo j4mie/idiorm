@@ -182,7 +182,7 @@ Setting: `error_mode`
 
 This can be used to set the `PDO::ATTR_ERRMODE` setting on the database connection class used by Idiorm. It should be passed one of the class constants defined by PDO. For example:
 
-    ORM::configure('error_mode', PDO::ERRMODE_WARNING');
+    ORM::configure('error_mode', PDO::ERRMODE_WARNING);
 
 The default setting is `PDO::ERRMODE_EXCEPTION`. For full details of the error modes available, see [the PDO documentation](http://uk2.php.net/manual/en/pdo.setattribute.php).
 
