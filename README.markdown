@@ -45,7 +45,7 @@ First, `require` the Idiorm source file:
 
     require_once 'idiorm.php';
 
-Then, pass a *Data Source Name* connection string to the `configure` method of the ORM class. This is used by PDO to connect to your database. For more information, see the [PDO documentation](http://uk2.php.net/manual/en/pdo.construct.php).
+Then, pass a *Data Source Name* connection string to the `configure` method of the ORM class. This is used by PDO to connect to your database. For more information, see the [PDO documentation](http://uk2.php.net/manual/en/pdo.construct.php). Particularly, if you need to pass a username and password to your database driver, use the `username` and `password` configuration options. See "Configuration" section below.
 
     ORM::configure('sqlite:./example.db');
 
@@ -175,6 +175,12 @@ To delete an object from the database, simply call its `delete` method.
 Other than setting the DSN string for the database connection (see above), the `configure` method can be used to set some other simple options on the ORM class. Modifying settings involves passing a key/value pair to the `configure` method, representing the setting you wish to modify and the value you wish to set it to.
 
     ORM::configure('setting_name', 'value_for_setting');
+
+#### Database authentication details ####
+
+Settings: `username` and `password`
+
+Some database adapters (such as MySQL) require a username and password to be supplied separately to the DSN string. These settings allow you to provide these values.
 
 #### PDO Error Mode ####
 

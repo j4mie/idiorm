@@ -79,6 +79,8 @@
             'id_column' => 'id',
             'id_column_overrides' => array(),
             'error_mode' => PDO::ERRMODE_EXCEPTION,
+            'username' => false,
+            'password' => false,
         );
 
         // Database connection, instance of the PDO class
@@ -174,7 +176,15 @@
          */
         private static function setup_db() {
             if (!is_object(self::$db)) {
-                self::$db = new PDO(self::$config['connection_string']);
+                if (self::$config['username'] && self::$config['password']) {
+                    self::$db = new PDO(
+                        self::$config['connection_string'],
+                        self::$config['username'],
+                        self::$config['password']
+                    );
+                } else {
+                    self::$db = new PDO(self::$config['connection_string']);
+                }
                 self::$db->setAttribute(PDO::ATTR_ERRMODE, self::$config['error_mode']);
             }
         }
