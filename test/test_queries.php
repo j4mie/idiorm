@@ -35,27 +35,27 @@
     Tester::check_equal("where_like method", $expected);
 
     ORM::for_table('widget')->limit(5)->find_one();
-    $expected = 'SELECT * FROM widget LIMIT "5"';
+    $expected = 'SELECT * FROM widget LIMIT 5';
     Tester::check_equal("LIMIT clause", $expected);
 
     ORM::for_table('widget')->limit(5)->offset(5)->find_one();
-    $expected = 'SELECT * FROM widget LIMIT "5" OFFSET "5"';
+    $expected = 'SELECT * FROM widget LIMIT 5 OFFSET 5';
     Tester::check_equal("LIMIT and OFFSET clause", $expected);
 
     ORM::for_table('widget')->order_by_desc('name')->find_one();
-    $expected = 'SELECT * FROM widget ORDER BY "name" DESC';
+    $expected = 'SELECT * FROM widget ORDER BY name DESC';
     Tester::check_equal("ORDER BY DESC", $expected);
 
     ORM::for_table('widget')->order_by_asc('name')->find_one();
-    $expected = 'SELECT * FROM widget ORDER BY "name" ASC';
+    $expected = 'SELECT * FROM widget ORDER BY name ASC';
     Tester::check_equal("ORDER BY ASC", $expected);
 
     ORM::for_table('widget')->order_by_asc('name')->order_by_desc('age')->find_one();
-    $expected = 'SELECT * FROM widget ORDER BY "name" ASC, "age" DESC';
+    $expected = 'SELECT * FROM widget ORDER BY name ASC, age DESC';
     Tester::check_equal("Multiple ORDER BY", $expected);
 
     ORM::for_table('widget')->where('name', 'Fred')->limit(5)->offset(5)->order_by_asc('name')->find_many();
-    $expected = 'SELECT * FROM widget WHERE name = "Fred" LIMIT "5" OFFSET "5" ORDER BY "name" ASC';
+    $expected = 'SELECT * FROM widget WHERE name = "Fred" ORDER BY name ASC LIMIT 5 OFFSET 5';
     Tester::check_equal("Complex query", $expected);
 
     ORM::for_table('widget')->where_raw('name = ? AND (age = ? OR age = ?)', array('Fred', 5, 10))->find_many();

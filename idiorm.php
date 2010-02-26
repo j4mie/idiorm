@@ -422,28 +422,25 @@
                 }
             }
 
-            // Add LIMIT if present
-            if (!is_null($this->limit)) {
-                $query[] = "LIMIT ?";
-                $this->values[] = $this->limit;
-            }
-
-            // Add OFFSET if present
-            if (!is_null($this->offset)) {
-                $query[] = "OFFSET ?";
-                $this->values[] = $this->offset;
-            }
-
             // Add ORDER BY clause(s)
             $order_by = array();
             foreach ($this->order_by as $order) {
-                $order_by[] = "? " . $order[self::ORDER_BY_ORDERING];
-                $this->values[] = $order[self::ORDER_BY_COLUMN_NAME];
+                $order_by[] = $order[self::ORDER_BY_COLUMN_NAME] . " " . $order[self::ORDER_BY_ORDERING];
             }
 
             if (count($order_by) != 0) {
                 $query[] = "ORDER BY";
                 $query[] = join(", ", $order_by);
+            }
+
+            // Add LIMIT if present
+            if (!is_null($this->limit)) {
+                $query[] = "LIMIT " . $this->limit;
+            }
+
+            // Add OFFSET if present
+            if (!is_null($this->offset)) {
+                $query[] = "OFFSET " . $this->offset;
             }
 
             return join(" ", $query);

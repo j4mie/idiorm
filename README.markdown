@@ -55,6 +55,8 @@ Idiorm provides a [*fluent interface*](http://en.wikipedia.org/wiki/Fluent_inter
 
 All Idiorm queries start with a call to the `for_table` static method on the ORM class. This tells the ORM which table to use when making the query. Method calls which are then strung together. Finally, the chain is finished by calling either `find_one()` or `find_many()`, which executes the query and returns the result.
 
+*Note that this method **does not** escape its query parameter and so the table name should **not** be passed directly from user input.*
+
 Let's start with a simple example. Say we have a table called `person` which contains the columns `id` (the primary key of the record - Idiorm assumes the primary key column is called `id` but this is configurable, see below), `name`, `age` and `gender`.
 
 #### Single records ####
@@ -107,11 +109,15 @@ Note that this method only supports "question mark placeholder" syntax, and NOT 
 
 #### LIMIT and OFFSET ####
 
+*Note that these methods **do not** escape their query parameters and so these should **not** be passed directly from user input.*
+
 The `limit` and `offset` methods map pretty closely to their SQL equivalents.
 
     $people = ORM::for_table('person')->where('gender', 'female')->limit(5)->offset(10)->find_many();
 
 #### ORDER BY ####
+
+*Note that this method **does not** escape its query parameter and so this should **not** be passed directly from user input.*
 
 Two methods are provided to add `ORDER BY` clauses to your query. These are `order_by_desc` and `order_by_asc`, each of which takes a column name to sort by.
 
