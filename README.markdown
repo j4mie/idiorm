@@ -186,7 +186,11 @@ Other than setting the DSN string for the database connection (see above), the `
 
 Settings: `username` and `password`
 
-Some database adapters (such as MySQL) require a username and password to be supplied separately to the DSN string. These settings allow you to provide these values.
+Some database adapters (such as MySQL) require a username and password to be supplied separately to the DSN string. These settings allow you to provide these values. A typical MySQL connection setup might look like this:
+
+    ORM::configure('mysql:host=localhost;dbname=my_database');
+    ORM::configure('username', 'database_user');
+    ORM::configure('password', 'top_secret');
 
 #### PDO Error Mode ####
 
