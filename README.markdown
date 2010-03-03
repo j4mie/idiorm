@@ -53,7 +53,7 @@ Then, pass a *Data Source Name* connection string to the `configure` method of t
 
 Idiorm provides a [*fluent interface*](http://en.wikipedia.org/wiki/Fluent_interface) to enable simple queries to be built without writing a single character of SQL. If you've used [jQuery](http://jquery.com) at all, you'll be familiar with the concept of a fluent interface. It just means that you can *chain* method calls together, one after another. This can make your code more readable, as the method calls strung together in order can start to look a bit like a sentence.
 
-All Idiorm queries start with a call to the `for_table` static method on the ORM class. This tells the ORM which table to use when making the query. Method calls which are then strung together. Finally, the chain is finished by calling either `find_one()` or `find_many()`, which executes the query and returns the result.
+All Idiorm queries start with a call to the `for_table` static method on the ORM class. This tells the ORM which table to use when making the query. Method calls which add filters and constraints to your query are then strung together. Finally, the chain is finished by calling either `find_one()` or `find_many()`, which executes the query and returns the result.
 
 *Note that this method **does not** escape its query parameter and so the table name should **not** be passed directly from user input.*
 
