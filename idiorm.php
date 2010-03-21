@@ -559,7 +559,7 @@
 
             // If we've just inserted a new record, set the ID of this object
             if ($this->update_or_insert == self::INSERT) {
-                $this->update_or_insert == self::UPDATE;
+                $this->update_or_insert = self::UPDATE;
                 $this->data[$this->get_id_column_name()] = self::$db->lastInsertId();
             }
 
