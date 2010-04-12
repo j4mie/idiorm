@@ -48,6 +48,7 @@
     }
 
     // Get a list of all contacts from the database
+    $count = ORM::for_table('contact')->count();
     $contact_list = ORM::for_table('contact')->find_many();
 ?>
 
@@ -60,7 +61,7 @@
     
         <h1>Idiorm Demo</h1>
 
-        <h2>Contact List</h2>
+        <h2>Contact List (<?php echo $count; ?> contacts)</h2>
         <ul>
             <?php foreach ($contact_list as $contact): ?>
                 <li>

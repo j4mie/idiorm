@@ -51,6 +51,7 @@
         // Find types
         const FIND_ONE = 0;
         const FIND_MANY = 1;
+        const COUNT = 2;
 
         // Update or insert?
         const UPDATE = 0;
@@ -266,6 +267,16 @@
             return $this->run();
         }
 
+        /**
+         * Tell the ORM that you wish to execute a COUNT query.
+         * Will return an integer representing the number of
+         * rows returned.
+         */
+        public function count() {
+            $this->find_type = self::COUNT;
+            return $this->run();
+        }
+
          /**
          * This method can be called hydrate (populate) this
          * instance of the class from an associative array of data.
@@ -395,7 +406,12 @@
             }
 
             $query = array();
-            $query[] = 'SELECT * FROM ' . $this->table_name;
+
+            if ($this->find_type === self::COUNT) {
+                $query[] = 'SELECT COUNT(*) AS count FROM ' . $this->table_name;
+            } else {
+                $query[] = 'SELECT * FROM ' . $this->table_name;
+            }
 
             if ($this->where_is_raw) { // Raw WHERE clause
                 $query[] = "WHERE";
@@ -458,15 +474,19 @@
             $statement = self::$db->prepare($this->build_select());
             $statement->execute($this->values);
 
-            if ($this->find_type == self::FIND_ONE) {
-                $result = $statement->fetch(PDO::FETCH_ASSOC);
-                return $result ? self::for_table($this->table_name)->hydrate($result) : $result;
-            } else {
-                $instances = array();
-                while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
-                    $instances[] = self::for_table($this->table_name)->hydrate($row);
-                }
-                return $instances;
+            switch ($this->find_type) {
+                case self::FIND_ONE:
+                    $result = $statement->fetch(PDO::FETCH_ASSOC);
+                    return $result ? self::for_table($this->table_name)->hydrate($result) : $result;
+                case self::FIND_MANY:
+                    $instances = array();
+                    while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
+                        $instances[] = self::for_table($this->table_name)->hydrate($row);
+                    }
+                    return $instances;
+                case self::COUNT:
+                    $result = $statement->fetch(PDO::FETCH_ASSOC);
+                    return isset($result['count']) ? (int) $result['count'] : 0;
             }
         }
 

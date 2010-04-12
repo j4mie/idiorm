@@ -22,6 +22,10 @@
     $expected = 'SELECT * FROM widget WHERE id = "5"';
     Tester::check_equal("Filtering on ID", $expected);
 
+    ORM::for_table('widget')->count();
+    $expected = 'SELECT COUNT(*) AS count FROM widget';
+    Tester::check_equal("COUNT query", $expected);
+
     ORM::for_table('widget')->where('name', 'Fred')->find_one();
     $expected = 'SELECT * FROM widget WHERE name = "Fred"';
     Tester::check_equal("Single where clause", $expected);

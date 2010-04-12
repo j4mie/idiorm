@@ -87,6 +87,12 @@ To find all records where the `gender` is `female`:
 
     $females = ORM::for_table('person')->where('gender', 'female')->find_many();
 
+#### Counting results ####
+
+To return a count of the number of rows that would be returned by a query, call the `count()` method.
+
+    $number_of_people = ORM::for_table('person')->count();
+
 #### WHERE clauses ####
 
 The `where` method on the ORM class adds a single `WHERE` clause to your query. The method may be called (chained) multiple times to add more than one `WHERE` clause. All the `WHERE` clauses will be `AND`ed together when the query is run. Support for `OR`ing `WHERE` clauses is not currently present; if a query requires an `OR` operator you should use the `where_raw` or `raw_select` methods (see below).
