@@ -312,19 +312,11 @@
         }
 
         /**
-         * Add a WHERE clause to your query. Each time this is called
-         * in the chain, an additional WHERE will be added, and these
-         * will be ANDed together when the final query is built.
-         * By default, the operator used is '=', but the third
-         * parameter to this method may be used to indicate other
-         * operators such as LIKE. Class constants should be used to
-         * provide this operator.
-         *
-         * Note: the $operator argument is now really private API. The
-         * where_* methods below should be used instead to add different
-         * types of WHERE clause.
+         * Private method to add a WHERE clause to the query
+         * Class constants defined above should be used to provide the
+         * $operator argument.
          */
-        public function where($column_name, $value, $operator=self::EQUALS) {
+        private function add_where($column_name, $value, $operator) {
             $this->where[] = array(
                 self::WHERE_COLUMN_NAME => $column_name,
                 self::WHERE_VALUE => $value,
@@ -334,10 +326,28 @@
         }
 
         /**
+         * Add a WHERE column = value clause to your query. Each time
+         * this is called in the chain, an additional WHERE will be
+         * added, and these will be ANDed together when the final query
+         * is built.
+         */
+        public function where($column_name, $value) {
+            return $this->where_equals($column_name, $value);
+        }
+
+        /**
+         * More explicitly named version of for the where() method.
+         * Can be used if preferred.
+         */
+        public function where_equals($column_name, $value) {
+            return $this->add_where($column_name, $value, self::EQUALS);
+        }
+
+        /**
          * Add a WHERE ... LIKE clause to your query.
          */
         public function where_like($column_name, $value) {
-            return $this->where($column_name, $value, self::LIKE);
+            return $this->add_where($column_name, $value, self::LIKE);
         }
 
 
