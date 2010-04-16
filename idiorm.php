@@ -590,13 +590,13 @@
          * Delete this record from the database
          */
         public function delete() {
-            $query = array();
-            $query[] = "DELETE FROM";
-            $query[] = $this->table_name;
-            $query[] = "WHERE";
-            $query[] = $this->get_id_column_name();
-            $query[] = "= ?";
-            $query = join(" ", $query);
+            $query = join(" ", array(
+                "DELETE FROM",
+                $this->table_name,
+                "WHERE",
+                $this->get_id_column_name(),
+                "= ?",
+            ));
             self::setup_db();
             $statement = self::$db->prepare($query);
             return $statement->execute(array($this->id()));
