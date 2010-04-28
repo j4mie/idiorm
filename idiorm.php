@@ -4,6 +4,8 @@
      *
      * Idiorm
      *
+     * http://github.com/j4mie/idiorm/
+     *
      * A single-class super-simple database abstraction layer for PHP.
      * Provides (nearly) zero-configuration object-relational mapping
      * and a fluent interface for building basic, commonly-used queries.
