@@ -430,24 +430,19 @@
                 $query[] = $this->raw_where_clause;
                 $this->values = array_merge($this->values, $this->raw_where_parameters);
             } else if (count($this->where) > 0) { // Standard WHERE clauses
-                $query[] = "WHERE";
-                $first = array_shift($this->where);
-                $query[] = join(" ", array(
-                    $first[self::WHERE_COLUMN_NAME],
-                    $first[self::WHERE_OPERATOR],
-                    '?'
-                ));
-                $this->values[] = $first[self::WHERE_VALUE];
+                $where_clauses = array();
 
                 while($where = array_shift($this->where)) {
-                    $query[] = "AND";
-                    $query[] = join(" ", array(
+                    $where_clauses[] = join(" ", array(
                         $where[self::WHERE_COLUMN_NAME],
                         $where[self::WHERE_OPERATOR],
                         '?'
                     ));
                     $this->values[] = $where[self::WHERE_VALUE];
                 }
+
+                $query[] = "WHERE";
+                $query[] = join(" AND ", $where_clauses);
             }
 
             // Add ORDER BY clause(s)
