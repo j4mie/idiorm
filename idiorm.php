@@ -78,7 +78,7 @@
 
         // Class configuration
         private static $config = array(
-            'connection_string' => 'sqlite://:memory:',
+            'connection_string' => 'sqlite::memory:',
             'id_column' => 'id',
             'id_column_overrides' => array(),
             'error_mode' => PDO::ERRMODE_EXCEPTION,
