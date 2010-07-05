@@ -84,6 +84,7 @@
             'error_mode' => PDO::ERRMODE_EXCEPTION,
             'username' => null,
             'password' => null,
+            'driver_options' => null,
         );
 
         // Database connection, instance of the PDO class
@@ -182,7 +183,8 @@
                 $connection_string = self::$config['connection_string'];
                 $username = self::$config['username'];
                 $password = self::$config['password'];
-                self::$db = new PDO($connection_string, $username, $password);
+                $driver_options = self::$config['driver_options'];
+                self::$db = new PDO($connection_string, $username, $password, $driver_options);
                 self::$db->setAttribute(PDO::ATTR_ERRMODE, self::$config['error_mode']);
             }
         }

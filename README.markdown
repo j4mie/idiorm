@@ -200,6 +200,15 @@ Some database adapters (such as MySQL) require a username and password to be sup
     ORM::configure('username', 'database_user');
     ORM::configure('password', 'top_secret');
 
+#### PDO Driver Options ####
+
+Setting: `driver_options`
+
+Some database adapters require (or allow) an array of driver-specific configuration options. This setting allows you to pass these options through to the PDO constructor. For more information, see [the PDO documentation](http://www.php.net/manual/en/pdo.construct.php). For example, to force the MySQL driver to use UTF-8 for the connection:
+
+    ORM::configure('driver_options', array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'));
+
+
 #### PDO Error Mode ####
 
 Setting: `error_mode`
