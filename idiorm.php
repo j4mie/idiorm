@@ -10,7 +10,7 @@
      * Provides (nearly) zero-configuration object-relational mapping
      * and a fluent interface for building basic, commonly-used queries.
      *
-     * Version 0.4
+     * Version 0.5
      *
      * BSD Licensed.
      *

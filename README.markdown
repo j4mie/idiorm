@@ -1,7 +1,7 @@
 Idiorm
 ======
 
-** Version 0.4 - Alpha **
+** Version 0.5 - Alpha **
 
 A lightweight nearly-zero-configuration object-relational mapper and fluent query builder for PHP5.
 
