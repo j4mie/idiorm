@@ -307,11 +307,11 @@
          * Class constants defined above should be used to provide the
          * $operator argument.
          */
-        private function add_where($column_name, $value, $operator) {
+        private function add_where($column_name, $operator, $value) {
             $this->where[] = array(
                 self::WHERE_COLUMN_NAME => $column_name,
+                self::WHERE_OPERATOR => $operator,
                 self::WHERE_VALUE => $value,
-                self::WHERE_OPERATOR => $operator
             );
             return $this;
         }
@@ -331,42 +331,42 @@
          * Can be used if preferred.
          */
         public function where_equals($column_name, $value) {
-            return $this->add_where($column_name, $value, '=');
+            return $this->add_where($column_name, '=', $value);
         }
 
         /**
          * Add a WHERE ... LIKE clause to your query.
          */
         public function where_like($column_name, $value) {
-            return $this->add_where($column_name, $value, 'LIKE');
+            return $this->add_where($column_name, 'LIKE', $value);
         }
 
         /**
          * Add a WHERE ... > clause to your query
          */
         public function where_gt($column_name, $value) {
-            return $this->add_where($column_name, $value, '>');
+            return $this->add_where($column_name, '>', $value);
         }
 
         /**
          * Add a WHERE ... < clause to your query
          */
         public function where_lt($column_name, $value) {
-            return $this->add_where($column_name, $value, '<');
+            return $this->add_where($column_name, '<', $value);
         }
 
         /**
          * Add a WHERE ... >= clause to your query
          */
         public function where_gte($column_name, $value) {
-            return $this->add_where($column_name, $value, '>=');
+            return $this->add_where($column_name, '>=', $value);
         }
 
         /**
          * Add a WHERE ... <= clause to your query
          */
         public function where_lte($column_name, $value) {
-            return $this->add_where($column_name, $value, '<=');
+            return $this->add_where($column_name, '<=', $value);
         }
 
         /**
