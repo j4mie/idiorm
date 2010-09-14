@@ -206,7 +206,7 @@
 
         /**
          * Private constructor; can't be called directly.
-         * Use a factory method instead (probably ORM::for_table)
+         * Use the ORM::for_table factory method instead.
          */
         private function __construct($table_name, $data=array()) {
             $this->table_name = $table_name;
@@ -269,7 +269,7 @@
         }
 
          /**
-         * This method can be called hydrate (populate) this
+         * This method can be called to hydrate (populate) this
          * instance of the class from an associative array of data.
          * This will usually be called only from inside the class,
          * but it's public in case you need to call it directly.
