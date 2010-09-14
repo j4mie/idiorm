@@ -109,10 +109,10 @@ To add a `WHERE ... LIKE` clause, use:
 
 There are four methods available for inequalities:
 
-    * Less than: `$people = ORM::for_table('person')->where_lt('age', 10)->find_many();`
-    * Greater than: `$people = ORM::for_table('person')->where_gt('age', 5)->find_many();`
-    * Less than or equal: `$people = ORM::for_table('person')->where_lte('age', 10)->find_many();`
-    * Greater than or equal: `$people = ORM::for_table('person')->where_gte('age', 5)->find_many();`
+* Less than: `$people = ORM::for_table('person')->where_lt('age', 10)->find_many();`
+* Greater than: `$people = ORM::for_table('person')->where_gt('age', 5)->find_many();`
+* Less than or equal: `$people = ORM::for_table('person')->where_lte('age', 10)->find_many();`
+* Greater than or equal: `$people = ORM::for_table('person')->where_gte('age', 5)->find_many();`
 
 #### Raw WHERE clauses ####
 
