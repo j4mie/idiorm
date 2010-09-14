@@ -46,10 +46,6 @@
         // --- CLASS CONSTANTS --- //
         // ----------------------- //
 
-        // Select WHERE operators
-        const EQUALS = '=';
-        const LIKE = 'LIKE';
-
         // Find types
         const FIND_ONE = 0;
         const FIND_MANY = 1;
@@ -58,10 +54,6 @@
         // Update or insert?
         const UPDATE = 0;
         const INSERT = 1;
-
-        // Order by
-        const ASC = 'ASC';
-        const DESC = 'DESC';
 
         // Order by array keys
         const ORDER_BY_COLUMN_NAME = 0;
@@ -339,14 +331,14 @@
          * Can be used if preferred.
          */
         public function where_equals($column_name, $value) {
-            return $this->add_where($column_name, $value, self::EQUALS);
+            return $this->add_where($column_name, $value, '=');
         }
 
         /**
          * Add a WHERE ... LIKE clause to your query.
          */
         public function where_like($column_name, $value) {
-            return $this->add_where($column_name, $value, self::LIKE);
+            return $this->add_where($column_name, $value, 'LIKE');
         }
 
 
@@ -393,14 +385,14 @@
          * Add an ORDER BY column DESC clause
          */
         public function order_by_desc($column_name) {
-            return $this->add_order_by($column_name, self::DESC);
+            return $this->add_order_by($column_name, 'DESC');
         }
 
         /**
          * Add an ORDER BY column ASC clause
          */
         public function order_by_asc($column_name) {
-            return $this->add_order_by($column_name, self::ASC);
+            return $this->add_order_by($column_name, 'ASC');
         }
 
         /**
