@@ -323,14 +323,14 @@
          * is built.
          */
         public function where($column_name, $value) {
-            return $this->where_equals($column_name, $value);
+            return $this->where_equal($column_name, $value);
         }
 
         /**
          * More explicitly named version of for the where() method.
          * Can be used if preferred.
          */
-        public function where_equals($column_name, $value) {
+        public function where_equal($column_name, $value) {
             return $this->add_where($column_name, '=', $value);
         }
 
