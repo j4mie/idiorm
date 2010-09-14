@@ -341,6 +341,33 @@
             return $this->add_where($column_name, $value, 'LIKE');
         }
 
+        /**
+         * Add a WHERE ... > clause to your query
+         */
+        public function where_gt($column_name, $value) {
+            return $this->add_where($column_name, $value, '>');
+        }
+
+        /**
+         * Add a WHERE ... < clause to your query
+         */
+        public function where_lt($column_name, $value) {
+            return $this->add_where($column_name, $value, '<');
+        }
+
+        /**
+         * Add a WHERE ... >= clause to your query
+         */
+        public function where_gte($column_name, $value) {
+            return $this->add_where($column_name, $value, '>=');
+        }
+
+        /**
+         * Add a WHERE ... <= clause to your query
+         */
+        public function where_lte($column_name, $value) {
+            return $this->add_where($column_name, $value, '<=');
+        }
 
         /**
          * Add a raw WHERE clause to the query. The clause should

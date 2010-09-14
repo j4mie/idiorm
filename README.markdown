@@ -105,6 +105,15 @@ To add a `WHERE ... LIKE` clause, use:
 
     $people = ORM::for_table('person')->where_like('Name', '%fred%')->find_many();
 
+#### Less Than / Greater Than ####
+
+There are four methods available for inequalities:
+
+    * Less than: `$people = ORM::for_table('person')->where_lt('age', 10)->find_many();`
+    * Greater than: `$people = ORM::for_table('person')->where_gt('age', 5)->find_many();`
+    * Less than or equal: `$people = ORM::for_table('person')->where_lte('age', 10)->find_many();`
+    * Greater than or equal: `$people = ORM::for_table('person')->where_gte('age', 5)->find_many();`
+
 #### Raw WHERE clauses ####
 
 If you require a more complex query, you can use the `where_raw` method to specify the SQL fragment exactly. This method takes two arguments: the string to add to the query, and an array of parameters which will be bound to the string. The string should contain question marks to represent the values to be bound, and the parameter array should contain the values to be substituted into the string in the correct order.

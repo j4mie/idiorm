@@ -62,6 +62,14 @@
     $expected = 'SELECT * FROM widget WHERE name = "Fred" ORDER BY name ASC LIMIT 5 OFFSET 5';
     Tester::check_equal("Complex query", $expected);
 
+    ORM::for_table('widget')->where_lt('age', 10)->where_gt('age', 5)->find_many();
+    $expected = 'SELECT * FROM widget WHERE age < "10" AND age > "5"';
+    Tester::check_equal("Less than and greater than", $expected);
+
+    ORM::for_table('widget')->where_lte('age', 10)->where_gte('age', 5)->find_many();
+    $expected = 'SELECT * FROM widget WHERE age <= "10" AND age >= "5"';
+    Tester::check_equal("Less than or equal and greater than or equal", $expected);
+
     ORM::for_table('widget')->where_raw('name = ? AND (age = ? OR age = ?)', array('Fred', 5, 10))->find_many();
     $expected = 'SELECT * FROM widget WHERE name = "Fred" AND (age = "5" OR age = "10")';
     Tester::check_equal("Raw WHERE clause", $expected);
