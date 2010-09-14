@@ -105,7 +105,7 @@ To add a `WHERE ... LIKE` clause, use:
 
     $people = ORM::for_table('person')->where_like('Name', '%fred%')->find_many();
 
-#### Less Than / Greater Than ####
+##### Less Than / Greater Than #####
 
 There are four methods available for inequalities:
 
