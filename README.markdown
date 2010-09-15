@@ -91,19 +91,25 @@ To return a count of the number of rows that would be returned by a query, call 
 
     $number_of_people = ORM::for_table('person')->count();
 
-#### WHERE clauses ####
+#### Filtering results ####
 
-The `where` method on the ORM class adds a single `WHERE` clause to your query. The method may be called (chained) multiple times to add more than one `WHERE` clause. All the `WHERE` clauses will be `AND`ed together when the query is run. Support for `OR`ing `WHERE` clauses is not currently present; if a query requires an `OR` operator you should use the `where_raw` or `raw_select` methods (see below).
+Idiorm provides a family of methods to extract only records which satisfy some condition or conditions. These methods may be called multiple times to build up your query, and Idiorm's fluent interface allows method calls to be *chained* to create readable and simple-to-understand queries.
 
-By default, calling `where` with two parameters (the column name and the value) will combine them using an equals operator (`=`). For example, calling `where('name', 'Fred')` will result in the clause `WHERE name = "Fred"`. To use other types of operator, you can use one of the alternate `where_*` methods below.
+##### *Caveats* #####
 
-##### LIKE #####
+Only a subset of the available conditions supported by SQL are available when using Idiorm. Additionally, all the `WHERE` clauses will be `AND`ed together when the query is run. Support for `OR`ing `WHERE` clauses is not currently present.
 
-To add a `WHERE ... LIKE` clause, use:
+These limits are deliberate: these are by far the most commonly used criteria, and by avoiding support for very complex queries, the Idiorm codebase can remain small and simple.
 
-    $people = ORM::for_table('person')->where_like('Name', '%fred%')->find_many();
+Some support for more complex conditions and queries is provided by the `where_raw` and `raw_select` methods (see below). If you find yourself regularly requiring more functionality than Idiorm can provide, it may be time to consider using a more full-featured ORM.
 
-##### Less Than / Greater Than #####
+##### Equality: `where` and `where_equal` #####
+
+By default, calling `where` with two parameters (the column name and the value) will combine them using an equals operator (`=`). For example, calling `where('name', 'Fred')` will result in the clause `WHERE name = "Fred"`.
+
+If your coding style favours clarity over brevity, you may prefer to use the `where_equal` method: this is identical to `where`.
+
+##### Less than / greater than: `where_lt`, `where_gt`, `where_lte`, `where_gte` #####
 
 There are four methods available for inequalities:
 
@@ -112,7 +118,13 @@ There are four methods available for inequalities:
 * Less than or equal: `$people = ORM::for_table('person')->where_lte('age', 10)->find_many();`
 * Greater than or equal: `$people = ORM::for_table('person')->where_gte('age', 5)->find_many();`
 
-#### Raw WHERE clauses ####
+##### String comparision: `where_like` #####
+
+To add a `WHERE ... LIKE` clause, use:
+
+    $people = ORM::for_table('person')->where_like('Name', '%fred%')->find_many();
+
+##### Raw WHERE clauses #####
 
 If you require a more complex query, you can use the `where_raw` method to specify the SQL fragment exactly. This method takes two arguments: the string to add to the query, and an array of parameters which will be bound to the string. The string should contain question marks to represent the values to be bound, and the parameter array should contain the values to be substituted into the string in the correct order.
 
@@ -122,7 +134,7 @@ This method may be chained with other methods such as `offset`, `limit` and `ord
 
 Note that this method only supports "question mark placeholder" syntax, and NOT "named placeholder" syntax.
 
-#### LIMIT and OFFSET ####
+##### Limits and offsets #####
 
 *Note that these methods **do not** escape their query parameters and so these should **not** be passed directly from user input.*
 
@@ -130,7 +142,7 @@ The `limit` and `offset` methods map pretty closely to their SQL equivalents.
 
     $people = ORM::for_table('person')->where('gender', 'female')->limit(5)->offset(10)->find_many();
 
-#### ORDER BY ####
+##### Ordering #####
 
 *Note that this method **does not** escape its query parameter and so this should **not** be passed directly from user input.*
 
