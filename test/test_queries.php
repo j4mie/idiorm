@@ -38,6 +38,10 @@
     $expected = 'SELECT * FROM widget WHERE name LIKE "%Fred%"';
     Tester::check_equal("where_like method", $expected);
 
+    ORM::for_table('widget')->where_not_like('name', '%Fred%')->find_one();
+    $expected = 'SELECT * FROM widget WHERE name NOT LIKE "%Fred%"';
+    Tester::check_equal("where_not_like method", $expected);
+
     ORM::for_table('widget')->limit(5)->find_one();
     $expected = 'SELECT * FROM widget LIMIT 5';
     Tester::check_equal("LIMIT clause", $expected);

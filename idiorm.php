@@ -340,6 +340,13 @@
         }
 
         /**
+         * Add where WHERE ... NOT LIKE clause to your query.
+         */
+        public function where_not_like($column_name, $value) {
+            return $this->add_where($column_name, 'NOT LIKE', $value);
+        }
+
+        /**
          * Add a WHERE ... > clause to your query
          */
         public function where_gt($column_name, $value) {

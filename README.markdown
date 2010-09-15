@@ -118,11 +118,15 @@ There are four methods available for inequalities:
 * Less than or equal: `$people = ORM::for_table('person')->where_lte('age', 10)->find_many();`
 * Greater than or equal: `$people = ORM::for_table('person')->where_gte('age', 5)->find_many();`
 
-##### String comparision: `where_like` #####
+##### String comparision: `where_like` and `where_not_like` #####
 
 To add a `WHERE ... LIKE` clause, use:
 
     $people = ORM::for_table('person')->where_like('Name', '%fred%')->find_many();
+
+Similarly, to add a `WHERE ... NOT LIKE` clause, use:
+
+    $people = ORM::for_table('person')->where_not_like('Name', '%bob%')->find_many();
 
 ##### Raw WHERE clauses #####
 
