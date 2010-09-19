@@ -67,7 +67,7 @@
         // ------------------------ //
 
         // Class configuration
-        private static $config = array(
+        protected static $_config = array(
             'connection_string' => 'sqlite::memory:',
             'id_column' => 'id',
             'id_column_overrides' => array(),
@@ -78,60 +78,60 @@
         );
 
         // Database connection, instance of the PDO class
-        private static $db;
+        protected static $_db;
 
         // --------------------------- //
         // --- INSTANCE PROPERTIES --- //
         // --------------------------- //
 
         // The name of the table the current ORM instance is associated with
-        private $table_name;
+        protected $_table_name;
 
         // Will be FIND_ONE or FIND_MANY
-        private $find_type;
+        protected $_find_type;
 
         // Values to be bound to the query
-        private $values = array();
+        protected $_values = array();
 
         // Is this a raw query?
-        private $is_raw_query = false;
+        protected $_is_raw_query = false;
 
         // The raw query
-        private $raw_query = '';
+        protected $_raw_query = '';
 
         // The raw query parameters
-        private $raw_parameters = array();
+        protected $_raw_parameters = array();
 
         // Array of WHERE clauses
-        private $where = array();
+        protected $_where = array();
 
         // Is the WHERE clause raw?
-        private $where_is_raw = false;
+        protected $_where_is_raw = false;
 
         // Raw WHERE clause
-        private $raw_where_clause = '';
+        protected $_raw_where_clause = '';
 
         // Raw WHERE parameters
-        private $raw_where_parameters = array();
+        protected $_raw_where_parameters = array();
 
         // LIMIT
-        private $limit = null;
+        protected $_limit = null;
 
         // OFFSET
-        private $offset = null;
+        protected $_offset = null;
 
         // ORDER BY
-        private $order_by = array();
+        protected $_order_by = array();
 
         // The data for a hydrated instance of the class
-        private $data = array();
+        protected $_data = array();
 
         // Fields that have been modified during the
         // lifetime of the object
-        private $dirty_fields = array();
+        protected $_dirty_fields = array();
 
         // Are we updating or inserting?
-        private $update_or_insert = self::UPDATE;
+        protected $_update_or_insert = self::UPDATE;
 
         // ---------------------- //
         // --- STATIC METHODS --- //
@@ -151,7 +151,7 @@
                 $value = $key;
                 $key = 'connection_string';
             }
-            self::$config[$key] = $value;
+            self::$_config[$key] = $value;
         }
 
         /**
@@ -168,14 +168,14 @@
         /**
          * Set up the database connection used by the class.
          */
-        private static function setup_db() {
-            if (!is_object(self::$db)) {
-                $connection_string = self::$config['connection_string'];
-                $username = self::$config['username'];
-                $password = self::$config['password'];
-                $driver_options = self::$config['driver_options'];
-                self::$db = new PDO($connection_string, $username, $password, $driver_options);
-                self::$db->setAttribute(PDO::ATTR_ERRMODE, self::$config['error_mode']);
+        protected static function _setup_db() {
+            if (!is_object(self::$_db)) {
+                $connection_string = self::$_config['connection_string'];
+                $username = self::$_config['username'];
+                $password = self::$_config['password'];
+                $driver_options = self::$_config['driver_options'];
+                self::$_db = new PDO($connection_string, $username, $password, $driver_options);
+                self::$_db->setAttribute(PDO::ATTR_ERRMODE, self::$_config['error_mode']);
             }
         }
 
@@ -185,7 +185,7 @@
          * operation, but it's here in case it's needed.
          */
         public static function set_db($db) {
-            self::$db = $db;
+            self::$_db = $db;
         }
 
         /**
@@ -194,8 +194,8 @@
          * required outside the class.
          */
         public static function get_db() {
-            self::setup_db();
-            return self::$db;
+            self::_setup_db();
+            return self::$_db;
         }
 
         // ------------------------ //
@@ -203,12 +203,12 @@
         // ------------------------ //
 
         /**
-         * Private constructor; can't be called directly.
+         * "Private" constructor; shouldn't be called directly.
          * Use the ORM::for_table factory method instead.
          */
-        private function __construct($table_name, $data=array()) {
-            $this->table_name = $table_name;
-            $this->data = $data;
+        protected function __construct($table_name, $data=array()) {
+            $this->_table_name = $table_name;
+            $this->_data = $data;
         }
 
         /**
@@ -220,7 +220,7 @@
          * save() is called.
          */
         public function create($data=null) {
-            $this->update_or_insert = self::INSERT;
+            $this->_update_or_insert = self::INSERT;
 
             if (!is_null($data)) {
                 return $this->hydrate($data)->force_all_dirty();
@@ -239,10 +239,10 @@
          */
         public function find_one($id=null) {
             if(!is_null($id)) {
-                $this->where($this->get_id_column_name(), $id);
+                $this->where($this->_get_id_column_name(), $id);
             }
-            $this->find_type = self::FIND_ONE;
-            return $this->run();
+            $this->_find_type = self::FIND_ONE;
+            return $this->_run();
         }
 
         /**
@@ -252,8 +252,8 @@
          * no rows were returned.
          */
         public function find_many() {
-            $this->find_type = self::FIND_MANY;
-            return $this->run();
+            $this->_find_type = self::FIND_MANY;
+            return $this->_run();
         }
 
         /**
@@ -262,8 +262,8 @@
          * rows returned.
          */
         public function count() {
-            $this->find_type = self::COUNT;
-            return $this->run();
+            $this->_find_type = self::COUNT;
+            return $this->_run();
         }
 
          /**
@@ -273,7 +273,7 @@
          * but it's public in case you need to call it directly.
          */
         public function hydrate($data=array()) {
-            $this->data = $data;
+            $this->_data = $data;
             return $this;
         }
 
@@ -282,7 +282,7 @@
          * as "dirty" and therefore update them when save() is called.
          */
         public function force_all_dirty() {
-            $this->dirty_fields = $this->data;
+            $this->_dirty_fields = $this->_data;
             return $this;
         }
 
@@ -294,9 +294,9 @@
          * other query building methods will be ignored.
          */
         public function raw_query($query, $parameters) {
-            $this->is_raw_query = true;
-            $this->raw_query = $query;
-            $this->raw_parameters = $parameters;
+            $this->_is_raw_query = true;
+            $this->_raw_query = $query;
+            $this->_raw_parameters = $parameters;
             return $this;
         }
 
@@ -305,8 +305,8 @@
          * Class constants defined above should be used to provide the
          * $operator argument.
          */
-        private function add_where($column_name, $operator, $value) {
-            $this->where[] = array(
+        protected function _add_where($column_name, $operator, $value) {
+            $this->_where[] = array(
                 self::WHERE_COLUMN_NAME => $column_name,
                 self::WHERE_OPERATOR => $operator,
                 self::WHERE_VALUE => $value,
@@ -329,49 +329,49 @@
          * Can be used if preferred.
          */
         public function where_equal($column_name, $value) {
-            return $this->add_where($column_name, '=', $value);
+            return $this->_add_where($column_name, '=', $value);
         }
 
         /**
          * Add a WHERE ... LIKE clause to your query.
          */
         public function where_like($column_name, $value) {
-            return $this->add_where($column_name, 'LIKE', $value);
+            return $this->_add_where($column_name, 'LIKE', $value);
         }
 
         /**
          * Add where WHERE ... NOT LIKE clause to your query.
          */
         public function where_not_like($column_name, $value) {
-            return $this->add_where($column_name, 'NOT LIKE', $value);
+            return $this->_add_where($column_name, 'NOT LIKE', $value);
         }
 
         /**
          * Add a WHERE ... > clause to your query
          */
         public function where_gt($column_name, $value) {
-            return $this->add_where($column_name, '>', $value);
+            return $this->_add_where($column_name, '>', $value);
         }
 
         /**
          * Add a WHERE ... < clause to your query
          */
         public function where_lt($column_name, $value) {
-            return $this->add_where($column_name, '<', $value);
+            return $this->_add_where($column_name, '<', $value);
         }
 
         /**
          * Add a WHERE ... >= clause to your query
          */
         public function where_gte($column_name, $value) {
-            return $this->add_where($column_name, '>=', $value);
+            return $this->_add_where($column_name, '>=', $value);
         }
 
         /**
          * Add a WHERE ... <= clause to your query
          */
         public function where_lte($column_name, $value) {
-            return $this->add_where($column_name, '<=', $value);
+            return $this->_add_where($column_name, '<=', $value);
         }
 
         /**
@@ -380,9 +380,9 @@
          * to the parameters supplied in the second argument.
          */
         public function where_raw($clause, $parameters) {
-            $this->where_is_raw = true;
-            $this->raw_where_clause = $clause;
-            $this->raw_where_parameters = $parameters;
+            $this->_where_is_raw = true;
+            $this->_raw_where_clause = $clause;
+            $this->_raw_where_parameters = $parameters;
             return $this;
         }
 
@@ -390,7 +390,7 @@
          * Add a LIMIT to the query
          */
         public function limit($limit) {
-            $this->limit = $limit;
+            $this->_limit = $limit;
             return $this;
         }
 
@@ -398,15 +398,15 @@
          * Add an OFFSET to the query
          */
         public function offset($offset) {
-            $this->offset = $offset;
+            $this->_offset = $offset;
             return $this;
         }
 
         /**
          * Add an ORDER BY clause to the query
          */
-        private function add_order_by($column_name, $ordering) {
-            $this->order_by[] = array(
+        protected function _add_order_by($column_name, $ordering) {
+            $this->_order_by[] = array(
                 self::ORDER_BY_COLUMN_NAME => $column_name,
                 self::ORDER_BY_ORDERING => $ordering,
             );
@@ -417,49 +417,49 @@
          * Add an ORDER BY column DESC clause
          */
         public function order_by_desc($column_name) {
-            return $this->add_order_by($column_name, 'DESC');
+            return $this->_add_order_by($column_name, 'DESC');
         }
 
         /**
          * Add an ORDER BY column ASC clause
          */
         public function order_by_asc($column_name) {
-            return $this->add_order_by($column_name, 'ASC');
+            return $this->_add_order_by($column_name, 'ASC');
         }
 
         /**
          * Build a SELECT statement based on the clauses that have
          * been passed to this instance by chaining method calls.
          */
-        private function build_select() {
+        protected function _build_select() {
 
-            if ($this->is_raw_query) {
-                $this->values = $this->raw_parameters;
-                return $this->raw_query;
+            if ($this->_is_raw_query) {
+                $this->_values = $this->_raw_parameters;
+                return $this->_raw_query;
             }
 
             $query = array();
 
-            if ($this->find_type === self::COUNT) {
-                $query[] = 'SELECT COUNT(*) AS count FROM ' . $this->table_name;
+            if ($this->_find_type === self::COUNT) {
+                $query[] = 'SELECT COUNT(*) AS count FROM ' . $this->_table_name;
             } else {
-                $query[] = 'SELECT * FROM ' . $this->table_name;
+                $query[] = 'SELECT * FROM ' . $this->_table_name;
             }
 
-            if ($this->where_is_raw) { // Raw WHERE clause
+            if ($this->_where_is_raw) { // Raw WHERE clause
                 $query[] = "WHERE";
-                $query[] = $this->raw_where_clause;
-                $this->values = array_merge($this->values, $this->raw_where_parameters);
-            } else if (count($this->where) > 0) { // Standard WHERE clauses
+                $query[] = $this->_raw_where_clause;
+                $this->_values = array_merge($this->_values, $this->_raw_where_parameters);
+            } else if (count($this->_where) > 0) { // Standard WHERE clauses
                 $where_clauses = array();
 
-                while($where = array_shift($this->where)) {
+                while($where = array_shift($this->_where)) {
                     $where_clauses[] = join(" ", array(
                         $where[self::WHERE_COLUMN_NAME],
                         $where[self::WHERE_OPERATOR],
                         '?'
                     ));
-                    $this->values[] = $where[self::WHERE_VALUE];
+                    $this->_values[] = $where[self::WHERE_VALUE];
                 }
 
                 $query[] = "WHERE";
@@ -468,7 +468,7 @@
 
             // Add ORDER BY clause(s)
             $order_by = array();
-            foreach ($this->order_by as $order) {
+            foreach ($this->_order_by as $order) {
                 $order_by[] = $order[self::ORDER_BY_COLUMN_NAME] . " " . $order[self::ORDER_BY_ORDERING];
             }
 
@@ -478,13 +478,13 @@
             }
 
             // Add LIMIT if present
-            if (!is_null($this->limit)) {
-                $query[] = "LIMIT " . $this->limit;
+            if (!is_null($this->_limit)) {
+                $query[] = "LIMIT " . $this->_limit;
             }
 
             // Add OFFSET if present
-            if (!is_null($this->offset)) {
-                $query[] = "OFFSET " . $this->offset;
+            if (!is_null($this->_offset)) {
+                $query[] = "OFFSET " . $this->_offset;
             }
 
             return join(" ", $query);
@@ -497,19 +497,19 @@
          * the class or false. If find_many() has been called, this will return
          * an array of instances of the class.
          */
-        private function run() {
-            self::setup_db();
-            $statement = self::$db->prepare($this->build_select());
-            $statement->execute($this->values);
+        protected function _run() {
+            self::_setup_db();
+            $statement = self::$_db->prepare($this->_build_select());
+            $statement->execute($this->_values);
 
-            switch ($this->find_type) {
+            switch ($this->_find_type) {
                 case self::FIND_ONE:
                     $result = $statement->fetch(PDO::FETCH_ASSOC);
-                    return $result ? self::for_table($this->table_name)->hydrate($result) : $result;
+                    return $result ? self::for_table($this->_table_name)->hydrate($result) : $result;
                 case self::FIND_MANY:
                     $instances = array();
                     while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
-                        $instances[] = self::for_table($this->table_name)->hydrate($row);
+                        $instances[] = self::for_table($this->_table_name)->hydrate($row);
                     }
                     return $instances;
                 case self::COUNT:
@@ -523,18 +523,18 @@
          * or null if not present.
          */
         public function get($key) {
-            return isset($this->data[$key]) ? $this->data[$key] : null;
+            return isset($this->_data[$key]) ? $this->_data[$key] : null;
         }
 
         /**
          * Return the name of the column in the database table which contains
          * the primary key ID of the row.
          */
-        private function get_id_column_name() {
-            if (isset(self::$config['id_column_overrides'][$this->table_name])) {
-                return self::$config['id_column_overrides'][$this->table_name];
+        protected function _get_id_column_name() {
+            if (isset(self::$_config['id_column_overrides'][$this->_table_name])) {
+                return self::$_config['id_column_overrides'][$this->_table_name];
             } else {
-                return self::$config['id_column'];
+                return self::$_config['id_column'];
             }
         }
 
@@ -542,7 +542,7 @@
          * Get the primary key ID of this object.
          */
         public function id() {
-            return $this->get($this->get_id_column_name());
+            return $this->get($this->_get_id_column_name());
         }
 
         /**
@@ -551,8 +551,8 @@
          * database when save() is called.
          */
         public function set($key, $value) {
-            $this->data[$key] = $value;
-            $this->dirty_fields[$key] = $value;
+            $this->_data[$key] = $value;
+            $this->_dirty_fields[$key] = $value;
         }
 
         /**
@@ -561,9 +561,9 @@
          */
         public function save() {
             $query = array();
-            $values = array_values($this->dirty_fields);
+            $values = array_values($this->_dirty_fields);
 
-            if ($this->update_or_insert == self::UPDATE) {
+            if ($this->_update_or_insert == self::UPDATE) {
 
                 // If there are no dirty values, do nothing
                 if (count($values) == 0) {
@@ -571,28 +571,28 @@
                 }
 
                 $query[] = "UPDATE";
-                $query[] = $this->table_name;
+                $query[] = $this->_table_name;
                 $query[] = "SET";
 
                 $field_list = array();
-                foreach ($this->dirty_fields as $key => $value) {
+                foreach ($this->_dirty_fields as $key => $value) {
                     $field_list[] = "$key = ?";
                 }
                 $query[] = join(", ", $field_list);
 
                 $query[] = "WHERE";
-                $query[] = $this->get_id_column_name();
+                $query[] = $this->_get_id_column_name();
                 $query[] = "= ?";
                 $values[] = $this->id();
 
             } else {
                 $query[] = "INSERT INTO"; 
-                $query[] = $this->table_name;
-                $query[] = "(" . join(", ", array_keys($this->dirty_fields)) . ")";
+                $query[] = $this->_table_name;
+                $query[] = "(" . join(", ", array_keys($this->_dirty_fields)) . ")";
                 $query[] = "VALUES";
 
                 $placeholders = array();
-                $dirty_field_count = count($this->dirty_fields);
+                $dirty_field_count = count($this->_dirty_fields);
                 for ($i = 0; $i < $dirty_field_count; $i++) {
                     $placeholders[] = "?";
                 }
@@ -601,14 +601,14 @@
             }
 
             $query = join(" ", $query);
-            self::setup_db();
-            $statement = self::$db->prepare($query);
+            self::_setup_db();
+            $statement = self::$_db->prepare($query);
             $success = $statement->execute($values);
 
             // If we've just inserted a new record, set the ID of this object
-            if ($this->update_or_insert == self::INSERT) {
-                $this->update_or_insert = self::UPDATE;
-                $this->data[$this->get_id_column_name()] = self::$db->lastInsertId();
+            if ($this->_update_or_insert == self::INSERT) {
+                $this->_update_or_insert = self::UPDATE;
+                $this->_data[$this->_get_id_column_name()] = self::$_db->lastInsertId();
             }
 
             return $success;
@@ -620,13 +620,13 @@
         public function delete() {
             $query = join(" ", array(
                 "DELETE FROM",
-                $this->table_name,
+                $this->_table_name,
                 "WHERE",
-                $this->get_id_column_name(),
+                $this->_get_id_column_name(),
                 "= ?",
             ));
-            self::setup_db();
-            $statement = self::$db->prepare($query);
+            self::_setup_db();
+            $statement = self::$_db->prepare($query);
             return $statement->execute(array($this->id()));
         }
 
