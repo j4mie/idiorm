@@ -464,9 +464,10 @@
          */
         protected function _build_select_start() {
             if ($this->_find_type === self::COUNT) {
-                return 'SELECT COUNT(*) AS count FROM ' . $this->_table_name;
+                $count_column = $this->_quote_identifier('count');
+                return "SELECT COUNT(*) AS $count_column FROM " . $this->_quote_identifier($this->_table_name);
             } else {
-                return 'SELECT * FROM ' . $this->_table_name;
+                return 'SELECT * FROM ' . $this->_quote_identifier($this->_table_name);
             }
         }
 
@@ -490,7 +491,7 @@
             $where_clauses = array();
             while($where = array_shift($this->_where)) {
                 $where_clauses[] = join(" ", array(
-                    $where[self::WHERE_COLUMN_NAME],
+                    $this->_quote_identifier($where[self::WHERE_COLUMN_NAME]),
                     $where[self::WHERE_OPERATOR],
                     '?'
                 ));
@@ -508,7 +509,7 @@
             }
             $order_by = array();
             foreach ($this->_order_by as $order) {
-                $order_by[] = $order[self::ORDER_BY_COLUMN_NAME] . " " . $order[self::ORDER_BY_ORDERING];
+                $order_by[] = $this->_quote_identifier($order[self::ORDER_BY_COLUMN_NAME]) . " " . $order[self::ORDER_BY_ORDERING];
             }
             return "ORDER BY " . join(", ", $order_by);
         }
@@ -548,6 +549,14 @@
                 }
             }
             return join($glue, $filtered_pieces);
+        }
+
+        /**
+         * Quote a string that is used as an identifier
+         * (table names, column names etc).
+         */
+        protected function _quote_identifier($identifier) {
+            return "`$identifier`";
         }
 
         /**
@@ -635,15 +644,15 @@
          */
         protected function _build_update() {
             $query = array();
-            $query[] = "UPDATE {$this->_table_name} SET";
+            $query[] = "UPDATE {$this->_quote_identifier($this->_table_name)} SET";
 
             $field_list = array();
             foreach ($this->_dirty_fields as $key => $value) {
-                $field_list[] = "$key = ?";
+                $field_list[] = "{$this->_quote_identifier($key)} = ?";
             }
             $query[] = join(", ", $field_list);
             $query[] = "WHERE";
-            $query[] = $this->_get_id_column_name();
+            $query[] = $this->_quote_identifier($this->_get_id_column_name());
             $query[] = "= ?";
             return join(" ", $query);
         }
@@ -653,8 +662,9 @@
          */
         protected function _build_insert() {
             $query[] = "INSERT INTO";
-            $query[] = $this->_table_name;
-            $query[] = "(" . join(", ", array_keys($this->_dirty_fields)) . ")";
+            $query[] = $this->_quote_identifier($this->_table_name);
+            $field_list = array_map(array($this, '_quote_identifier'), array_keys($this->_dirty_fields));
+            $query[] = "(" . join(", ", $field_list) . ")";
             $query[] = "VALUES";
 
             $placeholders = array();
@@ -673,9 +683,9 @@
         public function delete() {
             $query = join(" ", array(
                 "DELETE FROM",
-                $this->_table_name,
+                $this->_quote_identifier($this->_table_name),
                 "WHERE",
-                $this->_get_id_column_name(),
+                $this->_quote_identifier($this->_get_id_column_name()),
                 "= ?",
             ));
             self::_setup_db();
