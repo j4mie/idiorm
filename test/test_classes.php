@@ -100,6 +100,7 @@
             'BLACK' => "30",
             'RED' => "31",
             'GREEN' => "32",
+            'DEFAULT' => "00",
         );
 
         /**
@@ -118,7 +119,7 @@
          * Colouring code loosely based on
          * http://www.zend.com//code/codex.php?ozid=1112&single=1
          */
-        private static function format_line($line, $colour='BLACK') {
+        private static function format_line($line, $colour='DEFAULT') {
             if (isset($_SERVER['HTTP_USER_AGENT'])) {
                 $colour = strtolower($colour);
                 return "<p style=\"color: $colour;\">$line</p>\n";
