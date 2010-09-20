@@ -432,70 +432,122 @@
          * been passed to this instance by chaining method calls.
          */
         protected function _build_select() {
-
+            // If the query is raw, just set the $this->_values to be
+            // the raw query parameters and return the raw query
             if ($this->_is_raw_query) {
                 $this->_values = $this->_raw_parameters;
                 return $this->_raw_query;
             }
 
-            $query = array();
+            // Build and return the full SELECT statment by concatenating
+            // the results of calling each separate builder method.
+            return $this->_join_if_not_empty(" ", array(
+                $this->_build_select_start(),
+                $this->_build_where(),
+                $this->_build_order_by(),
+                $this->_build_limit(),
+                $this->_build_offset(),
+            ));
+        }
 
+        /**
+         * Build the start of the SELECT statement
+         */
+        protected function _build_select_start() {
             if ($this->_find_type === self::COUNT) {
-                $query[] = 'SELECT COUNT(*) AS count FROM ' . $this->_table_name;
+                return 'SELECT COUNT(*) AS count FROM ' . $this->_table_name;
             } else {
-                $query[] = 'SELECT * FROM ' . $this->_table_name;
+                return 'SELECT * FROM ' . $this->_table_name;
             }
+        }
 
-            if ($this->_where_is_raw) { // Raw WHERE clause
-                $query[] = "WHERE";
-                $query[] = $this->_raw_where_clause;
+        /**
+         * Build the WHERE clause(s)
+         */
+        protected function _build_where() {
+            // If the WHERE clause is raw, just set $this->_values to
+            // the raw parameters and return the raw clause.
+            if ($this->_where_is_raw) {
                 $this->_values = array_merge($this->_values, $this->_raw_where_parameters);
-            } else if (count($this->_where) > 0) { // Standard WHERE clauses
-                $where_clauses = array();
-
-                while($where = array_shift($this->_where)) {
-                    $where_clauses[] = join(" ", array(
-                        $where[self::WHERE_COLUMN_NAME],
-                        $where[self::WHERE_OPERATOR],
-                        '?'
-                    ));
-                    $this->_values[] = $where[self::WHERE_VALUE];
-                }
-
-                $query[] = "WHERE";
-                $query[] = join(" AND ", $where_clauses);
+                return "WHERE " . $this->_raw_where_clause;
             }
 
-            // Add ORDER BY clause(s)
+            // If there are no WHERE clauses, return empty string
+            if (count($this->_where) === 0) {
+                return '';
+            }
+
+            // Build the WHERE clauses
+            $where_clauses = array();
+            while($where = array_shift($this->_where)) {
+                $where_clauses[] = join(" ", array(
+                    $where[self::WHERE_COLUMN_NAME],
+                    $where[self::WHERE_OPERATOR],
+                    '?'
+                ));
+                $this->_values[] = $where[self::WHERE_VALUE];
+            }
+            return "WHERE " . join(" AND ", $where_clauses);
+        }
+
+        /**
+         * Build ORDER BY
+         */
+        protected function _build_order_by() {
+            if (count($this->_order_by) === 0) {
+                return '';
+            }
             $order_by = array();
             foreach ($this->_order_by as $order) {
                 $order_by[] = $order[self::ORDER_BY_COLUMN_NAME] . " " . $order[self::ORDER_BY_ORDERING];
             }
+            return "ORDER BY " . join(", ", $order_by);
+        }
 
-            if (count($order_by) != 0) {
-                $query[] = "ORDER BY";
-                $query[] = join(", ", $order_by);
-            }
-
-            // Add LIMIT if present
+        /**
+         * Build LIMIT
+         */
+        protected function _build_limit() {
             if (!is_null($this->_limit)) {
-                $query[] = "LIMIT " . $this->_limit;
+                return "LIMIT " . $this->_limit;
             }
+            return '';
+        }
 
-            // Add OFFSET if present
+        /**
+         * Build OFFSET
+         */
+        protected function _build_offset() {
             if (!is_null($this->_offset)) {
-                $query[] = "OFFSET " . $this->_offset;
+                return "OFFSET " . $this->_offset;
             }
+            return '';
+        }
 
-            return join(" ", $query);
+        /**
+         * Wrapper around PHP's join function which
+         * only adds the pieces if they are not empty.
+         */
+        protected function _join_if_not_empty($glue, $pieces) {
+            $filtered_pieces = array();
+            foreach ($pieces as $piece) {
+                if (is_string($piece)) {
+                    $piece = trim($piece);
+                }
+                if (!empty($piece)) {
+                    $filtered_pieces[] = $piece;
+                }
+            }
+            return join($glue, $filtered_pieces);
         }
 
         /**
          * Execute the SELECT query that has been built up by chaining methods
-         * on this class. This method is called by find_one() and find_many().
-         * If find_one() has been called, this will return a single instance of
-         * the class or false. If find_many() has been called, this will return
-         * an array of instances of the class.
+         * on this class. This method is called by find_one(), find_many() and
+         * count(). If find_one() has been called, this will return a single
+         * instance of the class or false. If find_many() has been called, this
+         * will return an array of instances of the class. If count() has been
+         * called, this will return an integer count of the rows.
          */
         protected function _run() {
             self::_setup_db();
