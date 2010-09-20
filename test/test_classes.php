@@ -96,6 +96,12 @@
         private static $failed_tests = array();
         private static $db;
 
+        private static $term_colours = array(
+            'BLACK' => "30",
+            'RED' => "31",
+            'GREEN' => "32",
+        );
+
         /**
          * Set the dummy database connection to be
          * used by the class to capture the SQL strings
@@ -108,12 +114,17 @@
          * Format a line for printing. Detects
          * if the script is being run from the command
          * line or from a browser.
+         *
+         * Colouring code loosely based on
+         * http://www.zend.com//code/codex.php?ozid=1112&single=1
          */
-        private static function format_line($line) {
+        private static function format_line($line, $colour='BLACK') {
             if (isset($_SERVER['HTTP_USER_AGENT'])) {
-                return "<p>$line</p>\n";
+                $colour = strtolower($colour);
+                return "<p style=\"color: $colour;\">$line</p>\n";
             } else {
-                return "$line\n";
+                $colour = self::$term_colours[$colour];
+                return chr(27) . "[0;{$colour}m{$line}" . chr(27) . "[00m\n";
             }
         }
 
@@ -121,7 +132,7 @@
          * Report a passed test
          */
         private static function report_pass($test_name) {
-            echo self::format_line("PASS: $test_name");
+            echo self::format_line("PASS: $test_name", 'GREEN');
             self::$passed_tests[] = $test_name;
         }
 
@@ -129,9 +140,9 @@
          * Report a failed test
          */
         private static function report_failure($test_name, $query) {
-            echo self::format_line("FAIL: $test_name");
-            echo self::format_line("Expected: $query");
-            echo self::format_line("Actual: " . self::$db->get_last_query());
+            echo self::format_line("FAIL: $test_name", 'RED');
+            echo self::format_line("Expected: $query", 'RED');
+            echo self::format_line("Actual: " . self::$db->get_last_query(), 'RED');
             self::$failed_tests[] = $test_name;
         }
 
@@ -141,6 +152,7 @@
         public static function report() {
             $passed_count = count(self::$passed_tests);
             $failed_count = count(self::$failed_tests);
+            echo self::format_line('');
             echo self::format_line("$passed_count tests passed. $failed_count tests failed.");
 
             if ($failed_count != 0) {
