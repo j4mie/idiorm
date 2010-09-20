@@ -607,43 +607,16 @@
             $values = array_values($this->_dirty_fields);
 
             if ($this->_update_or_insert == self::UPDATE) {
-
                 // If there are no dirty values, do nothing
                 if (count($values) == 0) {
                     return true;
                 }
-
-                $query[] = "UPDATE";
-                $query[] = $this->_table_name;
-                $query[] = "SET";
-
-                $field_list = array();
-                foreach ($this->_dirty_fields as $key => $value) {
-                    $field_list[] = "$key = ?";
-                }
-                $query[] = join(", ", $field_list);
-
-                $query[] = "WHERE";
-                $query[] = $this->_get_id_column_name();
-                $query[] = "= ?";
+                $query = $this->_build_update();
                 $values[] = $this->id();
-
-            } else {
-                $query[] = "INSERT INTO"; 
-                $query[] = $this->_table_name;
-                $query[] = "(" . join(", ", array_keys($this->_dirty_fields)) . ")";
-                $query[] = "VALUES";
-
-                $placeholders = array();
-                $dirty_field_count = count($this->_dirty_fields);
-                for ($i = 0; $i < $dirty_field_count; $i++) {
-                    $placeholders[] = "?";
-                }
-
-                $query[] = "(" . join(", ", $placeholders) . ")";
+            } else { // INSERT
+                $query = $this->_build_insert();
             }
 
-            $query = join(" ", $query);
             self::_setup_db();
             $statement = self::$_db->prepare($query);
             $success = $statement->execute($values);
@@ -655,6 +628,43 @@
             }
 
             return $success;
+        }
+
+        /**
+         * Build an UPDATE query
+         */
+        protected function _build_update() {
+            $query = array();
+            $query[] = "UPDATE {$this->_table_name} SET";
+
+            $field_list = array();
+            foreach ($this->_dirty_fields as $key => $value) {
+                $field_list[] = "$key = ?";
+            }
+            $query[] = join(", ", $field_list);
+            $query[] = "WHERE";
+            $query[] = $this->_get_id_column_name();
+            $query[] = "= ?";
+            return join(" ", $query);
+        }
+
+        /**
+         * Build an INSERT query
+         */
+        protected function _build_insert() {
+            $query[] = "INSERT INTO";
+            $query[] = $this->_table_name;
+            $query[] = "(" . join(", ", array_keys($this->_dirty_fields)) . ")";
+            $query[] = "VALUES";
+
+            $placeholders = array();
+            $dirty_field_count = count($this->_dirty_fields);
+            for ($i = 0; $i < $dirty_field_count; $i++) {
+                $placeholders[] = "?";
+            }
+
+            $query[] = "(" . join(", ", $placeholders) . ")";
+            return join(" ", $query);
         }
 
         /**
