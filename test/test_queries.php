@@ -6,8 +6,8 @@
      *
      */
 
-    require_once "../idiorm.php";
-    require_once "test_classes.php";
+    require_once dirname(__FILE__) . "/../idiorm.php";
+    require_once dirname(__FILE__) . "/test_classes.php";
 
     // Set up the dummy database connection
     $db = new DummyPDO();

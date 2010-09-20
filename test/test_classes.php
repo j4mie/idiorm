@@ -105,10 +105,23 @@
         }
 
         /**
+         * Format a line for printing. Detects
+         * if the script is being run from the command
+         * line or from a browser.
+         */
+        private static function format_line($line) {
+            if (isset($_SERVER['HTTP_USER_AGENT'])) {
+                return "<p>$line</p>\n";
+            } else {
+                return "$line\n";
+            }
+        }
+
+        /**
          * Report a passed test
          */
         private static function report_pass($test_name) {
-            echo "<p>PASS: $test_name</p>";
+            echo self::format_line("PASS: $test_name");
             self::$passed_tests[] = $test_name;
         }
 
@@ -116,9 +129,9 @@
          * Report a failed test
          */
         private static function report_failure($test_name, $query) {
-            echo "<p>FAIL: $test_name</p>";
-            echo "<p>Expected: $query</p>";
-            echo "<p>Actual: " . self::$db->get_last_query() . "</p>";
+            echo self::format_line("FAIL: $test_name");
+            echo self::format_line("Expected: $query");
+            echo self::format_line("Actual: " . self::$db->get_last_query());
             self::$failed_tests[] = $test_name;
         }
 
@@ -128,10 +141,10 @@
         public static function report() {
             $passed_count = count(self::$passed_tests);
             $failed_count = count(self::$failed_tests);
-            echo "<p>$passed_count tests passed. $failed_count tests failed.</p>";
+            echo self::format_line("$passed_count tests passed. $failed_count tests failed.");
 
             if ($failed_count != 0) {
-                echo "<p>Failed tests: " . join(", ", self::$failed_tests) . "</p>";
+                echo self::format_line("Failed tests: " . join(", ", self::$failed_tests));
             }
         }
 
