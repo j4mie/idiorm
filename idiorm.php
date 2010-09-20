@@ -242,7 +242,9 @@
                 $this->where($this->_get_id_column_name(), $id);
             }
             $this->_find_type = self::FIND_ONE;
-            return $this->_run();
+            $statement = $this->_run();
+            $result = $statement->fetch(PDO::FETCH_ASSOC);
+            return $result ? self::for_table($this->_table_name)->hydrate($result) : $result;
         }
 
         /**
@@ -253,7 +255,12 @@
          */
         public function find_many() {
             $this->_find_type = self::FIND_MANY;
-            return $this->_run();
+            $statement = $this->_run();
+            $instances = array();
+            while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
+                $instances[] = self::for_table($this->_table_name)->hydrate($row);
+            }
+            return $instances;
         }
 
         /**
@@ -263,7 +270,9 @@
          */
         public function count() {
             $this->_find_type = self::COUNT;
-            return $this->_run();
+            $statement = $this->_run();
+            $result = $statement->fetch(PDO::FETCH_ASSOC);
+            return isset($result['count']) ? (int) $result['count'] : 0;
         }
 
          /**
@@ -543,31 +552,13 @@
 
         /**
          * Execute the SELECT query that has been built up by chaining methods
-         * on this class. This method is called by find_one(), find_many() and
-         * count(). If find_one() has been called, this will return a single
-         * instance of the class or false. If find_many() has been called, this
-         * will return an array of instances of the class. If count() has been
-         * called, this will return an integer count of the rows.
+         * on this class. Return the executed PDOStatement object.
          */
         protected function _run() {
             self::_setup_db();
             $statement = self::$_db->prepare($this->_build_select());
             $statement->execute($this->_values);
-
-            switch ($this->_find_type) {
-                case self::FIND_ONE:
-                    $result = $statement->fetch(PDO::FETCH_ASSOC);
-                    return $result ? self::for_table($this->_table_name)->hydrate($result) : $result;
-                case self::FIND_MANY:
-                    $instances = array();
-                    while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
-                        $instances[] = self::for_table($this->_table_name)->hydrate($row);
-                    }
-                    return $instances;
-                case self::COUNT:
-                    $result = $statement->fetch(PDO::FETCH_ASSOC);
-                    return isset($result['count']) ? (int) $result['count'] : 0;
-            }
+            return $statement;
         }
 
         /**
