@@ -448,7 +448,7 @@
                 return $this->_raw_query;
             }
 
-            // Build and return the full SELECT statment by concatenating
+            // Build and return the full SELECT statement by concatenating
             // the results of calling each separate builder method.
             return $this->_join_if_not_empty(" ", array(
                 $this->_build_select_start(),
