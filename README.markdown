@@ -7,9 +7,6 @@ Built on top of [Idiorm](http://github.com/j4mie/idiorm/).
 
 Released under a [BSD license](http://en.wikipedia.org/wiki/BSD_licenses).
 
-Features
---------
-
 Philosophy
 ----------
 
