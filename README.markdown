@@ -116,7 +116,7 @@ For example, let's say you wish to generalise your role filter (see above) to al
     $admin_users = Model::factory('User')->filter('has_role', 'admin')->find_many();
     $guest_users = Model::factory('User')->filter('has_role', 'guest')->find_many();
 
-These examples may seem simple (`filter('has_role', 'admin')` could just as easily be achieved using `where('role', 'admin')`, but remember that filters can contain arbitrarily complex code - adding `raw_where` clauses or even complete `raw_query` calls to perform joins, etc. Filters provide a powerful mechanism to hide complexity in your model's query API.
+These examples may seem simple (`filter('has_role', 'admin')` could just as easily be achieved using `where('role', 'admin')`), but remember that filters can contain arbitrarily complex code - adding `raw_where` clauses or even complete `raw_query` calls to perform joins, etc. Filters provide a powerful mechanism to hide complexity in your model's query API.
 
 ### Getting data from objects, updating and inserting data ###
 
