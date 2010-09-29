@@ -140,8 +140,8 @@
          * the _class_name_to_table_name method method.
          */
         protected static function _get_table_name($class_name) {
-            if (isset($class_name::$_table)) {
-                return $class_name::$_table;
+            if (class_exists($class_name) && property_exists($class_name, '_table')) {
+                return eval($class_name . '::$_table');
             }
             return self::_class_name_to_table_name($class_name);
         }
