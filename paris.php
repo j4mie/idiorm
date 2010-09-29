@@ -66,6 +66,18 @@
         }
 
         /**
+         * Add a custom filter to the method chain specified on the
+         * model class. This allows custom queries to be added
+         * to models. The filter should take an instance of the
+         * ORM wrapper and return an instance of the ORM wrapper.
+         */
+        public function filter($filter_function) {
+            if (method_exists($this->_class_name, $filter_function)) {
+                return call_user_func_array(array($this->_class_name, $filter_function), array($this));
+            }
+        }
+
+        /**
          * Factory method, return an instance of this
          * class bound to the supplied table name.
          */

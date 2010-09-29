@@ -13,7 +13,7 @@ Features
 Philosophy
 ----------
 
-Paris is build with the same *less is more* philosophy as [Idiorm](http://github.com/j4mie/idiorm/).
+Paris is built with the same *less is more* philosophy as [Idiorm](http://github.com/j4mie/idiorm/).
 
 Let's See Some Code
 -------------------
@@ -75,9 +75,34 @@ The only differences between using Idiorm and using Paris for querying are as fo
 
 2. The `find_one` and `find_many` methods will return instances of *your model subclass*, instead of the base `ORM` class. Like Idiorm, `find_one` will return a single instance or `false` if no rows matched your query, while `find_many` will return an array of instances, which may be empty if no rows matched.
 
+3. Custom filtering, see next section.
+
 You may also retrieve a count of the number of rows returned by your query. This method behaves exactly like Idiorm's `count` method:
 
     $count = Model::factory('User')->where_lt('age', 20)->count();
+
+#### Custom filters ####
+
+It is often desirable to create reusable filters that can be used as part of queries. Paris allows this by providing a method called `filter` which can be chained in queries alongside the existing Idiorm query API. The filter method takes the name of a **public static** method on the current Model subclass as an argument. The supplied method which will be called at the point in the chain where `filter` is called, and will be passed the `ORM` object as the first parameter. It should return the ORM object after calling one or more query methods on it. The method chain can then be continued if necessary.
+
+It is easiest to illustrate this with an example. It may be desirable for users in your application to have a role, which controls their access to certain parts of the application. In this situation, you may often wish to retrieve a list of users with the role 'admin'. To do this, add a static method called 'admins' to your Model class:
+
+    class User extends Model {
+        public static function admins($orm) {
+            return $orm->where('role', 'admin');
+        }
+    }
+
+You can then use this filter in your queries:
+
+    $admin_users = Model::factory('User')->filter('admins')->find_many();
+
+You can also chain it with other methods as normal:
+
+    $young_admins = Model::factory('User')
+                        ->filter('admins')
+                        ->where_lt('age', 18)
+                        ->find_many();
 
 ### Getting data from objects, updating and inserting data ###
 
