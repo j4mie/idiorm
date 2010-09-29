@@ -5,6 +5,8 @@ A lightweight nearly-zero-configuration object-relational mapper and fluent quer
 
 Released under a [BSD license](http://en.wikipedia.org/wiki/BSD_licenses).
 
+**See Also: [Paris](http://github.com/j4mie/paris), an Active Record implementation built on top of Idiorm.**
+
 Features
 --------
 
