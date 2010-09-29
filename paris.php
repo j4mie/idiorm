@@ -160,7 +160,7 @@
         protected static function _get_table_name($class_name) {
             if (class_exists($class_name) && property_exists($class_name, '_table')) {
                 $properties = get_class_vars($class_name);
-                return $vars['_table'];
+                return $properties['_table'];
             }
             return self::_class_name_to_table_name($class_name);
         }
