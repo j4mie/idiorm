@@ -60,5 +60,27 @@
     $expected = 'SELECT * FROM `model_with_filters` WHERE `name` = "Bob"';
     Tester::check_equal("Filter with arguments", $expected);
 
+    class Widget extends Model {
+    }
+
+    $widget = Model::factory('Widget')->create();
+    $widget->name = "Fred";
+    $widget->age = 10;
+    $widget->save();
+    $expected = 'INSERT INTO `widget` (`name`, `age`) VALUES ("Fred", "10")';
+    Tester::check_equal("Insert data", $expected);
+
+    $widget = Model::factory('Widget')->find_one(1);
+    $widget->name = "Fred";
+    $widget->age = 10;
+    $widget->save();
+    $expected = 'UPDATE `widget` SET `name` = "Fred", `age` = "10" WHERE `id` = "1"';
+    Tester::check_equal("Update data", $expected);
+
+    $widget = Model::factory('Widget')->find_one(1);
+    $widget->delete();
+    $expected = 'DELETE FROM `widget` WHERE `id` = "1"';
+    Tester::check_equal("Delete data", $expected);
+
     Tester::report();
 ?>
