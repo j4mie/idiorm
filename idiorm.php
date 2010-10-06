@@ -57,10 +57,9 @@
         const ORDER_BY_COLUMN_NAME = 0;
         const ORDER_BY_ORDERING = 1;
 
-        // Where clauses array keys
-        const WHERE_COLUMN_NAME = 0;
-        const WHERE_VALUE = 1;
-        const WHERE_OPERATOR = 2;
+        // Where condition array keys
+        const WHERE_FRAGMENT = 0;
+        const WHERE_VALUES = 1;
 
         // ------------------------ //
         // --- CLASS PROPERTIES --- //
@@ -310,17 +309,28 @@
         }
 
         /**
-         * Private method to add a WHERE clause to the query
-         * Class constants defined above should be used to provide the
-         * $operator argument.
+         * Internal method to add a WHERE condition to the query
          */
-        protected function _add_where($column_name, $operator, $value) {
+        protected function _add_where($fragment, $values) {
+            if (!is_array($values)) {
+                $values = array($values);
+            }
             $this->_where_conditions[] = array(
-                self::WHERE_COLUMN_NAME => $column_name,
-                self::WHERE_OPERATOR => $operator,
-                self::WHERE_VALUE => $value,
+                self::WHERE_FRAGMENT => $fragment,
+                self::WHERE_VALUES => $values,
             );
             return $this;
+        }
+
+        /**
+         * Helper method to compile a simple COLUMN SEPARATOR VALUE
+         * style WHERE condition into a string and value ready to
+         * be passed to the _add_where method. Avoids duplication
+         * of the call to _quote_identifier
+         */
+        protected function _add_simple_where($column_name, $separator, $value) {
+            $column_name = $this->_quote_identifier($column_name);
+            return $this->_add_where("{$column_name} {$separator} ?", $value);
         }
 
         /**
@@ -338,49 +348,49 @@
          * Can be used if preferred.
          */
         public function where_equal($column_name, $value) {
-            return $this->_add_where($column_name, '=', $value);
+            return $this->_add_simple_where($column_name, '=', $value);
         }
 
         /**
          * Add a WHERE ... LIKE clause to your query.
          */
         public function where_like($column_name, $value) {
-            return $this->_add_where($column_name, 'LIKE', $value);
+            return $this->_add_simple_where($column_name, 'LIKE', $value);
         }
 
         /**
          * Add where WHERE ... NOT LIKE clause to your query.
          */
         public function where_not_like($column_name, $value) {
-            return $this->_add_where($column_name, 'NOT LIKE', $value);
+            return $this->_add_simple_where($column_name, 'NOT LIKE', $value);
         }
 
         /**
          * Add a WHERE ... > clause to your query
          */
         public function where_gt($column_name, $value) {
-            return $this->_add_where($column_name, '>', $value);
+            return $this->_add_simple_where($column_name, '>', $value);
         }
 
         /**
          * Add a WHERE ... < clause to your query
          */
         public function where_lt($column_name, $value) {
-            return $this->_add_where($column_name, '<', $value);
+            return $this->_add_simple_where($column_name, '<', $value);
         }
 
         /**
          * Add a WHERE ... >= clause to your query
          */
         public function where_gte($column_name, $value) {
-            return $this->_add_where($column_name, '>=', $value);
+            return $this->_add_simple_where($column_name, '>=', $value);
         }
 
         /**
          * Add a WHERE ... <= clause to your query
          */
         public function where_lte($column_name, $value) {
-            return $this->_add_where($column_name, '<=', $value);
+            return $this->_add_simple_where($column_name, '<=', $value);
         }
 
         /**
@@ -487,16 +497,12 @@
                 return '';
             }
 
-            // Build the WHERE clauses
             $where_conditions = array();
-            while($where = array_shift($this->_where_conditions)) {
-                $where_conditions[] = join(" ", array(
-                    $this->_quote_identifier($where[self::WHERE_COLUMN_NAME]),
-                    $where[self::WHERE_OPERATOR],
-                    '?'
-                ));
-                $this->_values[] = $where[self::WHERE_VALUE];
+            foreach ($this->_where_conditions as $condition) {
+                $where_conditions[] = $condition[self::WHERE_FRAGMENT];
+                $this->_values = array_merge($this->_values, $condition[self::WHERE_VALUES]);
             }
+
             return "WHERE " . join(" AND ", $where_conditions);
         }
 
