@@ -103,7 +103,7 @@
         protected $_raw_parameters = array();
 
         // Array of WHERE clauses
-        protected $_where = array();
+        protected $_where_conditions = array();
 
         // Is the WHERE clause raw?
         protected $_where_is_raw = false;
@@ -315,7 +315,7 @@
          * $operator argument.
          */
         protected function _add_where($column_name, $operator, $value) {
-            $this->_where[] = array(
+            $this->_where_conditions[] = array(
                 self::WHERE_COLUMN_NAME => $column_name,
                 self::WHERE_OPERATOR => $operator,
                 self::WHERE_VALUE => $value,
@@ -483,21 +483,21 @@
             }
 
             // If there are no WHERE clauses, return empty string
-            if (count($this->_where) === 0) {
+            if (count($this->_where_conditions) === 0) {
                 return '';
             }
 
             // Build the WHERE clauses
-            $where_clauses = array();
-            while($where = array_shift($this->_where)) {
-                $where_clauses[] = join(" ", array(
+            $where_conditions = array();
+            while($where = array_shift($this->_where_conditions)) {
+                $where_conditions[] = join(" ", array(
                     $this->_quote_identifier($where[self::WHERE_COLUMN_NAME]),
                     $where[self::WHERE_OPERATOR],
                     '?'
                 ));
                 $this->_values[] = $where[self::WHERE_VALUE];
             }
-            return "WHERE " . join(" AND ", $where_clauses);
+            return "WHERE " . join(" AND ", $where_conditions);
         }
 
         /**
