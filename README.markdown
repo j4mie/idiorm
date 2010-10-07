@@ -130,7 +130,7 @@ Similarly, to add a `WHERE ... NOT LIKE` clause, use:
 
     $people = ORM::for_table('person')->where_not_like('name', '%bob%')->find_many();
 
-#### Set membership: `where_in` and `where_not_in` #####
+##### Set membership: `where_in` and `where_not_in` #####
 
 To add a `WHERE ... IN ()` or `WHERE ... NOT IN ()` clause, use the `where_in` and `where_not_in` methods respectively.
 
