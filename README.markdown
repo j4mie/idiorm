@@ -160,4 +160,4 @@ To delete the database row associated with an instance of your model, call its `
 
 ### Configuration ###
 
-The only configuration provided by Paris itself is the `$_table` static property on model classes. To configure the database connection, you should use Idiorm's configuration system via the `ORM::configure` method. **See [Idiorm's documentation](http://github.com/j4mie/idiorm/) for full details.**
+The only configuration options provided by Paris itself are the `$_table` and `$_id_column` static properties on model classes. To configure the database connection, you should use Idiorm's configuration system via the `ORM::configure` method. **See [Idiorm's documentation](http://github.com/j4mie/idiorm/) for full details.**
