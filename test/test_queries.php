@@ -41,6 +41,15 @@
     $expected = 'SELECT * FROM `custom_table`';
     Tester::check_equal("Custom table name", $expected);
 
+    class ModelWithCustomTableAndCustomIdColumn extends Model {
+        public static $_table = 'custom_table';
+        public static $_id_column = 'custom_id_column';
+    }
+
+    Model::factory('ModelWithCustomTableAndCustomIdColumn')->find_one(5);
+    $expected = 'SELECT * FROM `custom_table` WHERE `custom_id_column` = "5"';
+    Tester::check_equal("Custom ID column", $expected);
+
     class ModelWithFilters extends Model {
 
         public static function name_is_fred($orm) {
@@ -81,6 +90,10 @@
     $widget->delete();
     $expected = 'DELETE FROM `widget` WHERE `id` = "1"';
     Tester::check_equal("Delete data", $expected);
+
+    class CustomIdWidget extends Model {
+        public static $_id_column = 'widget_id';
+    }
 
     Tester::report();
 ?>

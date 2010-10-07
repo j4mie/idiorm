@@ -151,6 +151,18 @@
         public $orm;
 
         /**
+         * Retrieve the value of a static property on a class. If the
+         * class or the property does not exist, returns null
+         */
+        protected static function _get_static_property($class_name, $property) {
+            if (!class_exists($class_name) || !property_exists($class_name, $property)) {
+                return null;
+            }
+            $properties = get_class_vars($class_name);
+            return $properties[$property];
+        }
+
+        /**
          * Static method to get a table name given a class name.
          * If the supplied class has a public static property
          * named $_table, the value of this property will be
@@ -158,11 +170,11 @@
          * the _class_name_to_table_name method method.
          */
         protected static function _get_table_name($class_name) {
-            if (class_exists($class_name) && property_exists($class_name, '_table')) {
-                $properties = get_class_vars($class_name);
-                return $properties['_table'];
+            $specified_table_name = self::_get_static_property($class_name, '_table');
+            if (is_null($specified_table_name)) {
+                return self::_class_name_to_table_name($class_name);
             }
-            return self::_class_name_to_table_name($class_name);
+            return $specified_table_name;
         }
 
         /**
@@ -172,6 +184,14 @@
          */
         protected static function _class_name_to_table_name($class_name) {
             return strtolower(preg_replace('/(?<=[a-z])([A-Z])/', '_$1', $class_name));
+        }
+
+        /**
+         * Return the ID column name to use for this class. If it is
+         * not set on the class, returns null.
+         */
+        protected static function _get_id_column_name($class_name) {
+            return self::_get_static_property($class_name, '_id_column');
         }
 
         /**
@@ -187,6 +207,7 @@
             $table_name = self::_get_table_name($class_name);
             $wrapper = ORMWrapper::for_table($table_name);
             $wrapper->set_class_name($class_name);
+            $wrapper->use_id_column(self::_get_id_column_name($class_name));
             return $wrapper;
         }
 

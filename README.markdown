@@ -51,6 +51,14 @@ To override this default behaviour, add a **public static** property to your cla
         public static $_table = 'my_user_table';
     }
 
+### ID Column ###
+
+Paris requires that your database tables have a unique primary key column. By default, Paris will use a column called `id`. To override this default behaviour, add a **public static** property to your class called `$_id_column`:
+
+    class User extends Model {
+        public static $_id_column = 'my_id_column';
+    }
+
 ### Querying ###
 
 Querying allows you to select data from your database and populate instances of your model classes. Queries start with a call to a static *factory method* on the base `Model` class that takes a single argument: the name of the model class you wish to use for your query. This factory method is then used as the start of a *method chain* which gives you full access to [Idiorm](http://github.com/j4mie/idiorm/)'s fluent query API. **See Idiorm's documentation for details of this API.**
