@@ -699,13 +699,8 @@
             $query[] = "(" . join(", ", $field_list) . ")";
             $query[] = "VALUES";
 
-            $placeholders = array();
-            $dirty_field_count = count($this->_dirty_fields);
-            for ($i = 0; $i < $dirty_field_count; $i++) {
-                $placeholders[] = "?";
-            }
-
-            $query[] = "(" . join(", ", $placeholders) . ")";
+            $placeholders = $this->_create_placeholders(count($this->_dirty_fields));
+            $query[] = "({$placeholders})";
             return join(" ", $query);
         }
 
