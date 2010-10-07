@@ -136,5 +136,17 @@
     $expected = 'SELECT * FROM `widget_nozzle` WHERE `primary_key` = "5"';
     Tester::check_equal("Setting: id_column_overrides, third test", $expected);
 
+    ORM::for_table('widget')->use_id_column('new_id')->find_one(5);
+    $expected = 'SELECT * FROM `widget` WHERE `new_id` = "5"';
+    Tester::check_equal("Instance ID column, first test", $expected);
+
+    ORM::for_table('widget_handle')->use_id_column('new_id')->find_one(5);
+    $expected = 'SELECT * FROM `widget_handle` WHERE `new_id` = "5"';
+    Tester::check_equal("Instance ID column, second test", $expected);
+
+    ORM::for_table('widget_nozzle')->use_id_column('new_id')->find_one(5);
+    $expected = 'SELECT * FROM `widget_nozzle` WHERE `new_id` = "5"';
+    Tester::check_equal("Instance ID column, third test", $expected);
+
     Tester::report();
 ?>

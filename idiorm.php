@@ -123,6 +123,10 @@
         // Are we updating or inserting?
         protected $_update_or_insert = self::UPDATE;
 
+        // Name of the column to use as the primary key for
+        // this instance only. Overrides the config settings.
+        protected $_instance_id_column = null;
+
         // ---------------------- //
         // --- STATIC METHODS --- //
         // ---------------------- //
@@ -219,6 +223,19 @@
         }
 
         /**
+         * Specify the ID column to use for this instance or array of instances only.
+         * This overrides the id_column and id_column_overrides settings.
+         *
+         * This is mostly useful for libraries built on top of Idiorm, and will
+         * not normally be used in manually built queries. If you don't know why
+         * you would want to use this, you should probably just ignore it.
+         */
+        public function use_id_column($id_column) {
+            $this->_instance_id_column = $id_column;
+            return $this;
+        }
+
+        /**
          * Tell the ORM that you are expecting a single result
          * back from your query, and execute it. Will return
          * a single instance of the ORM class, or false if no
@@ -234,7 +251,7 @@
             $this->_find_type = self::FIND_ONE;
             $statement = $this->_run();
             $result = $statement->fetch(PDO::FETCH_ASSOC);
-            return $result ? self::for_table($this->_table_name)->hydrate($result) : $result;
+            return $result ? self::for_table($this->_table_name)->use_id_column($this->_instance_id_column)->hydrate($result) : $result;
         }
 
         /**
@@ -248,7 +265,7 @@
             $statement = $this->_run();
             $instances = array();
             while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
-                $instances[] = self::for_table($this->_table_name)->hydrate($row);
+                $instances[] = self::for_table($this->_table_name)->use_id_column($this->_instance_id_column)->hydrate($row);
             }
             return $instances;
         }
@@ -596,6 +613,9 @@
          * the primary key ID of the row.
          */
         protected function _get_id_column_name() {
+            if (!is_null($this->_instance_id_column)) {
+                return $this->_instance_id_column;
+            }
             if (isset(self::$_config['id_column_overrides'][$this->_table_name])) {
                 return self::$_config['id_column_overrides'][$this->_table_name];
             } else {
