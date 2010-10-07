@@ -104,15 +104,6 @@
         // Array of WHERE clauses
         protected $_where_conditions = array();
 
-        // Is the WHERE clause raw?
-        protected $_where_is_raw = false;
-
-        // Raw WHERE clause
-        protected $_raw_where_clause = '';
-
-        // Raw WHERE parameters
-        protected $_raw_where_parameters = array();
-
         // LIMIT
         protected $_limit = null;
 
@@ -425,10 +416,7 @@
          * to the parameters supplied in the second argument.
          */
         public function where_raw($clause, $parameters) {
-            $this->_where_is_raw = true;
-            $this->_raw_where_clause = $clause;
-            $this->_raw_where_parameters = $parameters;
-            return $this;
+            return $this->_add_where($clause, $parameters);
         }
 
         /**
@@ -511,13 +499,6 @@
          * Build the WHERE clause(s)
          */
         protected function _build_where() {
-            // If the WHERE clause is raw, just set $this->_values to
-            // the raw parameters and return the raw clause.
-            if ($this->_where_is_raw) {
-                $this->_values = array_merge($this->_values, $this->_raw_where_parameters);
-                return "WHERE " . $this->_raw_where_clause;
-            }
-
             // If there are no WHERE clauses, return empty string
             if (count($this->_where_conditions) === 0) {
                 return '';

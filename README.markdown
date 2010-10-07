@@ -140,13 +140,19 @@ Both methods accept two arguments. The first is the column name to compare again
 
 ##### Raw WHERE clauses #####
 
-If you require a more complex query, you can use the `where_raw` method to specify the SQL fragment exactly. This method takes two arguments: the string to add to the query, and an array of parameters which will be bound to the string. The string should contain question marks to represent the values to be bound, and the parameter array should contain the values to be substituted into the string in the correct order.
+If you require a more complex query, you can use the `where_raw` method to specify the SQL fragment for the WHERE clause exactly. This method takes two arguments: the string to add to the query, and an array of parameters which will be bound to the string. The string should contain question marks to represent the values to be bound, and the parameter array should contain the values to be substituted into the string in the correct order.
 
-This method may be chained with other methods such as `offset`, `limit` and `order_by_(*)`, but it may NOT be chained with other calls to `where`. If other `where` calls are present in the method chain, they will simply be ignored in the resulting query.
+This method may be used in a method chain alongside other `where_*` methods as well as methods such as `offset`, `limit` and `order_by_(*)`. The contents of the string you supply will be connected with preceding and following WHERE clauses with AND.
 
-    $people = ORM::for_table('person')->where_raw('name = ? AND (age = ? OR age = ?)', array('Fred', 5, 10))->order_by_asc('name')->find_many();
+    $people = ORM::for_table('person')
+                ->where_raw('name = ? AND (age = ? OR age = ?)', array('Fred', 5, 10))
+                ->where('size', 'LARGE')
+                ->order_by_asc('name')
+                ->find_many();
 
-Note that this method only supports "question mark placeholder" syntax, and NOT "named placeholder" syntax.
+Note that this method only supports "question mark placeholder" syntax, and NOT "named placeholder" syntax. This is because PDO does not allow queries that contain a mixture of placeholder types. Also, you should ensure that the number of question mark placeholders in the string exactly matches the number of elements in the array.
+
+If you require yet more flexibility, you can manually specify the entire query. See *Raw queries* below.
 
 ##### Limits and offsets #####
 
