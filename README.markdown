@@ -124,11 +124,11 @@ There are four methods available for inequalities:
 
 To add a `WHERE ... LIKE` clause, use:
 
-    $people = ORM::for_table('person')->where_like('Name', '%fred%')->find_many();
+    $people = ORM::for_table('person')->where_like('name', '%fred%')->find_many();
 
 Similarly, to add a `WHERE ... NOT LIKE` clause, use:
 
-    $people = ORM::for_table('person')->where_not_like('Name', '%bob%')->find_many();
+    $people = ORM::for_table('person')->where_not_like('name', '%bob%')->find_many();
 
 #### Set membership: `where_in` and `where_not_in` #####
 
@@ -136,19 +136,22 @@ To add a `WHERE ... IN ()` or `WHERE ... NOT IN ()` clause, use the `where_in` a
 
 Both methods accept two arguments. The first is the column name to compare against. The second is an *array* of possible values.
 
-    $people = ORM::for_table('person')->where_in('Name', array('Fred', 'Joe', 'John')->find_many();
+    $people = ORM::for_table('person')->where_in('name', array('Fred', 'Joe', 'John')->find_many();
 
 ##### Raw WHERE clauses #####
 
 If you require a more complex query, you can use the `where_raw` method to specify the SQL fragment for the WHERE clause exactly. This method takes two arguments: the string to add to the query, and an array of parameters which will be bound to the string. The string should contain question marks to represent the values to be bound, and the parameter array should contain the values to be substituted into the string in the correct order.
 
-This method may be used in a method chain alongside other `where_*` methods as well as methods such as `offset`, `limit` and `order_by_(*)`. The contents of the string you supply will be connected with preceding and following WHERE clauses with AND.
+This method may be used in a method chain alongside other `where_*` methods as well as methods such as `offset`, `limit` and `order_by_*`. The contents of the string you supply will be connected with preceding and following WHERE clauses with AND.
 
     $people = ORM::for_table('person')
-                ->where_raw('name = ? AND (age = ? OR age = ?)', array('Fred', 5, 10))
-                ->where('size', 'LARGE')
+                ->where('name', 'Fred')
+                ->where_raw('(`age` = ? OR `age` = ?)', array(20, 25))
                 ->order_by_asc('name')
                 ->find_many();
+
+    // Creates SQL:
+    SELECT * FROM `person` WHERE `name` = "Fred" AND (`age` = 20 OR `age` = 25) ORDER BY `name` ASC;
 
 Note that this method only supports "question mark placeholder" syntax, and NOT "named placeholder" syntax. This is because PDO does not allow queries that contain a mixture of placeholder types. Also, you should ensure that the number of question mark placeholders in the string exactly matches the number of elements in the array.
 
