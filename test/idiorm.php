@@ -57,10 +57,9 @@
         const ORDER_BY_COLUMN_NAME = 0;
         const ORDER_BY_ORDERING = 1;
 
-        // Where clauses array keys
-        const WHERE_COLUMN_NAME = 0;
-        const WHERE_VALUE = 1;
-        const WHERE_OPERATOR = 2;
+        // Where condition array keys
+        const WHERE_FRAGMENT = 0;
+        const WHERE_VALUES = 1;
 
         // ------------------------ //
         // --- CLASS PROPERTIES --- //
@@ -103,16 +102,7 @@
         protected $_raw_parameters = array();
 
         // Array of WHERE clauses
-        protected $_where = array();
-
-        // Is the WHERE clause raw?
-        protected $_where_is_raw = false;
-
-        // Raw WHERE clause
-        protected $_raw_where_clause = '';
-
-        // Raw WHERE parameters
-        protected $_raw_where_parameters = array();
+        protected $_where_conditions = array();
 
         // LIMIT
         protected $_limit = null;
@@ -132,6 +122,10 @@
 
         // Are we updating or inserting?
         protected $_update_or_insert = self::UPDATE;
+
+        // Name of the column to use as the primary key for
+        // this instance only. Overrides the config settings.
+        protected $_instance_id_column = null;
 
         // ---------------------- //
         // --- STATIC METHODS --- //
@@ -229,6 +223,19 @@
         }
 
         /**
+         * Specify the ID column to use for this instance or array of instances only.
+         * This overrides the id_column and id_column_overrides settings.
+         *
+         * This is mostly useful for libraries built on top of Idiorm, and will
+         * not normally be used in manually built queries. If you don't know why
+         * you would want to use this, you should probably just ignore it.
+         */
+        public function use_id_column($id_column) {
+            $this->_instance_id_column = $id_column;
+            return $this;
+        }
+
+        /**
          * Tell the ORM that you are expecting a single result
          * back from your query, and execute it. Will return
          * a single instance of the ORM class, or false if no
@@ -244,7 +251,7 @@
             $this->_find_type = self::FIND_ONE;
             $statement = $this->_run();
             $result = $statement->fetch(PDO::FETCH_ASSOC);
-            return $result ? self::for_table($this->_table_name)->hydrate($result) : $result;
+            return $result ? self::for_table($this->_table_name)->use_id_column($this->_instance_id_column)->hydrate($result) : $result;
         }
 
         /**
@@ -258,7 +265,7 @@
             $statement = $this->_run();
             $instances = array();
             while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
-                $instances[] = self::for_table($this->_table_name)->hydrate($row);
+                $instances[] = self::for_table($this->_table_name)->use_id_column($this->_instance_id_column)->hydrate($row);
             }
             return $instances;
         }
@@ -310,17 +317,36 @@
         }
 
         /**
-         * Private method to add a WHERE clause to the query
-         * Class constants defined above should be used to provide the
-         * $operator argument.
+         * Internal method to add a WHERE condition to the query
          */
-        protected function _add_where($column_name, $operator, $value) {
-            $this->_where[] = array(
-                self::WHERE_COLUMN_NAME => $column_name,
-                self::WHERE_OPERATOR => $operator,
-                self::WHERE_VALUE => $value,
+        protected function _add_where($fragment, $values) {
+            if (!is_array($values)) {
+                $values = array($values);
+            }
+            $this->_where_conditions[] = array(
+                self::WHERE_FRAGMENT => $fragment,
+                self::WHERE_VALUES => $values,
             );
             return $this;
+        }
+
+        /**
+         * Helper method to compile a simple COLUMN SEPARATOR VALUE
+         * style WHERE condition into a string and value ready to
+         * be passed to the _add_where method. Avoids duplication
+         * of the call to _quote_identifier
+         */
+        protected function _add_simple_where($column_name, $separator, $value) {
+            $column_name = $this->_quote_identifier($column_name);
+            return $this->_add_where("{$column_name} {$separator} ?", $value);
+        }
+
+        /**
+         * Return a string containing the given number of question marks,
+         * separated by commas. Eg "?, ?, ?"
+         */
+        protected function _create_placeholders($number_of_placeholders) {
+            return join(", ", array_fill(0, $number_of_placeholders, "?"));
         }
 
         /**
@@ -338,49 +364,67 @@
          * Can be used if preferred.
          */
         public function where_equal($column_name, $value) {
-            return $this->_add_where($column_name, '=', $value);
+            return $this->_add_simple_where($column_name, '=', $value);
         }
 
         /**
          * Add a WHERE ... LIKE clause to your query.
          */
         public function where_like($column_name, $value) {
-            return $this->_add_where($column_name, 'LIKE', $value);
+            return $this->_add_simple_where($column_name, 'LIKE', $value);
         }
 
         /**
          * Add where WHERE ... NOT LIKE clause to your query.
          */
         public function where_not_like($column_name, $value) {
-            return $this->_add_where($column_name, 'NOT LIKE', $value);
+            return $this->_add_simple_where($column_name, 'NOT LIKE', $value);
         }
 
         /**
          * Add a WHERE ... > clause to your query
          */
         public function where_gt($column_name, $value) {
-            return $this->_add_where($column_name, '>', $value);
+            return $this->_add_simple_where($column_name, '>', $value);
         }
 
         /**
          * Add a WHERE ... < clause to your query
          */
         public function where_lt($column_name, $value) {
-            return $this->_add_where($column_name, '<', $value);
+            return $this->_add_simple_where($column_name, '<', $value);
         }
 
         /**
          * Add a WHERE ... >= clause to your query
          */
         public function where_gte($column_name, $value) {
-            return $this->_add_where($column_name, '>=', $value);
+            return $this->_add_simple_where($column_name, '>=', $value);
         }
 
         /**
          * Add a WHERE ... <= clause to your query
          */
         public function where_lte($column_name, $value) {
-            return $this->_add_where($column_name, '<=', $value);
+            return $this->_add_simple_where($column_name, '<=', $value);
+        }
+
+        /**
+         * Add a WHERE ... IN clause to your query
+         */
+        public function where_in($column_name, $values) {
+            $column_name = $this->_quote_identifier($column_name);
+            $placeholders = $this->_create_placeholders(count($values));
+            return $this->_add_where("{$column_name} IN ({$placeholders})", $values);
+        }
+
+        /**
+         * Add a WHERE ... NOT IN clause to your query
+         */
+        public function where_not_in($column_name, $values) {
+            $column_name = $this->_quote_identifier($column_name);
+            $placeholders = $this->_create_placeholders(count($values));
+            return $this->_add_where("{$column_name} NOT IN ({$placeholders})", $values);
         }
 
         /**
@@ -389,10 +433,7 @@
          * to the parameters supplied in the second argument.
          */
         public function where_raw($clause, $parameters) {
-            $this->_where_is_raw = true;
-            $this->_raw_where_clause = $clause;
-            $this->_raw_where_parameters = $parameters;
-            return $this;
+            return $this->_add_where($clause, $parameters);
         }
 
         /**
@@ -475,29 +516,18 @@
          * Build the WHERE clause(s)
          */
         protected function _build_where() {
-            // If the WHERE clause is raw, just set $this->_values to
-            // the raw parameters and return the raw clause.
-            if ($this->_where_is_raw) {
-                $this->_values = array_merge($this->_values, $this->_raw_where_parameters);
-                return "WHERE " . $this->_raw_where_clause;
-            }
-
             // If there are no WHERE clauses, return empty string
-            if (count($this->_where) === 0) {
+            if (count($this->_where_conditions) === 0) {
                 return '';
             }
 
-            // Build the WHERE clauses
-            $where_clauses = array();
-            while($where = array_shift($this->_where)) {
-                $where_clauses[] = join(" ", array(
-                    $this->_quote_identifier($where[self::WHERE_COLUMN_NAME]),
-                    $where[self::WHERE_OPERATOR],
-                    '?'
-                ));
-                $this->_values[] = $where[self::WHERE_VALUE];
+            $where_conditions = array();
+            foreach ($this->_where_conditions as $condition) {
+                $where_conditions[] = $condition[self::WHERE_FRAGMENT];
+                $this->_values = array_merge($this->_values, $condition[self::WHERE_VALUES]);
             }
-            return "WHERE " . join(" AND ", $where_clauses);
+
+            return "WHERE " . join(" AND ", $where_conditions);
         }
 
         /**
@@ -583,6 +613,9 @@
          * the primary key ID of the row.
          */
         protected function _get_id_column_name() {
+            if (!is_null($this->_instance_id_column)) {
+                return $this->_instance_id_column;
+            }
             if (isset(self::$_config['id_column_overrides'][$this->_table_name])) {
                 return self::$_config['id_column_overrides'][$this->_table_name];
             } else {
@@ -667,13 +700,8 @@
             $query[] = "(" . join(", ", $field_list) . ")";
             $query[] = "VALUES";
 
-            $placeholders = array();
-            $dirty_field_count = count($this->_dirty_fields);
-            for ($i = 0; $i < $dirty_field_count; $i++) {
-                $placeholders[] = "?";
-            }
-
-            $query[] = "(" . join(", ", $placeholders) . ")";
+            $placeholders = $this->_create_placeholders(count($this->_dirty_fields));
+            $query[] = "({$placeholders})";
             return join(" ", $query);
         }
 
