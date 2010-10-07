@@ -334,6 +334,14 @@
         }
 
         /**
+         * Return a string containing the given number of question marks,
+         * separated by commas. Eg "?, ?, ?"
+         */
+        protected function _create_placeholders($number_of_placeholders) {
+            return join(", ", array_fill(0, $number_of_placeholders, "?"));
+        }
+
+        /**
          * Add a WHERE column = value clause to your query. Each time
          * this is called in the chain, an additional WHERE will be
          * added, and these will be ANDed together when the final query
@@ -391,6 +399,24 @@
          */
         public function where_lte($column_name, $value) {
             return $this->_add_simple_where($column_name, '<=', $value);
+        }
+
+        /**
+         * Add a WHERE ... IN clause to your query
+         */
+        public function where_in($column_name, $values) {
+            $column_name = $this->_quote_identifier($column_name);
+            $placeholders = $this->_create_placeholders(count($values));
+            return $this->_add_where("{$column_name} IN ({$placeholders})", $values);
+        }
+
+        /**
+         * Add a WHERE ... NOT IN clause to your query
+         */
+        public function where_not_in($column_name, $values) {
+            $column_name = $this->_quote_identifier($column_name);
+            $placeholders = $this->_create_placeholders(count($values));
+            return $this->_add_where("{$column_name} NOT IN ({$placeholders})", $values);
         }
 
         /**

@@ -130,6 +130,14 @@ Similarly, to add a `WHERE ... NOT LIKE` clause, use:
 
     $people = ORM::for_table('person')->where_not_like('Name', '%bob%')->find_many();
 
+#### Set membership: `where_in` and `where_not_in` #####
+
+To add a `WHERE ... IN ()` or `WHERE ... NOT IN ()` clause, use the `where_in` and `where_not_in` methods respectively.
+
+Both methods accept two arguments. The first is the column name to compare against. The second is an *array* of possible values.
+
+    $people = ORM::for_table('person')->where_in('Name', array('Fred', 'Joe', 'John')->find_many();
+
 ##### Raw WHERE clauses #####
 
 If you require a more complex query, you can use the `where_raw` method to specify the SQL fragment exactly. This method takes two arguments: the string to add to the query, and an array of parameters which will be bound to the string. The string should contain question marks to represent the values to be bound, and the parameter array should contain the values to be substituted into the string in the correct order.
