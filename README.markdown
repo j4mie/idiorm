@@ -136,7 +136,7 @@ To add a `WHERE ... IN ()` or `WHERE ... NOT IN ()` clause, use the `where_in` a
 
 Both methods accept two arguments. The first is the column name to compare against. The second is an *array* of possible values.
 
-    $people = ORM::for_table('person')->where_in('name', array('Fred', 'Joe', 'John')->find_many();
+    $people = ORM::for_table('person')->where_in('name', array('Fred', 'Joe', 'John'))->find_many();
 
 ##### Raw WHERE clauses #####
 
