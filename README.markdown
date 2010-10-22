@@ -161,3 +161,11 @@ To delete the database row associated with an instance of your model, call its `
 ### Configuration ###
 
 The only configuration options provided by Paris itself are the `$_table` and `$_id_column` static properties on model classes. To configure the database connection, you should use Idiorm's configuration system via the `ORM::configure` method. **See [Idiorm's documentation](http://github.com/j4mie/idiorm/) for full details.**
+
+### Query logging ###
+
+Idiorm can log all queries it executes. To enable query logging, set the `logging` option to `true` (it is `false` by default).
+
+    ORM::configure('logging', true);
+
+When query logging is enabled, you can use two static methods to access the log. `ORM::get_last_query()` returns the most recent query executed. `ORM::get_query_log()` returns an array of all queries executed.
