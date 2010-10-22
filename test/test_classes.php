@@ -7,10 +7,11 @@
      */
     class DummyPDOStatement extends PDOStatement {
 
+        private $current_row = 0;
         /**
          * Return some dummy data
          */
-        public function fetch($fetch_style) {
+        public function fetch($fetch_style=PDO::FETCH_BOTH, $cursor_orientation=PDO::FETCH_ORI_NEXT, $cursor_offset=0) {
             if ($this->current_row == 5) {
                 return false;
             } else {
@@ -31,7 +32,7 @@
         /**
          * Return a dummy PDO statement
          */
-        public function prepare($statement) {
+        public function prepare($statement, $driver_options=array()) {
             $this->last_query = new DummyPDOStatement($statement);
             return $this->last_query;
         }
