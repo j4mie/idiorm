@@ -279,3 +279,11 @@ This setting is used to specify the primary key column name for each table separ
         'person' => 'person_id',
         'role' => 'role_id',
     ));
+
+#### Query logging ####
+
+Setting: `logging`
+
+Idiorm can log all queries it executes. To enable query logging, set the `logging` option to `true` (it is `false` by default).
+
+When query logging is enabled, you can use two static methods to access the log. `ORM::get_last_query()` returns the most recent query executed. `ORM::get_query_log()` returns an array of all queries executed.
