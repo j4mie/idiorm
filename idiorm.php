@@ -306,6 +306,7 @@
             if(!is_null($id)) {
                 $this->where($this->_get_id_column_name(), $id);
             }
+            $this->limit(1);
             $this->_find_type = self::FIND_ONE;
             $statement = $this->_run();
             $result = $statement->fetch(PDO::FETCH_ASSOC);

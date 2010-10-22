@@ -18,10 +18,14 @@
 
     ORM::for_table('widget')->find_many();
     $expected = "SELECT * FROM `widget`";
-    Tester::check_equal("Basic unfiltered query", $expected);
+    Tester::check_equal("Basic unfiltered find_many query", $expected);
+
+    ORM::for_table('widget')->find_one();
+    $expected = "SELECT * FROM `widget` LIMIT 1";
+    Tester::check_equal("Basic unfiltered find_one query", $expected);
 
     ORM::for_table('widget')->find_one(5);
-    $expected = "SELECT * FROM `widget` WHERE `id` = '5'";
+    $expected = "SELECT * FROM `widget` WHERE `id` = '5' LIMIT 1";
     Tester::check_equal("Filtering on ID", $expected);
 
     ORM::for_table('widget')->count();
@@ -29,19 +33,19 @@
     Tester::check_equal("COUNT query", $expected);
 
     ORM::for_table('widget')->where('name', 'Fred')->find_one();
-    $expected = "SELECT * FROM `widget` WHERE `name` = 'Fred'";
+    $expected = "SELECT * FROM `widget` WHERE `name` = 'Fred' LIMIT 1";
     Tester::check_equal("Single where clause", $expected);
 
     ORM::for_table('widget')->where('name', 'Fred')->where('age', 10)->find_one();
-    $expected = "SELECT * FROM `widget` WHERE `name` = 'Fred' AND `age` = '10'";
+    $expected = "SELECT * FROM `widget` WHERE `name` = 'Fred' AND `age` = '10' LIMIT 1";
     Tester::check_equal("Multiple WHERE clauses", $expected);
 
     ORM::for_table('widget')->where_like('name', '%Fred%')->find_one();
-    $expected = "SELECT * FROM `widget` WHERE `name` LIKE '%Fred%'";
+    $expected = "SELECT * FROM `widget` WHERE `name` LIKE '%Fred%' LIMIT 1";
     Tester::check_equal("where_like method", $expected);
 
     ORM::for_table('widget')->where_not_like('name', '%Fred%')->find_one();
-    $expected = "SELECT * FROM `widget` WHERE `name` NOT LIKE '%Fred%'";
+    $expected = "SELECT * FROM `widget` WHERE `name` NOT LIKE '%Fred%' LIMIT 1";
     Tester::check_equal("where_not_like method", $expected);
 
     ORM::for_table('widget')->where_in('name', array('Fred', 'Joe'))->find_many();
@@ -52,24 +56,24 @@
     $expected = "SELECT * FROM `widget` WHERE `name` NOT IN ('Fred', 'Joe')";
     Tester::check_equal("where_not_in method", $expected);
 
-    ORM::for_table('widget')->limit(5)->find_one();
+    ORM::for_table('widget')->limit(5)->find_many();
     $expected = "SELECT * FROM `widget` LIMIT 5";
     Tester::check_equal("LIMIT clause", $expected);
 
-    ORM::for_table('widget')->limit(5)->offset(5)->find_one();
+    ORM::for_table('widget')->limit(5)->offset(5)->find_many();
     $expected = "SELECT * FROM `widget` LIMIT 5 OFFSET 5";
     Tester::check_equal("LIMIT and OFFSET clause", $expected);
 
     ORM::for_table('widget')->order_by_desc('name')->find_one();
-    $expected = "SELECT * FROM `widget` ORDER BY `name` DESC";
+    $expected = "SELECT * FROM `widget` ORDER BY `name` DESC LIMIT 1";
     Tester::check_equal("ORDER BY DESC", $expected);
 
     ORM::for_table('widget')->order_by_asc('name')->find_one();
-    $expected = "SELECT * FROM `widget` ORDER BY `name` ASC";
+    $expected = "SELECT * FROM `widget` ORDER BY `name` ASC LIMIT 1";
     Tester::check_equal("ORDER BY ASC", $expected);
 
     ORM::for_table('widget')->order_by_asc('name')->order_by_desc('age')->find_one();
-    $expected = "SELECT * FROM `widget` ORDER BY `name` ASC, `age` DESC";
+    $expected = "SELECT * FROM `widget` ORDER BY `name` ASC, `age` DESC LIMIT 1";
     Tester::check_equal("Multiple ORDER BY", $expected);
 
     ORM::for_table('widget')->where('name', 'Fred')->limit(5)->offset(5)->order_by_asc('name')->find_many();
@@ -117,7 +121,7 @@
 
     ORM::configure('id_column', 'primary_key');
     ORM::for_table('widget')->find_one(5);
-    $expected = "SELECT * FROM `widget` WHERE `primary_key` = '5'";
+    $expected = "SELECT * FROM `widget` WHERE `primary_key` = '5' LIMIT 1";
     Tester::check_equal("Setting: id_column", $expected);
 
     ORM::configure('id_column_overrides', array(
@@ -126,27 +130,27 @@
     ));
 
     ORM::for_table('widget')->find_one(5);
-    $expected = "SELECT * FROM `widget` WHERE `widget_id` = '5'";
+    $expected = "SELECT * FROM `widget` WHERE `widget_id` = '5' LIMIT 1";
     Tester::check_equal("Setting: id_column_overrides, first test", $expected);
 
     ORM::for_table('widget_handle')->find_one(5);
-    $expected = "SELECT * FROM `widget_handle` WHERE `widget_handle_id` = '5'";
+    $expected = "SELECT * FROM `widget_handle` WHERE `widget_handle_id` = '5' LIMIT 1";
     Tester::check_equal("Setting: id_column_overrides, second test", $expected);
 
     ORM::for_table('widget_nozzle')->find_one(5);
-    $expected = "SELECT * FROM `widget_nozzle` WHERE `primary_key` = '5'";
+    $expected = "SELECT * FROM `widget_nozzle` WHERE `primary_key` = '5' LIMIT 1";
     Tester::check_equal("Setting: id_column_overrides, third test", $expected);
 
     ORM::for_table('widget')->use_id_column('new_id')->find_one(5);
-    $expected = "SELECT * FROM `widget` WHERE `new_id` = '5'";
+    $expected = "SELECT * FROM `widget` WHERE `new_id` = '5' LIMIT 1";
     Tester::check_equal("Instance ID column, first test", $expected);
 
     ORM::for_table('widget_handle')->use_id_column('new_id')->find_one(5);
-    $expected = "SELECT * FROM `widget_handle` WHERE `new_id` = '5'";
+    $expected = "SELECT * FROM `widget_handle` WHERE `new_id` = '5' LIMIT 1";
     Tester::check_equal("Instance ID column, second test", $expected);
 
     ORM::for_table('widget_nozzle')->use_id_column('new_id')->find_one(5);
-    $expected = "SELECT * FROM `widget_nozzle` WHERE `new_id` = '5'";
+    $expected = "SELECT * FROM `widget_nozzle` WHERE `new_id` = '5' LIMIT 1";
     Tester::check_equal("Instance ID column, third test", $expected);
 
     Tester::report();
