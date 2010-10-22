@@ -777,10 +777,11 @@
                 $this->_quote_identifier($this->_get_id_column_name()),
                 "= ?",
             ));
+            $params = array($this->id());
             self::_setup_db();
-            self::_log_query();
+            self::_log_query($query, $params);
             $statement = self::$_db->prepare($query);
-            return $statement->execute(array($this->id()));
+            return $statement->execute($params);
         }
 
         // --------------------- //
