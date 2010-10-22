@@ -218,11 +218,11 @@
                 // Escape the parameters
                 $parameters = array_map(array(self::$_db, 'quote'), $parameters);
 
-                // Build an array containing the same number of ? placeholders as there are params
-                $placeholders = array_fill(0, count($parameters), '?');
+                // Replace placeholders in the query for vsprintf
+                $query = str_replace("?", "%s", $query);
 
                 // Replace the question marks in the query with the parameters
-                $bound_query = str_replace($placeholders, $parameters, $query);
+                $bound_query = vsprintf($query, $parameters);
             } else {
                 $bound_query = $query;
             }
