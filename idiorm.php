@@ -74,10 +74,17 @@
             'username' => null,
             'password' => null,
             'driver_options' => null,
+            'logging' => false,
         );
 
         // Database connection, instance of the PDO class
         protected static $_db;
+
+        // Last query run, only populated if logging is enabled
+        protected static $_last_query;
+
+        // Log of all queries run, only populated if logging is enabled
+        protected static $_query_log = array();
 
         // --------------------------- //
         // --- INSTANCE PROPERTIES --- //
@@ -190,6 +197,57 @@
         public static function get_db() {
             self::_setup_db();
             return self::$_db;
+        }
+
+        /**
+         * Add a query to the internal query log. Only works if the
+         * 'logging' config option is set to true.
+         *
+         * This works by manually binding the parameters to the query - the
+         * query isn't executed like this (PDO normally passes the query and
+         * parameters to the database which takes care of the binding) but
+         * doing it this way makes the logged queries more readable.
+         */
+        protected static function _log_query($query, $parameters) {
+            // If logging is not enabled, do nothing
+            if (!self::$_config['logging']) {
+                return false;
+            }
+
+            if (count($parameters) > 0) {
+                // Escape the parameters
+                $parameters = array_map(array(self::$_db, 'quote'), $parameters);
+
+                // Build an array containing the same number of ? placeholders as there are params
+                $placeholders = array_fill(0, count($parameters), '?');
+
+                // Replace the question marks in the query with the parameters
+                $bound_query = str_replace($placeholders, $parameters, $query);
+            } else {
+                $bound_query = $query;
+            }
+
+            self::$_last_query = $bound_query;
+            self::$_query_log[] = $bound_query;
+            return true;
+        }
+
+        /**
+         * Get the last query executed. Only works if the
+         * 'logging' config option is set to true. Otherwise
+         * this will return null.
+         */
+        public static function get_last_query() {
+            return self::$_last_query;
+        }
+
+        /**
+         * Get an array containing all the queries run up to
+         * now. Only works if the 'logging' config option is
+         * set to true. Otherwise returned array will be empty.
+         */
+        public static function get_query_log() {
+            return self::$_query_log;
         }
 
         // ------------------------ //
@@ -594,8 +652,10 @@
          * on this class. Return the executed PDOStatement object.
          */
         protected function _run() {
+            $query = $this->_build_select();
             self::_setup_db();
-            $statement = self::$_db->prepare($this->_build_select());
+            self::_log_query($query, $this->_values);
+            $statement = self::$_db->prepare($query);
             $statement->execute($this->_values);
             return $statement;
         }
@@ -660,6 +720,7 @@
             }
 
             self::_setup_db();
+            self::_log_query($query, $values);
             $statement = self::$_db->prepare($query);
             $success = $statement->execute($values);
 
@@ -717,6 +778,7 @@
                 "= ?",
             ));
             self::_setup_db();
+            self::_log_query();
             $statement = self::$_db->prepare($query);
             return $statement->execute(array($this->id()));
         }
