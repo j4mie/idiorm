@@ -53,10 +53,6 @@
         const UPDATE = 0;
         const INSERT = 1;
 
-        // Order by array keys
-        const ORDER_BY_COLUMN_NAME = 0;
-        const ORDER_BY_ORDERING = 1;
-
         // Where condition array keys
         const WHERE_FRAGMENT = 0;
         const WHERE_VALUES = 1;
@@ -515,10 +511,8 @@
          * Add an ORDER BY clause to the query
          */
         protected function _add_order_by($column_name, $ordering) {
-            $this->_order_by[] = array(
-                self::ORDER_BY_COLUMN_NAME => $column_name,
-                self::ORDER_BY_ORDERING => $ordering,
-            );
+            $column_name = $this->_quote_identifier($column_name);
+            $this->_order_by[] = "{$column_name} {$ordering}";
             return $this;
         }
 
@@ -596,11 +590,7 @@
             if (count($this->_order_by) === 0) {
                 return '';
             }
-            $order_by = array();
-            foreach ($this->_order_by as $order) {
-                $order_by[] = $this->_quote_identifier($order[self::ORDER_BY_COLUMN_NAME]) . " " . $order[self::ORDER_BY_ORDERING];
-            }
-            return "ORDER BY " . join(", ", $order_by);
+            return "ORDER BY " . join(", ", $this->_order_by);
         }
 
         /**
