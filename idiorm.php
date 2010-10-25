@@ -428,7 +428,7 @@
             // Add table alias if present
             if (!is_null($table_alias)) {
                 $table_alias = $this->_quote_identifier($table_alias);
-                $table .= " AS {$table_alias}";
+                $table .= " {$table_alias}";
             }
 
             // Build the constraint
