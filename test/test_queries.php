@@ -149,6 +149,7 @@
 
     ORM::for_table('widget')->table_alias('w')->find_many();
     $expected = "SELECT * FROM `widget` `w`";
+    Tester::check_equal("Main table alias", $expected);
 
     ORM::for_table('widget')->join('widget_handle', array('wh.widget_id', '=', 'widget.id'), 'wh')->find_many();
     $expected = "SELECT * FROM `widget` JOIN `widget_handle` `wh` ON `wh`.`widget_id` = `widget`.`id`";
