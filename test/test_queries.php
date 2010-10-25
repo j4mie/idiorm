@@ -100,6 +100,26 @@
     $expected = "SELECT `w`.* FROM `widget` w WHERE `name` = 'Fred' AND `age` = '5'";
     Tester::check_equal("Raw query", $expected);
 
+    ORM::for_table('widget')->select('name')->find_many();
+    $expected = "SELECT `name` FROM `widget`";
+    Tester::check_equal("Simple result column", $expected);
+
+    ORM::for_table('widget')->select('name')->select('age')->find_many();
+    $expected = "SELECT `name`, `age` FROM `widget`";
+    Tester::check_equal("Multiple simple result columns", $expected);
+
+    ORM::for_table('widget')->select('widget.name')->find_many();
+    $expected = "SELECT `widget`.`name` FROM `widget`";
+    Tester::check_equal("Specify table name and column in result columns", $expected);
+
+    ORM::for_table('widget')->select('widget.name', 'widget_name')->find_many();
+    $expected = "SELECT `widget`.`name` AS `widget_name` FROM `widget`";
+    Tester::check_equal("Aliases in result columns", $expected);
+
+    ORM::for_table('widget')->select_expr('COUNT(*)', 'count')->find_many();
+    $expected = "SELECT COUNT(*) AS `count` FROM `widget`";
+    Tester::check_equal("Literal expression in result columns", $expected);
+
     $widget = ORM::for_table('widget')->create();
     $widget->name = "Fred";
     $widget->age = 10;

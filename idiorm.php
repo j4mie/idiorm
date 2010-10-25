@@ -95,6 +95,12 @@
         // Values to be bound to the query
         protected $_values = array();
 
+        // Columns to select in the result
+        protected $_result_columns = array('*');
+
+        // Are we using the default result column or have these been manually changed?
+        protected $_using_default_result_columns = true;
+
         // Is this a raw query?
         protected $_is_raw_query = false;
 
@@ -372,6 +378,45 @@
         }
 
         /**
+         * Internal method to add an unquoted expression to the set
+         * of columns returned by the SELECT query. The second optional
+         * argument is the alias to return the expression as.
+         */
+        protected function _add_result_column($expr, $alias=null) {
+            if (!is_null($alias)) {
+                $expr .= " AS " . $this->_quote_identifier($alias);
+            }
+
+            if ($this->_using_default_result_columns) {
+                $this->_result_columns = array($expr);
+                $this->_using_default_result_columns = false;
+            } else {
+                $this->_result_columns[] = $expr;
+            }
+        }
+
+        /**
+         * Add a column to the list of columns returned by the SELECT
+         * query. This defaults to '*'. The second optional argument is
+         * the alias to return the column as.
+         */
+        public function select($column, $alias=null) {
+            $column = $this->_quote_identifier($column);
+            $this->_add_result_column($column, $alias);
+            return $this;
+        }
+
+        /**
+         * Add an unquoted expression to the list of columns returned
+         * by the SELECT query. The second optional argument is
+         * the alias to return the column as.
+         */
+        public function select_expr($expr, $alias=null) {
+            $this->_add_result_column($expr, $alias);
+            return $this;
+        }
+
+        /**
          * Internal method to add a WHERE condition to the query
          */
         protected function _add_where($fragment, $values) {
@@ -561,7 +606,8 @@
                 $count_column = $this->_quote_identifier('count');
                 return "SELECT COUNT(*) AS $count_column FROM " . $this->_quote_identifier($this->_table_name);
             } else {
-                return 'SELECT * FROM ' . $this->_quote_identifier($this->_table_name);
+                $result_columns = join(', ', $this->_result_columns);
+                return "SELECT {$result_columns} FROM " . $this->_quote_identifier($this->_table_name);
             }
         }
 
@@ -632,10 +678,22 @@
 
         /**
          * Quote a string that is used as an identifier
-         * (table names, column names etc).
+         * (table names, column names etc). This method can
+         * also deal with dot-separated identifiers eg table.column
          */
         protected function _quote_identifier($identifier) {
-            return "`$identifier`";
+            $parts = explode('.', $identifier);
+            $parts = array_map(array($this, '_quote_identifier_part'), $parts);
+            return join('.', $parts);
+        }
+
+        /**
+         * This method performs the actual quoting of a single
+         * part of an identifier. Currently uses backticks, which
+         * are compatible with (at least) MySQL and SQLite.
+         */
+        protected function _quote_identifier_part($part) {
+            return "`$part`";
         }
 
         /**

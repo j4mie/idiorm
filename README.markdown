@@ -173,6 +173,49 @@ Two methods are provided to add `ORDER BY` clauses to your query. These are `ord
 
     $people = ORM::for_table('person')->order_by_asc('gender')->order_by_desc('name')->find_many();
 
+#### Result columns ####
+
+By default, all columns in the `SELECT` statement are returned from your query. That is, calling:
+
+    $people = ORM::for_table('person')->find_many();
+
+Will result in the query:
+
+    SELECT * FROM `person`;
+
+The `select` and method gives you control over which columns are returned. Call `select` multiple times to specify columns to return.
+
+    $people = ORM::for_table('person')->select('name')->select('age')->find_many();
+
+Will result in the query:
+
+    SELECT `name`, `age` FROM `person`;
+
+Optionally, you may also supply a second argument to `select` to specify an alias for the column:
+
+    $people = ORM::for_table('person')->select('name', 'person_name')->find_many();
+
+Will result in the query:
+
+    SELECT `name` AS `person_name` FROM `person`;
+
+Column names passed to `select` are quoted automatically, even if they contain `table.column`-style identifiers:
+
+    $people = ORM::for_table('person')->select('person.name', 'person_name')->find_many();
+
+Will result in the query:
+
+    SELECT `person`.`name` AS `person_name` FROM `person`;
+
+If you wish to override this behaviour (for example, to supply a database expression) you should instead use the `select_expr` method. Again, this takes the alias as an optional second argument.
+
+    // NOTE: For illustrative purposes only. To perform a count query, use the count() method.
+    $people_count = ORM::for_table('person')->select('COUNT(*)', 'count')->find_many();
+
+Will result in the query:
+
+    SELECT COUNT(*) AS `count` FROM `person`;
+
 #### Raw queries ####
 
 If you need to perform more complex queries, you can completely specify the query to execute by using the `raw_query` method. This method takes a string and an array of parameters. The string should contain placeholders, either in question mark or named placeholder syntax, which will be used to bind the parameters to the query.
