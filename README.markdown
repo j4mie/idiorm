@@ -16,23 +16,18 @@ Features
 * Uses [prepared statements](http://uk.php.net/manual/en/pdo.prepared-statements.php) throughout to protect against [SQL injection](http://en.wikipedia.org/wiki/SQL_injection) attacks.
 * Requires no model classes, no XML configuration and no code generation: works out of the box, given only a connection string.
 * Consists of just one class called `ORM`. Minimal global namespace pollution.
-* Database agnostic (untested).
-
-TODO
-----
-
-* Improve documentation.
-* Extra `where_(*)` methods.
-* More features.
+* Database agnostic. Currently supports SQLite and MySQL. May support others, please give it a try!
 
 Philosophy
 ----------
 
 The [Pareto Principle](http://en.wikipedia.org/wiki/Pareto_principle) states that *roughly 80% of the effects come from 20% of the causes.* In software development terms, this could be translated into something along the lines of *80% of the results come from 20% of the complexity*. In other words, you can get pretty far by being pretty stupid. 
 
-**Idiorm** is an experiment in how far it's possible to get with database abstraction while remaining as simple as possible. If my hunch is correct, this should be quite far enough for many real-world applications. Let's face it: most of us aren't building Facebook. We're building little toy projects, where the emphasis is on fun and rapid development rather than infinite flexibility and features.
+**Idiorm is deliberately simple**. Where other ORMs consist of dozens of classes with complex inheritance hierarchies, Idiorm has only one class, `ORM`, which functions as both a fluent `SELECT` query API and a simple CRUD model class. If my hunch is correct, this should be quite enough for many real-world applications. Let's face it: most of us aren't building Facebook. We're working on small-to-medium-sized projects, where the emphasis is on simplicity and rapid development rather than infinite flexibility and features.
 
-You might think of **Idiorm** as a *micro-ORM*. It could, perhaps, be "the tie to go along with [Limonade](http://github.com/sofadesign/limonade/)'s tux" (to borrow a turn of phrase from [DocumentCloud](http://github.com/documentcloud/underscore)). Or it could be an effective bit of spring cleaning for one of those horrendous SQL-littered legacy PHP apps you have to support.
+You might think of **Idiorm** as a *micro-ORM*. It could, perhaps, be "the tie to go along with [Slim](http://github.com/codeguy/slim/)'s tux" (to borrow a turn of phrase from [DocumentCloud](http://github.com/documentcloud/underscore)). Or it could be an effective bit of spring cleaning for one of those horrendous SQL-littered legacy PHP apps you have to support.
+
+**Idiorm** might also provide a good base upon which to build higher-level, more complex database abstractions. For example, [Paris](http://github.com/j4mie/paris) is an implementation of the [Active Record pattern](http://martinfowler.com/eaaCatalog/activeRecord.html) built on top of Idiorm.
 
 Let's See Some Code
 -------------------
