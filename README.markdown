@@ -183,7 +183,7 @@ Will result in the query:
 
     SELECT * FROM `person`;
 
-The `select` and method gives you control over which columns are returned. Call `select` multiple times to specify columns to return.
+The `select` method gives you control over which columns are returned. Call `select` multiple times to specify columns to return.
 
     $people = ORM::for_table('person')->select('name')->select('age')->find_many();
 
