@@ -374,6 +374,7 @@
             } else {
                 $this->_result_columns[] = $expr;
             }
+            return $this;
         }
 
         /**
@@ -383,8 +384,7 @@
          */
         public function select($column, $alias=null) {
             $column = $this->_quote_identifier($column);
-            $this->_add_result_column($column, $alias);
-            return $this;
+            return $this->_add_result_column($column, $alias);
         }
 
         /**
@@ -393,8 +393,7 @@
          * the alias to return the column as.
          */
         public function select_expr($expr, $alias=null) {
-            $this->_add_result_column($expr, $alias);
-            return $this;
+            return $this->_add_result_column($expr, $alias);
         }
 
         /**
