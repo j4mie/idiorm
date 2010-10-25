@@ -93,9 +93,5 @@
     $expected = "DELETE FROM `widget` WHERE `id` = '1'";
     Tester::check_equal("Delete data", $expected);
 
-    class CustomIdWidget extends Model {
-        public static $_id_column = 'widget_id';
-    }
-
     Tester::report();
 ?>
