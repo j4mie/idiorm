@@ -89,6 +89,9 @@
         // Are we using the default result column or have these been manually changed?
         protected $_using_default_result_columns = true;
 
+        // Join sources
+        protected $_join_sources = array();
+
         // Is this a raw query?
         protected $_is_raw_query = false;
 
@@ -397,6 +400,55 @@
         }
 
         /**
+         * Internal method to add a JOIN source to the query.
+         *
+         * The join_operator should be one of INNER, LEFT OUTER, CROSS etc - this
+         * will be prepended to JOIN.
+         *
+         * The table should be the name of the table to join to.
+         *
+         * The constraint should be an array with three elements:
+         *
+         * first_column, operator, second_column
+         *
+         * Example: array('user.id', '=', 'profile.user_id')
+         *
+         * will compile to
+         *
+         * ON `user`.`id` = `profile`.`user_id`
+         *
+         * The final (optional) argument specifies an alias for the joined table.
+         */
+        protected function _add_join($join_operator, $table, $constraint, $table_alias=null) {
+
+            $join_operator = trim("{$join_operator} JOIN");
+
+            $table = $this->_quote_identifier($table);
+
+            // Add table alias if present
+            if (!is_null($table_alias)) {
+                $table_alias = $this->_quote_identifier($table_alias);
+                $table .= " AS {$table_alias}";
+            }
+
+            // Build the constraint
+            list($first_column, $operator, $second_column) = $constraint;
+            $first_column = $this->_quote_identifier($first_column);
+            $second_column = $this->_quote_identifier($second_column);
+            $constraint = "{$first_column} {$operator} {$second_column}";
+
+            $this->_join_sources[] = "{$join_operator} {$table} ON {$constraint}";
+            return $this;
+        }
+
+        /**
+         * Add a simple JOIN source to the query
+         */
+        public function join($table, $constraint, $table_alias=null) {
+            return $this->_add_join("", $table, $constraint, $table_alias);
+        }
+
+        /**
          * Internal method to add a WHERE condition to the query
          */
         protected function _add_where($fragment, $values) {
@@ -571,6 +623,7 @@
             // the results of calling each separate builder method.
             return $this->_join_if_not_empty(" ", array(
                 $this->_build_select_start(),
+                $this->_build_join(),
                 $this->_build_where(),
                 $this->_build_order_by(),
                 $this->_build_limit(),
@@ -584,6 +637,17 @@
         protected function _build_select_start() {
             $result_columns = join(', ', $this->_result_columns);
             return "SELECT {$result_columns} FROM " . $this->_quote_identifier($this->_table_name);
+        }
+
+        /**
+         * Build the JOIN sources
+         */
+        protected function _build_join() {
+            if (count($this->_join_sources) === 0) {
+                return '';
+            }
+
+            return join(" ", $this->_join_sources);
         }
 
         /**

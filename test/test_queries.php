@@ -120,6 +120,10 @@
     $expected = "SELECT COUNT(*) AS `count` FROM `widget`";
     Tester::check_equal("Literal expression in result columns", $expected);
 
+    ORM::for_table('widget')->join('widget_handle', array('widget_handle.widget_id', '=', 'widget.id'))->find_many();
+    $expected = "SELECT * FROM `widget` JOIN `widget_handle` ON `widget_handle`.`widget_id` = `widget`.`id`";
+    Tester::check_equal("Simple join", $expected);
+
     $widget = ORM::for_table('widget')->create();
     $widget->name = "Fred";
     $widget->age = 10;
