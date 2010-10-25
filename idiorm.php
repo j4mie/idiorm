@@ -80,6 +80,9 @@
         // The name of the table the current ORM instance is associated with
         protected $_table_name;
 
+        // Alias for the table to be used in SELECT queries
+        protected $_table_alias = null;
+
         // Values to be bound to the query
         protected $_values = array();
 
@@ -358,6 +361,14 @@
             $this->_is_raw_query = true;
             $this->_raw_query = $query;
             $this->_raw_parameters = $parameters;
+            return $this;
+        }
+
+        /**
+         * Add a an alias for the main table to be used in SELECT queries
+         */
+        public function table_alias($alias) {
+            $this->_table_alias = $alias;
             return $this;
         }
 
@@ -668,7 +679,11 @@
          */
         protected function _build_select_start() {
             $result_columns = join(', ', $this->_result_columns);
-            return "SELECT {$result_columns} FROM " . $this->_quote_identifier($this->_table_name);
+            $fragment = "SELECT {$result_columns} FROM " . $this->_quote_identifier($this->_table_name);
+            if (!is_null($this->_table_alias)) {
+                $fragment .= " " . $this->_quote_identifier($this->_table_alias);
+            }
+            return $fragment;
         }
 
         /**

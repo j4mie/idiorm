@@ -147,6 +147,9 @@
     $expected = "SELECT * FROM `widget` JOIN `widget_handle` ON `widget_handle`.`widget_id` = `widget`.`id` JOIN `widget_nozzle` ON `widget_nozzle`.`widget_id` = `widget`.`id`";
     Tester::check_equal("Multiple join sources", $expected);
 
+    ORM::for_table('widget')->table_alias('w')->find_many();
+    $expected = "SELECT * FROM `widget` `w`";
+
     ORM::for_table('widget')->join('widget_handle', array('wh.widget_id', '=', 'widget.id'), 'wh')->find_many();
     $expected = "SELECT * FROM `widget` JOIN `widget_handle` `wh` ON `wh`.`widget_id` = `widget`.`id`";
     Tester::check_equal("Join with alias", $expected);
