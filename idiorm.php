@@ -449,6 +449,34 @@
         }
 
         /**
+         * Add an INNER JOIN souce to the query
+         */
+        public function inner_join($table, $constraint, $table_alias=null) {
+            return $this->_add_join_source("INNER", $table, $constraint, $table_alias);
+        }
+
+        /**
+         * Add a LEFT OUTER JOIN souce to the query
+         */
+        public function left_outer_join($table, $constraint, $table_alias=null) {
+            return $this->_add_join_source("LEFT OUTER", $table, $constraint, $table_alias);
+        }
+
+        /**
+         * Add an RIGHT OUTER JOIN souce to the query
+         */
+        public function right_outer_join($table, $constraint, $table_alias=null) {
+            return $this->_add_join_source("RIGHT OUTER", $table, $constraint, $table_alias);
+        }
+
+        /**
+         * Add an FULL OUTER JOIN souce to the query
+         */
+        public function full_outer_join($table, $constraint, $table_alias=null) {
+            return $this->_add_join_source("FULL OUTER", $table, $constraint, $table_alias);
+        }
+
+        /**
          * Internal method to add a WHERE condition to the query
          */
         protected function _add_where($fragment, $values) {
