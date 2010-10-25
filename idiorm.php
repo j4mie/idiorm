@@ -44,11 +44,6 @@
         // --- CLASS CONSTANTS --- //
         // ----------------------- //
 
-        // Find types
-        const FIND_ONE = 0;
-        const FIND_MANY = 1;
-        const COUNT = 2;
-
         // Update or insert?
         const UPDATE = 0;
         const INSERT = 1;
@@ -88,9 +83,6 @@
 
         // The name of the table the current ORM instance is associated with
         protected $_table_name;
-
-        // Will be FIND_ONE or FIND_MANY
-        protected $_find_type;
 
         // Values to be bound to the query
         protected $_values = array();
@@ -309,7 +301,6 @@
                 $this->where($this->_get_id_column_name(), $id);
             }
             $this->limit(1);
-            $this->_find_type = self::FIND_ONE;
             $statement = $this->_run();
             $result = $statement->fetch(PDO::FETCH_ASSOC);
             return $result ? self::for_table($this->_table_name)->use_id_column($this->_instance_id_column)->hydrate($result) : $result;
@@ -322,7 +313,6 @@
          * no rows were returned.
          */
         public function find_many() {
-            $this->_find_type = self::FIND_MANY;
             $statement = $this->_run();
             $instances = array();
             while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
@@ -337,7 +327,7 @@
          * rows returned.
          */
         public function count() {
-            $this->_find_type = self::COUNT;
+            $this->select_expr('COUNT(*)', 'count');
             $statement = $this->_run();
             $result = $statement->fetch(PDO::FETCH_ASSOC);
             return isset($result['count']) ? (int) $result['count'] : 0;
@@ -602,13 +592,8 @@
          * Build the start of the SELECT statement
          */
         protected function _build_select_start() {
-            if ($this->_find_type === self::COUNT) {
-                $count_column = $this->_quote_identifier('count');
-                return "SELECT COUNT(*) AS $count_column FROM " . $this->_quote_identifier($this->_table_name);
-            } else {
-                $result_columns = join(', ', $this->_result_columns);
-                return "SELECT {$result_columns} FROM " . $this->_quote_identifier($this->_table_name);
-            }
+            $result_columns = join(', ', $this->_result_columns);
+            return "SELECT {$result_columns} FROM " . $this->_quote_identifier($this->_table_name);
         }
 
         /**
