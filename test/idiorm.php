@@ -44,19 +44,6 @@
         // --- CLASS CONSTANTS --- //
         // ----------------------- //
 
-        // Find types
-        const FIND_ONE = 0;
-        const FIND_MANY = 1;
-        const COUNT = 2;
-
-        // Update or insert?
-        const UPDATE = 0;
-        const INSERT = 1;
-
-        // Order by array keys
-        const ORDER_BY_COLUMN_NAME = 0;
-        const ORDER_BY_ORDERING = 1;
-
         // Where condition array keys
         const WHERE_FRAGMENT = 0;
         const WHERE_VALUES = 1;
@@ -93,11 +80,20 @@
         // The name of the table the current ORM instance is associated with
         protected $_table_name;
 
-        // Will be FIND_ONE or FIND_MANY
-        protected $_find_type;
+        // Alias for the table to be used in SELECT queries
+        protected $_table_alias = null;
 
         // Values to be bound to the query
         protected $_values = array();
+
+        // Columns to select in the result
+        protected $_result_columns = array('*');
+
+        // Are we using the default result column or have these been manually changed?
+        protected $_using_default_result_columns = true;
+
+        // Join sources
+        protected $_join_sources = array();
 
         // Is this a raw query?
         protected $_is_raw_query = false;
@@ -126,9 +122,6 @@
         // Fields that have been modified during the
         // lifetime of the object
         protected $_dirty_fields = array();
-
-        // Are we updating or inserting?
-        protected $_update_or_insert = self::UPDATE;
 
         // Name of the column to use as the primary key for
         // this instance only. Overrides the config settings.
@@ -272,8 +265,6 @@
          * save() is called.
          */
         public function create($data=null) {
-            $this->_update_or_insert = self::INSERT;
-
             if (!is_null($data)) {
                 return $this->hydrate($data)->force_all_dirty();
             }
@@ -307,7 +298,6 @@
                 $this->where($this->_get_id_column_name(), $id);
             }
             $this->limit(1);
-            $this->_find_type = self::FIND_ONE;
             $statement = $this->_run();
             $result = $statement->fetch(PDO::FETCH_ASSOC);
             return $result ? self::for_table($this->_table_name)->use_id_column($this->_instance_id_column)->hydrate($result) : $result;
@@ -320,7 +310,6 @@
          * no rows were returned.
          */
         public function find_many() {
-            $this->_find_type = self::FIND_MANY;
             $statement = $this->_run();
             $instances = array();
             while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
@@ -335,7 +324,7 @@
          * rows returned.
          */
         public function count() {
-            $this->_find_type = self::COUNT;
+            $this->select_expr('COUNT(*)', 'count');
             $statement = $this->_run();
             $result = $statement->fetch(PDO::FETCH_ASSOC);
             return isset($result['count']) ? (int) $result['count'] : 0;
@@ -373,6 +362,133 @@
             $this->_raw_query = $query;
             $this->_raw_parameters = $parameters;
             return $this;
+        }
+
+        /**
+         * Add an alias for the main table to be used in SELECT queries
+         */
+        public function table_alias($alias) {
+            $this->_table_alias = $alias;
+            return $this;
+        }
+
+        /**
+         * Internal method to add an unquoted expression to the set
+         * of columns returned by the SELECT query. The second optional
+         * argument is the alias to return the expression as.
+         */
+        protected function _add_result_column($expr, $alias=null) {
+            if (!is_null($alias)) {
+                $expr .= " AS " . $this->_quote_identifier($alias);
+            }
+
+            if ($this->_using_default_result_columns) {
+                $this->_result_columns = array($expr);
+                $this->_using_default_result_columns = false;
+            } else {
+                $this->_result_columns[] = $expr;
+            }
+            return $this;
+        }
+
+        /**
+         * Add a column to the list of columns returned by the SELECT
+         * query. This defaults to '*'. The second optional argument is
+         * the alias to return the column as.
+         */
+        public function select($column, $alias=null) {
+            $column = $this->_quote_identifier($column);
+            return $this->_add_result_column($column, $alias);
+        }
+
+        /**
+         * Add an unquoted expression to the list of columns returned
+         * by the SELECT query. The second optional argument is
+         * the alias to return the column as.
+         */
+        public function select_expr($expr, $alias=null) {
+            return $this->_add_result_column($expr, $alias);
+        }
+
+        /**
+         * Internal method to add a JOIN source to the query.
+         *
+         * The join_operator should be one of INNER, LEFT OUTER, CROSS etc - this
+         * will be prepended to JOIN.
+         *
+         * The table should be the name of the table to join to.
+         *
+         * The constraint may be either a string or an array with three elements. If it
+         * is a string, it will be compiled into the query as-is, with no escaping. The
+         * recommended way to supply the constraint is as an array with three elements:
+         *
+         * first_column, operator, second_column
+         *
+         * Example: array('user.id', '=', 'profile.user_id')
+         *
+         * will compile to
+         *
+         * ON `user`.`id` = `profile`.`user_id`
+         *
+         * The final (optional) argument specifies an alias for the joined table.
+         */
+        protected function _add_join_source($join_operator, $table, $constraint, $table_alias=null) {
+
+            $join_operator = trim("{$join_operator} JOIN");
+
+            $table = $this->_quote_identifier($table);
+
+            // Add table alias if present
+            if (!is_null($table_alias)) {
+                $table_alias = $this->_quote_identifier($table_alias);
+                $table .= " {$table_alias}";
+            }
+
+            // Build the constraint
+            if (is_array($constraint)) {
+                list($first_column, $operator, $second_column) = $constraint;
+                $first_column = $this->_quote_identifier($first_column);
+                $second_column = $this->_quote_identifier($second_column);
+                $constraint = "{$first_column} {$operator} {$second_column}";
+            }
+
+            $this->_join_sources[] = "{$join_operator} {$table} ON {$constraint}";
+            return $this;
+        }
+
+        /**
+         * Add a simple JOIN source to the query
+         */
+        public function join($table, $constraint, $table_alias=null) {
+            return $this->_add_join_source("", $table, $constraint, $table_alias);
+        }
+
+        /**
+         * Add an INNER JOIN souce to the query
+         */
+        public function inner_join($table, $constraint, $table_alias=null) {
+            return $this->_add_join_source("INNER", $table, $constraint, $table_alias);
+        }
+
+        /**
+         * Add a LEFT OUTER JOIN souce to the query
+         */
+        public function left_outer_join($table, $constraint, $table_alias=null) {
+            return $this->_add_join_source("LEFT OUTER", $table, $constraint, $table_alias);
+        }
+
+        /**
+         * Add an RIGHT OUTER JOIN souce to the query
+         */
+        public function right_outer_join($table, $constraint, $table_alias=null) {
+            return $this->_add_join_source("RIGHT OUTER", $table, $constraint, $table_alias);
+        }
+
+        /**
+         * Add an FULL OUTER JOIN souce to the query
+         */
+        public function full_outer_join($table, $constraint, $table_alias=null) {
+            return $this->_add_join_source("FULL OUTER", $table, $constraint, $table_alias);
         }
 
         /**
@@ -515,10 +631,8 @@
          * Add an ORDER BY clause to the query
          */
         protected function _add_order_by($column_name, $ordering) {
-            $this->_order_by[] = array(
-                self::ORDER_BY_COLUMN_NAME => $column_name,
-                self::ORDER_BY_ORDERING => $ordering,
-            );
+            $column_name = $this->_quote_identifier($column_name);
+            $this->_order_by[] = "{$column_name} {$ordering}";
             return $this;
         }
 
@@ -552,6 +666,7 @@
             // the results of calling each separate builder method.
             return $this->_join_if_not_empty(" ", array(
                 $this->_build_select_start(),
+                $this->_build_join(),
                 $this->_build_where(),
                 $this->_build_order_by(),
                 $this->_build_limit(),
@@ -563,12 +678,23 @@
          * Build the start of the SELECT statement
          */
         protected function _build_select_start() {
-            if ($this->_find_type === self::COUNT) {
-                $count_column = $this->_quote_identifier('count');
-                return "SELECT COUNT(*) AS $count_column FROM " . $this->_quote_identifier($this->_table_name);
-            } else {
-                return 'SELECT * FROM ' . $this->_quote_identifier($this->_table_name);
+            $result_columns = join(', ', $this->_result_columns);
+            $fragment = "SELECT {$result_columns} FROM " . $this->_quote_identifier($this->_table_name);
+            if (!is_null($this->_table_alias)) {
+                $fragment .= " " . $this->_quote_identifier($this->_table_alias);
             }
+            return $fragment;
+        }
+
+        /**
+         * Build the JOIN sources
+         */
+        protected function _build_join() {
+            if (count($this->_join_sources) === 0) {
+                return '';
+            }
+
+            return join(" ", $this->_join_sources);
         }
 
         /**
@@ -596,11 +722,7 @@
             if (count($this->_order_by) === 0) {
                 return '';
             }
-            $order_by = array();
-            foreach ($this->_order_by as $order) {
-                $order_by[] = $this->_quote_identifier($order[self::ORDER_BY_COLUMN_NAME]) . " " . $order[self::ORDER_BY_ORDERING];
-            }
-            return "ORDER BY " . join(", ", $order_by);
+            return "ORDER BY " . join(", ", $this->_order_by);
         }
 
         /**
@@ -642,10 +764,22 @@
 
         /**
          * Quote a string that is used as an identifier
-         * (table names, column names etc).
+         * (table names, column names etc). This method can
+         * also deal with dot-separated identifiers eg table.column
          */
         protected function _quote_identifier($identifier) {
-            return "`$identifier`";
+            $parts = explode('.', $identifier);
+            $parts = array_map(array($this, '_quote_identifier_part'), $parts);
+            return join('.', $parts);
+        }
+
+        /**
+         * This method performs the actual quoting of a single
+         * part of an identifier. Currently uses backticks, which
+         * are compatible with (at least) MySQL and SQLite.
+         */
+        protected function _quote_identifier_part($part) {
+            return "`$part`";
         }
 
         /**
@@ -709,7 +843,7 @@
             $query = array();
             $values = array_values($this->_dirty_fields);
 
-            if ($this->_update_or_insert == self::UPDATE) {
+            if (!is_null($this->id())) { // UPDATE
                 // If there are no dirty values, do nothing
                 if (count($values) == 0) {
                     return true;
@@ -726,8 +860,7 @@
             $success = $statement->execute($values);
 
             // If we've just inserted a new record, set the ID of this object
-            if ($this->_update_or_insert == self::INSERT) {
-                $this->_update_or_insert = self::UPDATE;
+            if (is_null($this->id())) {
                 $this->_data[$this->_get_id_column_name()] = self::$_db->lastInsertId();
             }
 
