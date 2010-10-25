@@ -144,6 +144,10 @@
     $expected = "SELECT * FROM `widget` JOIN `widget_handle` `wh` ON `wh`.`widget_id` = `widget`.`id`";
     Tester::check_equal("Join with alias", $expected);
 
+    ORM::for_table('widget')->join('widget_handle', "widget_handle.widget_id = widget.id")->find_many();
+    $expected = "SELECT * FROM `widget` JOIN `widget_handle` ON widget_handle.widget_id = widget.id";
+    Tester::check_equal("Join with string constraint", $expected);
+
     $widget = ORM::for_table('widget')->create();
     $widget->name = "Fred";
     $widget->age = 10;

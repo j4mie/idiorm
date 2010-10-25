@@ -407,7 +407,9 @@
          *
          * The table should be the name of the table to join to.
          *
-         * The constraint should be an array with three elements:
+         * The constraint may be either a string or an array with three elements. If it
+         * is a string, it will be compiled into the query as-is, with no escaping. The
+         * recommended way to supply the constraint is as an array with three elements:
          *
          * first_column, operator, second_column
          *
@@ -432,10 +434,12 @@
             }
 
             // Build the constraint
-            list($first_column, $operator, $second_column) = $constraint;
-            $first_column = $this->_quote_identifier($first_column);
-            $second_column = $this->_quote_identifier($second_column);
-            $constraint = "{$first_column} {$operator} {$second_column}";
+            if (is_array($constraint)) {
+                list($first_column, $operator, $second_column) = $constraint;
+                $first_column = $this->_quote_identifier($first_column);
+                $second_column = $this->_quote_identifier($second_column);
+                $constraint = "{$first_column} {$operator} {$second_column}";
+            }
 
             $this->_join_sources[] = "{$join_operator} {$table} ON {$constraint}";
             return $this;
