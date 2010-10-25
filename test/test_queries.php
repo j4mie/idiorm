@@ -140,6 +140,13 @@
     $expected = "SELECT * FROM `widget` FULL OUTER JOIN `widget_handle` ON `widget_handle`.`widget_id` = `widget`.`id`";
     Tester::check_equal("Full outer join", $expected);
 
+    ORM::for_table('widget')
+        ->join('widget_handle', array('widget_handle.widget_id', '=', 'widget.id'))
+        ->join('widget_nozzle', array('widget_nozzle.widget_id', '=', 'widget.id'))
+        ->find_many();
+    $expected = "SELECT * FROM `widget` JOIN `widget_handle` ON `widget_handle`.`widget_id` = `widget`.`id` JOIN `widget_nozzle` ON `widget_nozzle`.`widget_id` = `widget`.`id`";
+    Tester::check_equal("Multiple join sources", $expected);
+
     ORM::for_table('widget')->join('widget_handle', array('wh.widget_id', '=', 'widget.id'), 'wh')->find_many();
     $expected = "SELECT * FROM `widget` JOIN `widget_handle` `wh` ON `wh`.`widget_id` = `widget`.`id`";
     Tester::check_equal("Join with alias", $expected);
