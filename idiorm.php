@@ -365,7 +365,7 @@
         }
 
         /**
-         * Add a an alias for the main table to be used in SELECT queries
+         * Add an alias for the main table to be used in SELECT queries
          */
         public function table_alias($alias) {
             $this->_table_alias = $alias;
