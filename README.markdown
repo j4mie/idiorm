@@ -216,6 +216,32 @@ Will result in the query:
 
     SELECT COUNT(*) AS `count` FROM `person`;
 
+#### Joins ####
+
+Idiorm has a family of methods for adding different types of `JOIN`s to the queries it constructs:
+
+Methods: `join`, `inner_join`, `left_outer_join`, `right_outer_join`, `full_outer_join`.
+
+Each of these methods takes the same set of arguments. The following description will use the basic `join` method as an example, but the same applies to each method.
+
+The first two arguments are mandatory. The first is the name of the table to join, and the second supplies the conditions for the join. The recommended way to specify the conditions is as an *array* containing three components: the first column, the operator, and the second column. The table and column names will be automatically quoted. For example:
+
+    $results = ORM::for_table('person')->join('person_profile', array('person.id', '=', 'person_profile.person_id'))->find_many();
+
+It is also possible to specify the condition as a string, which will be inserted as-is into the query. However, in this case the column names will **not** be escaped, and so this method should be used with caution.
+
+    // Not recommended because the join condition will not be escaped.
+    $results = ORM::for_table('person')->join('person_profile', 'person.id = person_profile.person_id')->find_many();
+
+The `join` methods also take an optional third parameter, which is an `alias` for the table in the query. This is useful if you wish to join the table to *itself* to create a hierarchical structure. In this case, it is best combined with the `table_alias` method, which will add an alias to the *main* table associated with the ORM, and the `select` method to control which columns get returned.
+
+    $results = ORM::for_table('person')
+        ->table_alias('p1')
+        ->select('p1.*')
+        ->select('p2.name', 'parent_name')
+        ->join('person', array('p1.parent', '=', 'p2.id'), 'p2')
+        ->find_many();
+
 #### Raw queries ####
 
 If you need to perform more complex queries, you can completely specify the query to execute by using the `raw_query` method. This method takes a string and an array of parameters. The string should contain placeholders, either in question mark or named placeholder syntax, which will be used to bind the parameters to the query.
