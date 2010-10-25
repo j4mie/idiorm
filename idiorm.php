@@ -419,7 +419,7 @@
          *
          * The final (optional) argument specifies an alias for the joined table.
          */
-        protected function _add_join($join_operator, $table, $constraint, $table_alias=null) {
+        protected function _add_join_source($join_operator, $table, $constraint, $table_alias=null) {
 
             $join_operator = trim("{$join_operator} JOIN");
 
@@ -445,7 +445,7 @@
          * Add a simple JOIN source to the query
          */
         public function join($table, $constraint, $table_alias=null) {
-            return $this->_add_join("", $table, $constraint, $table_alias);
+            return $this->_add_join_source("", $table, $constraint, $table_alias);
         }
 
         /**
