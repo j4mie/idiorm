@@ -44,10 +44,6 @@
         // --- CLASS CONSTANTS --- //
         // ----------------------- //
 
-        // Update or insert?
-        const UPDATE = 0;
-        const INSERT = 1;
-
         // Where condition array keys
         const WHERE_FRAGMENT = 0;
         const WHERE_VALUES = 1;
@@ -120,9 +116,6 @@
         // Fields that have been modified during the
         // lifetime of the object
         protected $_dirty_fields = array();
-
-        // Are we updating or inserting?
-        protected $_update_or_insert = self::UPDATE;
 
         // Name of the column to use as the primary key for
         // this instance only. Overrides the config settings.
@@ -266,8 +259,6 @@
          * save() is called.
          */
         public function create($data=null) {
-            $this->_update_or_insert = self::INSERT;
-
             if (!is_null($data)) {
                 return $this->hydrate($data)->force_all_dirty();
             }
@@ -742,7 +733,7 @@
             $query = array();
             $values = array_values($this->_dirty_fields);
 
-            if ($this->_update_or_insert == self::UPDATE) {
+            if (!is_null($this->id())) { // UPDATE
                 // If there are no dirty values, do nothing
                 if (count($values) == 0) {
                     return true;
@@ -759,8 +750,7 @@
             $success = $statement->execute($values);
 
             // If we've just inserted a new record, set the ID of this object
-            if ($this->_update_or_insert == self::INSERT) {
-                $this->_update_or_insert = self::UPDATE;
+            if (is_null($this->id())) {
                 $this->_data[$this->_get_id_column_name()] = self::$_db->lastInsertId();
             }
 
