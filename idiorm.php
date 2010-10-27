@@ -295,7 +295,7 @@
          */
         public function find_one($id=null) {
             if(!is_null($id)) {
-                $this->where($this->_get_id_column_name(), $id);
+                $this->where_id_is($id);
             }
             $this->limit(1);
             $statement = $this->_run();
@@ -540,6 +540,13 @@
          */
         public function where_equal($column_name, $value) {
             return $this->_add_simple_where($column_name, '=', $value);
+        }
+
+        /**
+         * Special method to query the table by its primary key
+         */
+        public function where_id_is($id) {
+            return $this->where($this->_get_id_column_name(), $id);
         }
 
         /**

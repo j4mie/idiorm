@@ -24,9 +24,13 @@
     $expected = "SELECT * FROM `widget` LIMIT 1";
     Tester::check_equal("Basic unfiltered find_one query", $expected);
 
+    ORM::for_table('widget')->where_id_is(5)->find_one();
+    $expected = "SELECT * FROM `widget` WHERE `id` = '5' LIMIT 1";
+    Tester::check_equal("where_id_is method", $expected);
+
     ORM::for_table('widget')->find_one(5);
     $expected = "SELECT * FROM `widget` WHERE `id` = '5' LIMIT 1";
-    Tester::check_equal("Filtering on ID", $expected);
+    Tester::check_equal("Filtering on ID passed into find_one method", $expected);
 
     ORM::for_table('widget')->count();
     $expected = "SELECT COUNT(*) AS `count` FROM `widget`";

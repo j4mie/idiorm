@@ -106,6 +106,10 @@ By default, calling `where` with two parameters (the column name and the value) 
 
 If your coding style favours clarity over brevity, you may prefer to use the `where_equal` method: this is identical to `where`.
 
+##### Shortcut: `where_id_is` #####
+
+This is a simple helper method to query the table by primary key. Respects the ID column specified in the config.
+
 ##### Less than / greater than: `where_lt`, `where_gt`, `where_lte`, `where_gte` #####
 
 There are four methods available for inequalities:
