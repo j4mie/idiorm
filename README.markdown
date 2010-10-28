@@ -110,6 +110,8 @@ Use `has_many` in the base, and `belongs_to` in the associated model.
 
 Use `has_many_through` in both the base and associated models.
 
+Below, each association helper method is discussed in detail.
+
 #### Has-one ####
 
 One-to-one relationships are implemented using the `has_one` method. For example, say we have a `User` model. Each user has a single `Profile`, and so the `user` table should be associated with the `profile` table. To be able to find the profile for a particular user, we should add a method called `profile` to the `User` class (note that the method name here is arbitrary, but should describe the relationship). This method calls the protected `has_one` method provided by Paris, passing in the class name of the related object. The `profile` method should return an ORM instance ready for (optional) further filtering.
@@ -133,7 +135,7 @@ The API for this method works as follows:
 
 By default, Paris assumes that the foreign key column on the related table has the same name as the current (base) table, with `_id` appended. In the example above, Paris will look for a foreign key column called `user_id` on the table used by the `Profile` class. To override this behaviour, add a second argument to your `has_one` call, passing the name of the column to use.
 
-#### Has-many ####
+#### Has many ####
 
 One-to-many relationships are implemented using the `has_many` method. For example, say we have a `User` model. Each user has several `Post` objects. The `user` table should be associated with the `post` table. To be able to find the posts for a particular user, we should add a method called `posts` to the `User` class (note that the method name here is arbitrary, but should describe the relationship). This method calls the protected `has_many` method provided by Paris, passing in the class name of the related objects. **Pass the model class name literally, not a pluralised version**. The `posts` method should return an ORM instance ready for (optional) further filtering.
 
@@ -156,7 +158,7 @@ The API for this method works as follows:
 
 By default, Paris assumes that the foreign key column on the related table has the same name as the current (base) table, with `_id` appended. In the example above, Paris will look for a foreign key column called `user_id` on the table used by the `Post` class. To override this behaviour, add a second argument to your `has_many` call, passing the name of the column to use.
 
-#### Belongs-to ####
+#### Belongs to ####
 
 The 'other side' of `has_one` and `has_many` is `belongs_to`. This method call takes identical parameters as these methods, but assumes the foreign key is on the *current* (base) table, not the related table.
 
@@ -179,7 +181,7 @@ The API for this method works as follows:
 
 Again, Paris makes an assumption that the foreign key on the current (base) table has the same name as the related table with `_id` appended. In the example above, Paris will look for a column named `user_id`. To override this behaviour, pass a second argument to the `belongs_to` method, specifying the name of the column on the current (base) table to use.
 
-#### Has-many-through ####
+#### Has many through ####
 
 Many-to-many relationships are implemented using the `has_many_through` method. This method has only one required argument: the name of the related model. Supplying further arguments allows us to override default behaviour of the method.
 
