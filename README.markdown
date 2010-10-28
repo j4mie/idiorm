@@ -123,8 +123,11 @@ One-to-one relationships are implemented using the `has_one` method. For example
 
 The API for this method works as follows:
 
-    $user = Model::factory('User')->find_one($user_id);     // Select a particular user from the database
-    $profile = $user->profile()->find_one();                // Find the profile associated with the user
+    // Select a particular user from the database
+    $user = Model::factory('User')->find_one($user_id);
+
+    // Find the profile associated with the user
+    $profile = $user->profile()->find_one();
 
 By default, Paris assumes that the foreign key column on the related table has the same name as the current (base) table, with `_id` appended. In the example above, Paris will look for a foreign key column called `user_id` on the table used by the `Profile` class. To override this behaviour, add a second argument to your `has_one` call, passing the name of the column to use.
 
@@ -143,8 +146,11 @@ One-to-many relationships are implemented using the `has_many` method. For examp
 
 The API for this method works as follows:
 
-    $user = Model::factory('User')->find_one($user_id);     // Select a particular user from the database
-    $posts = $user->posts()->find_many();                   // Find the posts associated with the user
+    // Select a particular user from the database
+    $user = Model::factory('User')->find_one($user_id);
+
+    // Find the posts associated with the user
+    $posts = $user->posts()->find_many();
 
 By default, Paris assumes that the foreign key column on the related table has the same name as the current (base) table, with `_id` appended. In the example above, Paris will look for a foreign key column called `user_id` on the table used by the `Post` class. To override this behaviour, add a second argument to your `has_many` call, passing the name of the column to use.
 
@@ -163,8 +169,11 @@ The 'other side' of `has_one` and `has_many` is `belongs_to`. This method call t
 
 The API for this method works as follows:
 
-    $profile = Model::factory('Profile')->find_one($profile_id);    // Select a particular profile from the database
-    $user = $profile->user()->find_one();                           // Find the user associated with the profile
+    // Select a particular profile from the database
+    $profile = Model::factory('Profile')->find_one($profile_id);
+
+    // Find the user associated with the profile
+    $user = $profile->user()->find_one();
 
 Again, Paris makes an assumption that the foreign key on the current (base) table has the same name as the related table with `_id` appended. In the example above, Paris will look for a column named `user_id`. To override this behaviour, pass a second argument to the `belongs_to` method, specifying the name of the column on the current (base) table to use.
 
@@ -177,6 +186,9 @@ For example, say we have a `Book` model. Each `Book` may have several `Author` o
 We should then add a method called `authors` to the `Book` class (note that the method name here is arbitrary, but should describe the relationship). This method calls the protected `has_many_through` method provided by Paris, passing in the class name of the related objects. **Pass the model class name literally, not a pluralised version.**. The `authors` method should return an ORM instance ready for (optional) further filtering.
 
     class Author extends Model {
+        public function books() {
+            return $this->has_many_through('Book');
+        }
     }
 
     class Book extends Model {
@@ -185,10 +197,22 @@ We should then add a method called `authors` to the `Book` class (note that the 
         }
     }
 
+    class AuthorBook extends Model {
+    }
+
 The API for this method works as follows:
 
-    $book = Model::factory('Book')->find_one($book_id);     // Select a particular book from the database
-    $authors = $book->authors()->find_many();               // Find the authors associated with the book
+    // Select a particular book from the database
+    $book = Model::factory('Book')->find_one($book_id);
+
+    // Find the authors associated with the book
+    $authors = $book->authors()->find_many();
+
+    // Get the first author
+    $first_author = $authors[0];
+
+    // Find all the books written by this author
+    $first_author_books = $first_author->books()->find_many();
 
 ##### Overriding defaults #####
 
