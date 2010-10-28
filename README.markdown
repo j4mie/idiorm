@@ -59,6 +59,8 @@ Paris requires that your database tables have a unique primary key column. By de
         public static $_id_column = 'my_id_column';
     }
 
+**Note** - Paris has its *own* default ID column name mechanism, and does not respect column names specified in Idiorm's configuration.
+
 ### Querying ###
 
 Querying allows you to select data from your database and populate instances of your model classes. Queries start with a call to a static *factory method* on the base `Model` class that takes a single argument: the name of the model class you wish to use for your query. This factory method is then used as the start of a *method chain* which gives you full access to [Idiorm](http://github.com/j4mie/idiorm/)'s fluent query API. **See Idiorm's documentation for details of this API.**
