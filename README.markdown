@@ -166,7 +166,41 @@ The API for this method works as follows:
     $profile = Model::factory('Profile')->find_one($profile_id);    // Select a particular profile from the database
     $user = $profile->user()->find_one();                           // Find the user associated with the profile
 
-Again, Paris makes an assumuption that the foreign key on the current (base) table has the same name as the related table with `_id` appended. In the example above, Paris will look for a column named `user_id`. To override this behaviour, pass a second argument to the `belongs_to` method, specifying the name of the column on the current (base) table to use.
+Again, Paris makes an assumption that the foreign key on the current (base) table has the same name as the related table with `_id` appended. In the example above, Paris will look for a column named `user_id`. To override this behaviour, pass a second argument to the `belongs_to` method, specifying the name of the column on the current (base) table to use.
+
+#### Has-many-through ####
+
+Many-to-many relationships are implemented using the `has_many_through` method. This method has only one required argument: the name of the related model. Supplying further arguments allows us to override default behaviour of the method.
+
+For example, say we have a `Book` model. Each `Book` may have several `Author` objects, and each `Author` may have written several `Books`. To be able to find the authors for a particular book, we should first create an intermediary model. The name for this model should be constructed by concatenating the names of the two related classes, in alphabetical order. In this case, our classes are called `Author` and `Book`, so the intermediate model should be called `AuthorBook`.
+
+We should then add a method called `authors` to the `Book` class (note that the method name here is arbitrary, but should describe the relationship). This method calls the protected `has_many_through` method provided by Paris, passing in the class name of the related objects. **Pass the model class name literally, not a pluralised version.**. The `authors` method should return an ORM instance ready for (optional) further filtering.
+
+    class Author extends Model {
+    }
+
+    class Book extends Model {
+        public function authors() {
+            return $this->has_many_through('Author');
+        }
+    }
+
+The API for this method works as follows:
+
+    $book = Model::factory('Book')->find_one($book_id);     // Select a particular book from the database
+    $authors = $book->authors()->find_many();               // Find the authors associated with the book
+
+##### Overriding defaults #####
+
+The `has_many_through` method takes up to four arguments, which allow us to progressively override default assumptions made by the method.
+
+**First argument: associated model name** - this is mandatory and should be the name of the model we wish to select across the association.
+
+**Second argument: intermediate model name** - this is optional and defaults to the names of the two associated models, sorted alphabetically and concatenated.
+
+**Third argument: custom key to base table on intermediate table** - this is optional, and defaults to the name of the base table with `_id` appended.
+
+**Fourth argument: custom key to associated table on intermediate table** - this is optional, and defaults to the name of the associated table with `_id` appended.
 
 ### Filters ###
 

@@ -161,5 +161,39 @@
     $expected = "SELECT * FROM `post` WHERE `my_custom_fk_column` = '1'";
     Tester::check_equal("has_many relation with custom FK name", $expected);
 
+    class Author extends Model {
+    }
+
+    class AuthorBook extends Model {
+    }
+
+    class Book extends Model {
+        public function authors() {
+            return $this->has_many_through('Author');
+        }
+    }
+
+    $book = Model::factory('Book')->find_one(1);
+    $authors = $book->authors()->find_many();
+    $expected = "SELECT `author`.`*` FROM `author` JOIN `author_book` ON `author`.`id` = `author_book`.`author_id` WHERE `author_book`.`book_id` = '1'";
+    Tester::check_equal("has_many_through relation", $expected);
+
+    class AuthorTwo extends Model {
+    }
+
+    class WroteTheBook extends Model {
+    }
+
+    class BookTwo extends Model {
+        public function authors() {
+            return $this->has_many_through('AuthorTwo', 'WroteTheBook', 'custom_book_id', 'custom_author_id');
+        }
+    }
+
+    $book2 = Model::factory('BookTwo')->find_one(1);
+    $authors2 = $book2->authors()->find_many();
+    $expected = "SELECT `author_two`.`*` FROM `author_two` JOIN `wrote_the_book` ON `author_two`.`id` = `wrote_the_book`.`custom_author_id` WHERE `wrote_the_book`.`custom_book_id` = '1'";
+    Tester::check_equal("has_many_through relation with custom intermediate model and key names", $expected);
+
     Tester::report();
 ?>

@@ -257,6 +257,55 @@
             return self::factory($foreign_class_name)->where_id_is($foreign_object_id);
         }
 
+        protected function has_many_through($associated_class_name, $join_class_name=null, $key_to_base_table=null, $key_to_associated_table=null) {
+            $base_class_name = get_class($this);
+
+            // The class name of the join model, if not supplied, is
+            // formed by concatenating the names of the base class
+            // and the associated class, in alphabetical order.
+            if (is_null($join_class_name)) {
+                $class_names = array($base_class_name, $associated_class_name);
+                sort($class_names, SORT_STRING);
+                $join_class_name = join("", $class_names);
+            }
+
+            // Get table names for each class
+            $base_table_name = self::_get_table_name($base_class_name);
+            $associated_table_name = self::_get_table_name($associated_class_name);
+            $join_table_name = self::_get_table_name($join_class_name);
+
+            // Get column names - this is a bit smelly
+            // Should either respect Idiorm's default somehow (DRY) or
+            // Paris should explicitly override Idiorm's defaults for everything
+            $base_table_id_column = self::_get_id_column_name($base_table_name);
+            if (is_null($base_table_id_column)) {
+                $base_table_id_column = 'id';
+            }
+
+            $associated_table_id_column = self::_get_id_column_name($associated_table_name);
+            if (is_null($associated_table_id_column)) {
+                $associated_table_id_column = 'id';
+            }
+
+            // Get the column names for each side of the join table
+            if (is_null($key_to_base_table)) {
+                $key_to_base_table = $base_table_name . self::FOREIGN_KEY_DEFAULT_SUFFIX;
+            }
+
+            if (is_null($key_to_associated_table)) {
+                $key_to_associated_table = $associated_table_name . self::FOREIGN_KEY_DEFAULT_SUFFIX;
+            }
+
+            return self::factory($associated_class_name)
+                ->select("{$associated_table_name}.*")
+                ->join($join_table_name, array(
+                    "{$associated_table_name}.{$associated_table_id_column}",
+                    '=',
+                    "{$join_table_name}.{$key_to_associated_table}"
+                ))
+                ->where("{$join_table_name}.{$key_to_base_table}", $this->id());
+        }
+
         /**
          * Set the wrapped ORM instance associated with this Model instance.
          */
