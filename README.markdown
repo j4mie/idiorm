@@ -7,6 +7,17 @@ Built on top of [Idiorm](http://github.com/j4mie/idiorm/).
 
 Released under a [BSD license](http://en.wikipedia.org/wiki/BSD_licenses).
 
+Features
+--------
+
+* Extremely simple configuration.
+* Exposes the full power of [Idiorm](http://github.com/j4mie/idiorm/)'s fluent query API.
+* Supports associations.
+* Simple mechanism to encapsulate common queries in filter methods.
+* Built on top of [PDO](http://php.net/pdo).
+* Uses [prepared statements](http://uk.php.net/manual/en/pdo.prepared-statements.php) throughout to protect against [SQL injection](http://en.wikipedia.org/wiki/SQL_injection) attacks.
+* Database agnostic. Currently supports SQLite and MySQL. May support others, please give it a try!
+
 Philosophy
 ----------
 
