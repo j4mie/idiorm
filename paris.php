@@ -149,7 +149,7 @@
         const DEFAULT_ID_COLUMN = 'id';
 
         // Default foreign key suffix used by relationship methods
-        const FOREIGN_KEY_DEFAULT_SUFFIX = '_id';
+        const DEFAULT_FOREIGN_KEY_SUFFIX = '_id';
 
         /**
          * The ORM instance used by this model 
@@ -203,6 +203,19 @@
         }
 
         /**
+         * Build a foreign key based on a table name. If the first argument
+         * (the specified foreign key column name) is null, returns the second
+         * argument (the name of the table) with the default foreign key column
+         * suffix appended.
+         */
+        protected static function _build_foreign_key_name($specified_foreign_key_name, $table_name) {
+            if (!is_null($specified_foreign_key_name)) {
+                return $specified_foreign_key_name;
+            }
+            return $table_name . self::DEFAULT_FOREIGN_KEY_SUFFIX;
+        }
+
+        /**
          * Factory method used to acquire instances of the given class.
          * The class name should be supplied as a string, and the class
          * should already have been loaded by PHP (or a suitable autoloader
@@ -227,9 +240,7 @@
          */
         protected function _has_one_or_many($associated_class_name, $foreign_key_name=null) {
             $base_table_name = self::_get_table_name(get_class($this));
-            if (is_null($foreign_key_name)) {
-                $foreign_key_name = $base_table_name . self::FOREIGN_KEY_DEFAULT_SUFFIX;
-            }
+            $foreign_key_name = self::_build_foreign_key_name($foreign_key_name, $base_table_name);
             return self::factory($associated_class_name)->where($foreign_key_name, $this->id());
         }
 
@@ -255,9 +266,7 @@
          */
         protected function belongs_to($associated_class_name, $foreign_key_name=null) {
             $associated_table_name = self::_get_table_name($associated_class_name);
-            if (is_null($foreign_key_name)) {
-                $foreign_key_name = $associated_table_name . self::FOREIGN_KEY_DEFAULT_SUFFIX;
-            }
+            $foreign_key_name = self::_build_foreign_key_name($foreign_key_name, $associated_table_name);
             $associated_object_id = $this->$foreign_key_name;
             return self::factory($associated_class_name)->where_id_is($associated_object_id);
         }
@@ -288,13 +297,8 @@
             $associated_table_id_column = self::_get_id_column_name($associated_class_name);
 
             // Get the column names for each side of the join table
-            if (is_null($key_to_base_table)) {
-                $key_to_base_table = $base_table_name . self::FOREIGN_KEY_DEFAULT_SUFFIX;
-            }
-
-            if (is_null($key_to_associated_table)) {
-                $key_to_associated_table = $associated_table_name . self::FOREIGN_KEY_DEFAULT_SUFFIX;
-            }
+            $key_to_base_table = self::_build_foreign_key_name($key_to_base_table, $base_table_name);
+            $key_to_associated_table = self::_build_foreign_key_name($key_to_associated_table, $associated_table_name);
 
             return self::factory($associated_class_name)
                 ->select("{$associated_table_name}.*")
