@@ -284,8 +284,8 @@
             $join_table_name = self::_get_table_name($join_class_name);
 
             // Get ID column names
-            $base_table_id_column = self::_get_id_column_name($base_table_name);
-            $associated_table_id_column = self::_get_id_column_name($associated_table_name);
+            $base_table_id_column = self::_get_id_column_name($base_class_name);
+            $associated_table_id_column = self::_get_id_column_name($associated_class_name);
 
             // Get the column names for each side of the join table
             if (is_null($key_to_base_table)) {
