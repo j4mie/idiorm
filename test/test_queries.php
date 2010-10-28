@@ -93,5 +93,73 @@
     $expected = "DELETE FROM `widget` WHERE `id` = '1'";
     Tester::check_equal("Delete data", $expected);
 
+    class Profile extends Model {
+        public function user() {
+            return $this->belongs_to('User');
+        }
+    }
+
+    class User extends Model {
+        public function profile() {
+            return $this->has_one('Profile');
+        }
+    }
+
+    $user = Model::factory('User')->find_one(1);
+    $profile = $user->profile()->find_one();
+    $expected = "SELECT * FROM `profile` WHERE `user_id` = '1' LIMIT 1";
+    Tester::check_equal("has_one relation", $expected);
+
+    class UserTwo extends Model {
+        public function profile() {
+            return $this->has_one('Profile', 'my_custom_fk_column');
+        }
+    }
+
+    $user2 = Model::factory('UserTwo')->find_one(1);
+    $profile = $user2->profile()->find_one();
+    $expected = "SELECT * FROM `profile` WHERE `my_custom_fk_column` = '1' LIMIT 1";
+    Tester::check_equal("has_one relation with custom FK name", $expected);
+
+    $profile->user_id = 1;
+    $user3 = $profile->user()->find_one();
+    $expected = "SELECT * FROM `user` WHERE `id` = '1' LIMIT 1";
+    Tester::check_equal("belongs_to relation", $expected);
+
+    class ProfileTwo extends Model {
+        public function user() {
+            return $this->belongs_to('User', 'custom_user_fk_column');
+        }
+    }
+    $profile2 = Model::factory('ProfileTwo')->find_one(1);
+    $profile2->custom_user_fk_column = 5;
+    $user4 = $profile2->user()->find_one();
+    $expected = "SELECT * FROM `user` WHERE `id` = '5' LIMIT 1";
+    Tester::check_equal("belongs_to relation with custom FK name", $expected);
+
+    class Post extends Model {
+    }
+
+    class UserThree extends Model {
+        public function posts() {
+            return $this->has_many('Post');
+        }
+    }
+
+    $user4 = Model::factory('UserThree')->find_one(1);
+    $posts = $user4->posts()->find_many();
+    $expected = "SELECT * FROM `post` WHERE `user_three_id` = '1'";
+    Tester::check_equal("has_many relation", $expected);
+
+    class UserFour extends Model {
+        public function posts() {
+            return $this->has_many('Post', 'my_custom_fk_column');
+        }
+    }
+    $user5 = Model::factory('UserFour')->find_one(1);
+    $posts = $user5->posts()->find_many();
+    $expected = "SELECT * FROM `post` WHERE `my_custom_fk_column` = '1'";
+    Tester::check_equal("has_many relation with custom FK name", $expected);
+
     Tester::report();
 ?>

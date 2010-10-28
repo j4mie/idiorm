@@ -86,6 +86,88 @@ You may also retrieve a count of the number of rows returned by your query. This
 
     $count = Model::factory('User')->where_lt('age', 20)->count();
 
+### Associations ###
+
+Paris provides a simple API for one-to-one, one-to-many and many-to-many relationships (associations) between models. It takes a different approach to many other ORMs, which use associative arrays to add configuration metadata about relationships to model classes. These arrays can often be deeply nested and complex, and are therefore quite error-prone.
+
+Instead, Paris treats the act of querying across a relationship as a *behaviour*, and supplies a family of helper methods to help generate such queries. These helper methods should be called from within *methods* on your model classes which are named to describe the relationship. These methods return ORM instances (rather than actual Model instances) and so, if necessary, the relationship query can be modified and added to before it is run.
+
+#### Summary ####
+
+The following list summarises the associations provided by Paris, and explains which helper method supports each type of association:
+
+##### One-to-one #####
+
+Use `has_one` in the base, and `belongs_to` in the associated model.
+
+##### One-to-many #####
+
+Use `has_many` in the base, and `belongs_to` in the associated model.
+
+##### Many-to-many #####
+
+Use `has_many_through` in both the base and associated models.
+
+#### Has-one ####
+
+One-to-one relationships are implemented using the `has_one` method. For example, say we have a `User` model. Each user has a single `Profile`, and so the `user` table should be associated with the `profile` table. To be able to find the profile for a particular user, we should add a method called `profile` to the `User` class (note that the method name here is arbitrary, but should describe the relationship). This method calls the protected `has_one` method provided by Paris, passing in the class name of the related object. The `profile` method should return an ORM instance ready for (optional) further filtering.
+
+    class Profile extends Model {
+    }
+
+    class User extends Model {
+        public function profile() {
+            return $this->has_one('Profile');
+        }
+    }
+
+The API for this method works as follows:
+
+    $user = Model::factory('User')->find_one($user_id);     // Select a particular user from the database
+    $profile = $user->profile()->find_one();                // Find the profile associated with the user
+
+By default, Paris assumes that the foreign key column on the related table has the same name as the current (base) table, with `_id` appended. In the example above, Paris will look for a foreign key column called `user_id` on the table used by the `Profile` class. To override this behaviour, add a second argument to your `has_one` call, passing the name of the column to use.
+
+#### Has-many ####
+
+One-to-many relationships are implemented using the `has_many` method. For example, say we have a `User` model. Each user has several `Post` objects. The `user` table should be associated with the `post` table. To be able to find the posts for a particular user, we should add a method called `posts` to the `User` class (note that the method name here is arbitrary, but should describe the relationship). This method calls the protected `has_many` method provided by Paris, passing in the class name of the related objects. **Pass the model class name literally, not a pluralised version**. The `posts` method should return an ORM instance ready for (optional) further filtering.
+
+    class Post extends Model {
+    }
+
+    class User extends Model {
+        public function posts() {
+            return $this->has_many('Post'); // Note we use the model name literally - not a pluralised version
+        }
+    }
+
+The API for this method works as follows:
+
+    $user = Model::factory('User')->find_one($user_id);     // Select a particular user from the database
+    $posts = $user->posts()->find_many();                   // Find the posts associated with the user
+
+By default, Paris assumes that the foreign key column on the related table has the same name as the current (base) table, with `_id` appended. In the example above, Paris will look for a foreign key column called `user_id` on the table used by the `Post` class. To override this behaviour, add a second argument to your `has_many` call, passing the name of the column to use.
+
+#### Belongs-to ####
+
+The 'other side' of `has_one` and `has_many` is `belongs_to`. This method call takes identical parameters as these methods, but assumes the foreign key is on the *current* (base) table, not the related table.
+
+    class Profile extends Model {
+        public function user() {
+            return $this->belongs_to('User');
+        }
+    }
+
+    class User extends Model {
+    }
+
+The API for this method works as follows:
+
+    $profile = Model::factory('Profile')->find_one($profile_id);    // Select a particular profile from the database
+    $user = $profile->user()->find_one();                           // Find the user associated with the profile
+
+Again, Paris makes an assumuption that the foreign key on the current (base) table has the same name as the related table with `_id` appended. In the example above, Paris will look for a column named `user_id`. To override this behaviour, pass a second argument to the `belongs_to` method, specifying the name of the column on the current (base) table to use.
+
 ### Filters ###
 
 It is often desirable to create reusable queries that can be used to extract particular subsets of data without repeating large sections of code. Paris allows this by providing a method called `filter` which can be chained in queries alongside the existing Idiorm query API. The filter method takes the name of a **public static** method on the current Model subclass as an argument. The supplied method will be called at the point in the chain where `filter` is called, and will be passed the `ORM` object as the first parameter. It should return the ORM object after calling one or more query methods on it. The method chain can then be continued if necessary.

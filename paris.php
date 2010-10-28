@@ -144,6 +144,9 @@
      */
     class Model {
 
+        // Default foreign key suffix used by relationship methods
+        const FOREIGN_KEY_DEFAULT_SUFFIX = '_id';
+
         /**
          * The ORM instance used by this model 
          * instance to communicate with the database.
@@ -209,6 +212,49 @@
             $wrapper->set_class_name($class_name);
             $wrapper->use_id_column(self::_get_id_column_name($class_name));
             return $wrapper;
+        }
+
+        /**
+         * Internal method to construct the queries for both the has_one and
+         * has_many methods. These two types of association are identical; the
+         * only difference is whether find_one or find_many is used to complete
+         * the method chain.
+         */
+        protected function _has_one_or_many($foreign_class_name, $foreign_key_name=null) {
+            $local_table_name = self::_get_table_name(get_class($this));
+            if (is_null($foreign_key_name)) {
+                $foreign_key_name = $local_table_name . self::FOREIGN_KEY_DEFAULT_SUFFIX;
+            }
+            return self::factory($foreign_class_name)->where($foreign_key_name, $this->id());
+        }
+
+        /**
+         * Helper method to manage one-to-one relations where the foreign
+         * key is on the remote table.
+         */
+        protected function has_one($foreign_class_name, $foreign_key_name=null) {
+            return $this->_has_one_or_many($foreign_class_name, $foreign_key_name);
+        }
+
+        /**
+         * Helper method to manage one-to-many relations where the foreign
+         * key is on the remote table.
+         */
+        protected function has_many($foreign_class_name, $foreign_key_name=null) {
+            return $this->_has_one_or_many($foreign_class_name, $foreign_key_name);
+        }
+
+        /**
+         * Helper method to manage one-to-one and one-to-many relations where
+         * the foreign key is on the current table.
+         */
+        protected function belongs_to($foreign_class_name, $foreign_key_name=null) {
+            $foreign_table_name = self::_get_table_name($foreign_class_name);
+            if (is_null($foreign_key_name)) {
+                $foreign_key_name = $foreign_table_name . self::FOREIGN_KEY_DEFAULT_SUFFIX;
+            }
+            $foreign_object_id = $this->$foreign_key_name;
+            return self::factory($foreign_class_name)->where_id_is($foreign_object_id);
         }
 
         /**
