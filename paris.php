@@ -144,6 +144,10 @@
      */
     class Model {
 
+        // Default ID column for all models. Can be overridden by adding
+        // a public static _id_column property to your model classes.
+        const DEFAULT_ID_COLUMN = 'id';
+
         // Default foreign key suffix used by relationship methods
         const FOREIGN_KEY_DEFAULT_SUFFIX = '_id';
 
@@ -155,11 +159,12 @@
 
         /**
          * Retrieve the value of a static property on a class. If the
-         * class or the property does not exist, returns null
+         * class or the property does not exist, returns the default
+         * value supplied as the third argument (which defaults to null).
          */
-        protected static function _get_static_property($class_name, $property) {
+        protected static function _get_static_property($class_name, $property, $default=null) {
             if (!class_exists($class_name) || !property_exists($class_name, $property)) {
-                return null;
+                return $default;
             }
             $properties = get_class_vars($class_name);
             return $properties[$property];
@@ -194,7 +199,7 @@
          * not set on the class, returns null.
          */
         protected static function _get_id_column_name($class_name) {
-            return self::_get_static_property($class_name, '_id_column');
+            return self::_get_static_property($class_name, '_id_column', self::DEFAULT_ID_COLUMN);
         }
 
         /**
@@ -278,18 +283,9 @@
             $associated_table_name = self::_get_table_name($associated_class_name);
             $join_table_name = self::_get_table_name($join_class_name);
 
-            // Get column names - this is a bit smelly
-            // Should either respect Idiorm's default somehow (DRY) or
-            // Paris should explicitly override Idiorm's defaults for everything
+            // Get ID column names
             $base_table_id_column = self::_get_id_column_name($base_table_name);
-            if (is_null($base_table_id_column)) {
-                $base_table_id_column = 'id';
-            }
-
             $associated_table_id_column = self::_get_id_column_name($associated_table_name);
-            if (is_null($associated_table_id_column)) {
-                $associated_table_id_column = 'id';
-            }
 
             // Get the column names for each side of the join table
             if (is_null($key_to_base_table)) {
