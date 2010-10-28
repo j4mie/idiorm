@@ -123,6 +123,9 @@
         // lifetime of the object
         protected $_dirty_fields = array();
 
+        // Is this a new object (has create() been called)?
+        protected $_is_new = false;
+
         // Name of the column to use as the primary key for
         // this instance only. Overrides the config settings.
         protected $_instance_id_column = null;
@@ -265,6 +268,7 @@
          * save() is called.
          */
         public function create($data=null) {
+            $this->_is_new = true;
             if (!is_null($data)) {
                 return $this->hydrate($data)->force_all_dirty();
             }
@@ -850,7 +854,7 @@
             $query = array();
             $values = array_values($this->_dirty_fields);
 
-            if (!is_null($this->id())) { // UPDATE
+            if (!$this->_is_new) { // UPDATE
                 // If there are no dirty values, do nothing
                 if (count($values) == 0) {
                     return true;
@@ -867,8 +871,11 @@
             $success = $statement->execute($values);
 
             // If we've just inserted a new record, set the ID of this object
-            if (is_null($this->id())) {
-                $this->_data[$this->_get_id_column_name()] = self::$_db->lastInsertId();
+            if ($this->_is_new) {
+                $this->_is_new = false;
+                if (is_null($this->id())) {
+                    $this->_data[$this->_get_id_column_name()] = self::$_db->lastInsertId();
+                }
             }
 
             return $success;
