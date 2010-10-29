@@ -198,7 +198,7 @@ Many-to-many relationships are implemented using the `has_many_through` method. 
 
 For example, say we have a `Book` model. Each `Book` may have several `Author` objects, and each `Author` may have written several `Books`. To be able to find the authors for a particular book, we should first create an intermediary model. The name for this model should be constructed by concatenating the names of the two related classes, in alphabetical order. In this case, our classes are called `Author` and `Book`, so the intermediate model should be called `AuthorBook`.
 
-We should then add a method called `authors` to the `Book` class (note that the method name here is arbitrary, but should describe the relationship). This method calls the protected `has_many_through` method provided by Paris, passing in the class name of the related objects. **Pass the model class name literally, not a pluralised version.**. The `authors` method should return an ORM instance ready for (optional) further filtering.
+We should then add a method called `authors` to the `Book` class (note that the method name here is arbitrary, but should describe the relationship). This method calls the protected `has_many_through` method provided by Paris, passing in the class name of the related objects. **Pass the model class name literally, not a pluralised version**. The `authors` method should return an ORM instance ready for (optional) further filtering.
 
     class Author extends Model {
         public function books() {
@@ -299,7 +299,6 @@ Update data and save the instance:
 Of course, because these objects are instances of your base model classes, you can also call methods that you have defined on them:
 
     class User extends Model {
-
         public function full_name() {
             return $this->first_name . ' ' . $this->last_name;
         }
@@ -312,6 +311,14 @@ To delete the database row associated with an instance of your model, call its `
 
     $user = Model::factory('User')->find_one($id);
     $user->delete();
+
+### A word on validation ###
+
+It's generally considered a good idea to centralise your data validation in a single place, and a good place to do this is inside your model classes. This is preferable to handling validation alongside form handling code, for example. Placing validation code inside models means that if you extend your application in the future to update your model via an alternative route (say a REST API rather than a form) you can re-use the same validation code.
+
+Despite this, Paris doesn't provide any built-in support for validation. This is because validation is potentially quite complex, and often very application-specific. Paris is deliberately quite ignorant about your actual data - it simply executes queries, and gives you the responsibility of making sure the data inside your models is valid and correct. Adding a full validation framework to Paris would probably require more code than Paris itself!
+
+However, there are several simple ways that you could add validation to your models without any help from Paris. You could override the `save()` method, check the data is valid, and return `false` on failure, or call `parent::save()` on success. You could create your own subclass of the `Model` base class and add your own generic validation methods. Or you could write your own external validation framework which you pass model instances to for checking. Choose whichever approach is most suitable for your own requirements.
 
 ### Configuration ###
 
