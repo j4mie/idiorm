@@ -3,6 +3,8 @@ Idiorm
 
 A lightweight nearly-zero-configuration object-relational mapper and fluent query builder for PHP5.
 
+Tested on PHP 5.2.0+ - may work on earlier versions with PDO and the correct database drivers.
+
 Released under a [BSD license](http://en.wikipedia.org/wiki/BSD_licenses).
 
 **See Also: [Paris](http://github.com/j4mie/paris), an Active Record implementation built on top of Idiorm.**
