@@ -5,6 +5,8 @@ A lightweight Active Record implementation for PHP5.
 
 Built on top of [Idiorm](http://github.com/j4mie/idiorm/).
 
+Tested on PHP 5.2.0+ - may work on earlier versions with PDO and the correct database drivers.
+
 Released under a [BSD license](http://en.wikipedia.org/wiki/BSD_licenses).
 
 Features
