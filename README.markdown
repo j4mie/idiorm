@@ -41,7 +41,11 @@ Briefly, you need to pass a *Data Source Name* connection string to the `configu
 
     ORM::configure('sqlite:./example.db');
 
-You may also need to pass a username and password to your database driver, using the `username` and `password` configuration options.
+You may also need to pass a username and password to your database driver, using the `username` and `password` configuration options. For example, if you are using MySQL:
+
+    ORM::configure('mysql:host=localhost;dbname=my_database');
+    ORM::configure('username', 'database_user');
+    ORM::configure('password', 'top_secret');
 
 ### Model Classes ###
 
