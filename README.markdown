@@ -263,6 +263,22 @@ Once you've got a set of records (objects) back from a query, you can access pro
     $name = $person->get('name');
     $name = $person->name;
 
+You can also get the all the data wrapped by an ORM instance using the `as_array` method. This will return an associative array mapping column names (keys) to their values.
+
+The `as_array` method takes column names as optional arguments. If one or more of these arguments is supplied, only matching column names will be returned.
+
+    $person = ORM::for_table('person')->create();
+
+    $person->first_name = 'Fred';
+    $person->surname = 'Bloggs';
+    $person->age = 50;
+
+    // Returns array('first_name' => 'Fred', 'surname' => 'Bloggs', 'age' => 50)
+    $data = $person->as_array();
+
+    // Returns array('first_name' => 'Fred', 'age' => 50)
+    $data = $person->as_array('first_name', 'age');
+
 ### Updating records ###
 
 To update the database, change one or more of the properties of the object, then call the `save` method to commit the changes to the database. Again, you can change the values of the object's properties either by using the `set` method or by setting the value of the property directly:

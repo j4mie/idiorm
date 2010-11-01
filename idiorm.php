@@ -807,6 +807,20 @@
         }
 
         /**
+         * Return the raw data wrapped by this ORM
+         * instance as an associative array. Column
+         * names may optionally be supplied as arguments,
+         * if so, only those keys will be returned.
+         */
+        public function as_array() {
+            if (func_num_args() === 0) {
+                return $this->_data;
+            }
+            $args = func_get_args();
+            return array_intersect_key($this->_data, array_flip($args));
+        }
+
+        /**
          * Return the value of a property of this object (database row)
          * or null if not present.
          */
