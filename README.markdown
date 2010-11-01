@@ -318,6 +318,25 @@ To delete the database row associated with an instance of your model, call its `
     $user = Model::factory('User')->find_one($id);
     $user->delete();
 
+You can also get the all the data wrapped by a model subclass instance using the `as_array` method. This will return an associative array mapping column names (keys) to their values.
+
+The `as_array` method takes column names as optional arguments. If one or more of these arguments is supplied, only matching column names will be returned.
+
+    class Person extends Model {
+    }
+
+    $person = Model::factory('Person')->create();
+
+    $person->first_name = 'Fred';
+    $person->surname = 'Bloggs';
+    $person->age = 50;
+
+    // Returns array('first_name' => 'Fred', 'surname' => 'Bloggs', 'age' => 50)
+    $data = $person->as_array();
+
+    // Returns array('first_name' => 'Fred', 'age' => 50)
+    $data = $person->as_array('first_name', 'age');
+
 ### A word on validation ###
 
 It's generally considered a good idea to centralise your data validation in a single place, and a good place to do this is inside your model classes. This is preferable to handling validation alongside form handling code, for example. Placing validation code inside models means that if you extend your application in the future to update your model via an alternative route (say a REST API rather than a form) you can re-use the same validation code.

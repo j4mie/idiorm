@@ -342,6 +342,14 @@
         }
 
         /**
+         * Wrapper for Idiorm's as_array method.
+         */
+        public function as_array() {
+            $args = func_get_args();
+            return call_user_func_array(array($this->orm, 'as_array'), $args);
+        }
+
+        /**
          * Save the data associated with this model instance to the database.
          */
         public function save() {
