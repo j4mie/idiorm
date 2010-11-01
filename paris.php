@@ -328,6 +328,20 @@
         }
 
         /**
+         * Getter method, allows $model->get('property') access to data
+         */
+        public function get($property) {
+            return $this->orm->get($property);
+        }
+
+        /**
+         * Setter method, allows $model->set('property', 'value') access to data.
+         */
+        public function set($property, $value) {
+            $this->orm->set($property, $value);
+        }
+
+        /**
          * Save the data associated with this model instance to the database.
          */
         public function save() {
