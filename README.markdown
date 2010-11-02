@@ -347,6 +347,12 @@ This can be used to set the `PDO::ATTR_ERRMODE` setting on the database connecti
 
 The default setting is `PDO::ERRMODE_EXCEPTION`. For full details of the error modes available, see [the PDO documentation](http://uk2.php.net/manual/en/pdo.setattribute.php).
 
+#### Identifier quote character ####
+
+Setting: `identifier_quote_character`
+
+Set the character used to quote identifiers (eg table name, column name). If this is not set, it will be autodetected based on the database driver being used by PDO.
+
 #### ID Column ####
 
 By default, the ORM assumes that all your tables have a primary key column called `id`. There are two ways to override this: for all tables in the database, or on a per-table basis.

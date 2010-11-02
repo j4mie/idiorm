@@ -61,6 +61,7 @@
             'username' => null,
             'password' => null,
             'driver_options' => null,
+            'identifier_quote_character' => null, // if this is null, will be autodetected
             'logging' => false,
         );
 
@@ -790,7 +791,27 @@
          * are compatible with (at least) MySQL and SQLite.
          */
         protected function _quote_identifier_part($part) {
-            return "`$part`";
+            if (is_null(self::$_config['identifier_quote_character'])) {
+                self::$_config['identifier_quote_character'] = self::_detect_identifier_quote_character();
+            }
+            $quote_character = self::$_config['identifier_quote_character'];
+            return $quote_character . $part . $quote_character;
+        }
+
+        /**
+         * This method populates the $_config['identifier_quote_character']
+         * setting by looking at the driver being used by PDO.
+         */
+        protected static function _detect_identifier_quote_character() {
+            switch(self::$_db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
+                case 'pgsql':
+                    return '"';
+                case 'mysql':
+                case 'sqlite':
+                case 'sqlite2':
+                default:
+                    return '`';
+            }
         }
 
         /**
