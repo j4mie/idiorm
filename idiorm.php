@@ -805,6 +805,10 @@
         protected static function _detect_identifier_quote_character() {
             switch(self::$_db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
                 case 'pgsql':
+                case 'sqlsrv':
+                case 'dblib':
+                case 'mssql':
+                case 'sybase':
                     return '"';
                 case 'mysql':
                 case 'sqlite':
