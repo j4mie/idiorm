@@ -143,7 +143,7 @@ Both methods accept two arguments. The first is the column name to compare again
 
 ##### Raw WHERE clauses #####
 
-If you require a more complex query, you can use the `where_raw` method to specify the SQL fragment for the WHERE clause exactly. This method takes two arguments: the string to add to the query, and an array of parameters which will be bound to the string. The string should contain question marks to represent the values to be bound, and the parameter array should contain the values to be substituted into the string in the correct order.
+If you require a more complex query, you can use the `where_raw` method to specify the SQL fragment for the WHERE clause exactly. This method takes two arguments: the string to add to the query, and an (optional) array of parameters which will be bound to the string. If parameters are supplied, the string should contain question mark characters (`?`) to represent the values to be bound, and the parameter array should contain the values to be substituted into the string in the correct order.
 
 This method may be used in a method chain alongside other `where_*` methods as well as methods such as `offset`, `limit` and `order_by_*`. The contents of the string you supply will be connected with preceding and following WHERE clauses with AND.
 

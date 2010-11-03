@@ -661,7 +661,7 @@
          * contain question mark placeholders, which will be bound
          * to the parameters supplied in the second argument.
          */
-        public function where_raw($clause, $parameters) {
+        public function where_raw($clause, $parameters=array()) {
             return $this->_add_where($clause, $parameters);
         }
 

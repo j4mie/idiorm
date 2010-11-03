@@ -100,6 +100,10 @@
     $expected = "SELECT * FROM `widget` WHERE `name` = 'Fred' AND (`age` = '5' OR `age` = '10')";
     Tester::check_equal("Raw WHERE clause", $expected);
 
+    ORM::for_table('widget')->where_raw('`name` = "Fred"')->find_many();
+    $expected = "SELECT * FROM `widget` WHERE `name` = \"Fred\"";
+    Tester::check_equal("Raw WHERE clause with no parameters", $expected);
+
     ORM::for_table('widget')->where('age', 18)->where_raw('(`name` = ? OR `name` = ?)', array('Fred', 'Bob'))->where('size', 'large')->find_many();
     $expected = "SELECT * FROM `widget` WHERE `age` = '18' AND (`name` = 'Fred' OR `name` = 'Bob') AND `size` = 'large'";
     Tester::check_equal("Raw WHERE clause in method chain", $expected);
