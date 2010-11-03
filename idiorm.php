@@ -534,7 +534,7 @@
         /**
          * Internal method to add a WHERE condition to the query
          */
-        protected function _add_where($fragment, $values) {
+        protected function _add_where($fragment, $values=array()) {
             if (!is_array($values)) {
                 $values = array($values);
             }
@@ -654,6 +654,22 @@
             $column_name = $this->_quote_identifier($column_name);
             $placeholders = $this->_create_placeholders(count($values));
             return $this->_add_where("{$column_name} NOT IN ({$placeholders})", $values);
+        }
+
+        /**
+         * Add a WHERE column IS NULL clause to your query
+         */
+        public function where_null($column_name) {
+            $column_name = $this->_quote_identifier($column_name);
+            return $this->_add_where("{$column_name} IS NULL");
+        }
+
+        /**
+         * Add a WHERE column IS NOT NULL clause to your query
+         */
+        public function where_not_null($column_name) {
+            $column_name = $this->_quote_identifier($column_name);
+            return $this->_add_where("{$column_name} IS NOT NULL");
         }
 
         /**

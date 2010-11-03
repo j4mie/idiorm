@@ -141,6 +141,10 @@ Both methods accept two arguments. The first is the column name to compare again
 
     $people = ORM::for_table('person')->where_in('name', array('Fred', 'Joe', 'John'))->find_many();
 
+##### Working with `NULL` values: `where_null` and `where_not_null` #####
+
+To add a `WHERE column IS NULL` or `WHERE column IS NOT NULL` clause, use the `where_null` and `where_not_null` methods respectively. Both methods accept a single parameter: the column name to test.
+
 ##### Raw WHERE clauses #####
 
 If you require a more complex query, you can use the `where_raw` method to specify the SQL fragment for the WHERE clause exactly. This method takes two arguments: the string to add to the query, and an (optional) array of parameters which will be bound to the string. If parameters are supplied, the string should contain question mark characters (`?`) to represent the values to be bound, and the parameter array should contain the values to be substituted into the string in the correct order.

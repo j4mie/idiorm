@@ -96,6 +96,14 @@
     $expected = "SELECT * FROM `widget` WHERE `age` <= '10' AND `age` >= '5'";
     Tester::check_equal("Less than or equal and greater than or equal", $expected);
 
+    ORM::for_table('widget')->where_null('name')->find_many();
+    $expected = "SELECT * FROM `widget` WHERE `name` IS NULL";
+    Tester::check_equal("where_null method", $expected);
+
+    ORM::for_table('widget')->where_not_null('name')->find_many();
+    $expected = "SELECT * FROM `widget` WHERE `name` IS NOT NULL";
+    Tester::check_equal("where_not_null method", $expected);
+
     ORM::for_table('widget')->where_raw('`name` = ? AND (`age` = ? OR `age` = ?)', array('Fred', 5, 10))->find_many();
     $expected = "SELECT * FROM `widget` WHERE `name` = 'Fred' AND (`age` = '5' OR `age` = '10')";
     Tester::check_equal("Raw WHERE clause", $expected);
