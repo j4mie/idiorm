@@ -102,11 +102,13 @@ These limits are deliberate: these are by far the most commonly used criteria, a
 
 Some support for more complex conditions and queries is provided by the `where_raw` and `raw_select` methods (see below). If you find yourself regularly requiring more functionality than Idiorm can provide, it may be time to consider using a more full-featured ORM.
 
-##### Equality: `where` and `where_equal` #####
+##### Equality: `where`, `where_equal`, `where_not_equal` #####
 
 By default, calling `where` with two parameters (the column name and the value) will combine them using an equals operator (`=`). For example, calling `where('name', 'Fred')` will result in the clause `WHERE name = "Fred"`.
 
 If your coding style favours clarity over brevity, you may prefer to use the `where_equal` method: this is identical to `where`.
+
+The `where_not_equal` method adds a `WHERE column != "value"` clause to your query.
 
 ##### Shortcut: `where_id_is` #####
 

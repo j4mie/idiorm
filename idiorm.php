@@ -583,6 +583,13 @@
         }
 
         /**
+         * Add a WHERE column != value clause to your query.
+         */
+        public function where_not_equal($column_name, $value) {
+            return $this->_add_simple_where($column_name, '!=', $value);
+        }
+
+        /**
          * Special method to query the table by its primary key
          */
         public function where_id_is($id) {

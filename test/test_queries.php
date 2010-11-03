@@ -44,6 +44,10 @@
     $expected = "SELECT * FROM `widget` WHERE `name` = 'Fred' AND `age` = '10' LIMIT 1";
     Tester::check_equal("Multiple WHERE clauses", $expected);
 
+    ORM::for_table('widget')->where_not_equal('name', 'Fred')->find_many();
+    $expected = "SELECT * FROM `widget` WHERE `name` != 'Fred'";
+    Tester::check_equal("where_not_equal method", $expected);
+
     ORM::for_table('widget')->where_like('name', '%Fred%')->find_one();
     $expected = "SELECT * FROM `widget` WHERE `name` LIKE '%Fred%' LIMIT 1";
     Tester::check_equal("where_like method", $expected);
