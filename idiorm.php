@@ -803,6 +803,7 @@
          * setting by looking at the driver being used by PDO.
          */
         protected static function _detect_identifier_quote_character() {
+            self::_setup_db();
             switch(self::$_db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
                 case 'pgsql':
                 case 'sqlsrv':
