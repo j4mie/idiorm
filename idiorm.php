@@ -160,6 +160,7 @@
          * this will normally be the first method called in a chain.
          */
         public static function for_table($table_name) {
+            self::_setup_db();
             return new self($table_name);
         }
 
@@ -172,18 +173,52 @@
                 $username = self::$_config['username'];
                 $password = self::$_config['password'];
                 $driver_options = self::$_config['driver_options'];
-                self::$_db = new PDO($connection_string, $username, $password, $driver_options);
-                self::$_db->setAttribute(PDO::ATTR_ERRMODE, self::$_config['error_mode']);
+                $db = new PDO($connection_string, $username, $password, $driver_options);
+                $db->setAttribute(PDO::ATTR_ERRMODE, self::$_config['error_mode']);
+                self::set_db($db);
             }
         }
 
         /**
-         * This can be called if the ORM should use a ready-instantiated
-         * PDO object as its database connection. Won't be used in normal
-         * operation, but it's here in case it's needed.
+         * Set the PDO object used by Idiorm to communicate with the database.
+         * This is public in case the ORM should use a ready-instantiated
+         * PDO object as its database connection.
          */
         public static function set_db($db) {
             self::$_db = $db;
+            self::_setup_identifier_quote_character();
+        }
+
+        /**
+         * Detect and initialise the character used to quote identifiers
+         * (table names, column names etc). If this has been specified
+         * manually using ORM::configure('identifier_quote_character', 'some-char'),
+         * this will do nothing.
+         */
+        public static function _setup_identifier_quote_character() {
+            if (is_null(self::$_config['identifier_quote_character'])) {
+                self::$_config['identifier_quote_character'] = self::_detect_identifier_quote_character();
+            }
+        }
+
+        /**
+         * Return the correct character used to quote identifiers (table
+         * names, column names etc) by looking at the driver being used by PDO.
+         */
+        protected static function _detect_identifier_quote_character() {
+            switch(self::$_db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
+                case 'pgsql':
+                case 'sqlsrv':
+                case 'dblib':
+                case 'mssql':
+                case 'sybase':
+                    return '"';
+                case 'mysql':
+                case 'sqlite':
+                case 'sqlite2':
+                default:
+                    return '`';
+            }
         }
 
         /**
@@ -192,7 +227,7 @@
          * required outside the class.
          */
         public static function get_db() {
-            self::_setup_db();
+            self::_setup_db(); // required in case this is called before Idiorm is instantiated
             return self::$_db;
         }
 
@@ -791,32 +826,8 @@
          * are compatible with (at least) MySQL and SQLite.
          */
         protected function _quote_identifier_part($part) {
-            if (is_null(self::$_config['identifier_quote_character'])) {
-                self::$_config['identifier_quote_character'] = self::_detect_identifier_quote_character();
-            }
             $quote_character = self::$_config['identifier_quote_character'];
             return $quote_character . $part . $quote_character;
-        }
-
-        /**
-         * This method populates the $_config['identifier_quote_character']
-         * setting by looking at the driver being used by PDO.
-         */
-        protected static function _detect_identifier_quote_character() {
-            self::_setup_db();
-            switch(self::$_db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
-                case 'pgsql':
-                case 'sqlsrv':
-                case 'dblib':
-                case 'mssql':
-                case 'sybase':
-                    return '"';
-                case 'mysql':
-                case 'sqlite':
-                case 'sqlite2':
-                default:
-                    return '`';
-            }
         }
 
         /**
@@ -825,7 +836,6 @@
          */
         protected function _run() {
             $query = $this->_build_select();
-            self::_setup_db();
             self::_log_query($query, $this->_values);
             $statement = self::$_db->prepare($query);
             $statement->execute($this->_values);
@@ -905,7 +915,6 @@
                 $query = $this->_build_insert();
             }
 
-            self::_setup_db();
             self::_log_query($query, $values);
             $statement = self::$_db->prepare($query);
             $success = $statement->execute($values);
@@ -966,7 +975,6 @@
                 "= ?",
             ));
             $params = array($this->id());
-            self::_setup_db();
             self::_log_query($query, $params);
             $statement = self::$_db->prepare($query);
             return $statement->execute($params);
