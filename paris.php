@@ -88,6 +88,7 @@
          * class bound to the supplied table name.
          */
         public static function for_table($table_name) {
+            self::_setup_db();
             return new self($table_name);
         }
 
