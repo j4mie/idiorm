@@ -318,6 +318,21 @@ To delete an object from the database, simply call its `delete` method.
     $person = ORM::for_table('person')->find_one(5);
     $person->delete();
 
+### Transactions ###
+
+Idiorm doesn't supply any extra methods to deal with transactions, but it's very easy to use PDO's built-in methods:
+
+    // Start a transaction
+    ORM::get_db()->beginTransaction();
+
+    // Commit a transaction
+    ORM::get_db()->commit();
+
+    // Roll back a transaction
+    ORM::get_db()->rollBack();
+
+For more details, see [the PDO documentation on Transactions](http://www.php.net/manual/en/pdo.transactions.php).
+
 ### Configuration ###
 
 Other than setting the DSN string for the database connection (see above), the `configure` method can be used to set some other simple options on the ORM class. Modifying settings involves passing a key/value pair to the `configure` method, representing the setting you wish to modify and the value you wish to set it to.
