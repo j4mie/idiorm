@@ -1013,5 +1013,9 @@
         public function __set($key, $value) {
             $this->set($key, $value);
         }
+
+        public function __isset($key) {
+            return isset($this->_data[$key]);
+        }
     }
 
