@@ -1,7 +1,7 @@
 Idiorm
 ======
 
-[http://j4mie.github.com/parisandidiorm/](http://j4mie.github.com/parisandidiorm/)
+[http://j4mie.github.com/idiormandparis/](http://j4mie.github.com/idiormandparis/)
 
 A lightweight nearly-zero-configuration object-relational mapper and fluent query builder for PHP5.
 
