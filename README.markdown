@@ -1,6 +1,8 @@
 Idiorm
 ======
 
+[http://j4mie.github.com/parisandidiorm/](http://j4mie.github.com/parisandidiorm/)
+
 A lightweight nearly-zero-configuration object-relational mapper and fluent query builder for PHP5.
 
 Tested on PHP 5.2.0+ - may work on earlier versions with PDO and the correct database drivers.
