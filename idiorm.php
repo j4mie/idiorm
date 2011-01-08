@@ -920,6 +920,14 @@
         }
 
         /**
+         * Check whether the given field has been changed since this
+         * object was saved.
+         */
+        public function is_dirty($key) {
+            return isset($this->_dirty_fields[$key]);
+        }
+
+        /**
          * Save any fields which have been modified on this object
          * to the database.
          */
@@ -950,6 +958,7 @@
                 }
             }
 
+            $this->_dirty_fields = array();
             return $success;
         }
 
