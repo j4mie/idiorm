@@ -63,6 +63,7 @@
             'driver_options' => null,
             'identifier_quote_character' => null, // if this is null, will be autodetected
             'logging' => false,
+            'caching' => false,
         );
 
         // Database connection, instance of the PDO class
@@ -73,6 +74,9 @@
 
         // Log of all queries run, only populated if logging is enabled
         protected static $_query_log = array();
+
+        // Query cache, only used if query caching is enabled
+        protected static $_query_cache = array();
 
         // --------------------------- //
         // --- INSTANCE PROPERTIES --- //
@@ -864,11 +868,55 @@
         }
 
         /**
+         * Create a cache key for the given query and parameters.
+         */
+        protected static function _create_cache_key($query, $parameters) {
+            $parameter_string = join(',', $parameters);
+            return sha1($query . ':' . $parameters);
+        }
+
+        /**
+         * Check the query cache for the given cache key. If a value
+         * is cached for the key, return the value. Otherwise, return false.
+         */
+        protected static function _check_query_cache($cache_key) {
+            if (isset(self::$_query_cache[$cache_key])) {
+                return self::$_query_cache[$cache_key];
+            }
+            return false;
+        }
+
+        /**
+         * Clear the query cache
+         */
+        public static function clear_cache() {
+            self::$_query_cache = array();
+        }
+
+        /**
+         * Add the given value to the query cache.
+         */
+        protected static function _cache_query_result($cache_key, $value) {
+            self::$_query_cache[$cache_key] = $value;
+        }
+
+        /**
          * Execute the SELECT query that has been built up by chaining methods
          * on this class. Return an array of rows as associative arrays.
          */
         protected function _run() {
             $query = $this->_build_select();
+            $caching_enabled = self::$_config['caching'];
+
+            if ($caching_enabled) {
+                $cache_key = self::_create_cache_key($query, $this->_values);
+                $cached_result = self::_check_query_cache($cache_key);
+
+                if ($cached_result !== false) {
+                    return $cached_result;
+                }
+            }
+
             self::_log_query($query, $this->_values);
             $statement = self::$_db->prepare($query);
             $statement->execute($this->_values);
@@ -877,6 +925,11 @@
             while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
                 $rows[] = $row;
             }
+
+            if ($caching_enabled) {
+                self::_cache_query_result($cache_key, $rows);
+            }
+
             return $rows;
         }
 
