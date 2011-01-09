@@ -927,6 +927,7 @@
             $query = array();
             $values = array_values($this->_dirty_fields);
 
+            $this->_is_new = is_null($this->id());
             if (!$this->_is_new) { // UPDATE
                 // If there are no dirty values, do nothing
                 if (count($values) == 0) {
