@@ -872,7 +872,8 @@
          */
         protected static function _create_cache_key($query, $parameters) {
             $parameter_string = join(',', $parameters);
-            return sha1($query . ':' . $parameters);
+            $key = $query . ':' . $parameter_string;
+            return sha1($key);
         }
 
         /**
