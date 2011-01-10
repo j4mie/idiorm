@@ -381,7 +381,7 @@
         public function count() {
             $this->select_expr('COUNT(*)', 'count');
             $result = $this->find_one();
-            return isset($result->count) ? (int) $result->count : 0;
+            return ($result !== false && isset($result->count)) ? (int) $result->count : 0;
         }
 
          /**
