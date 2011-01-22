@@ -232,5 +232,14 @@
     $expected = "SELECT * FROM `widget_nozzle` WHERE `new_id` = '5' LIMIT 1";
     Tester::check_equal("Instance ID column, third test", $expected);
 
+    // Test caching. This is a bit of a hack.
+    ORM::configure('caching', true);
+    ORM::for_table('widget')->where('name', 'Fred')->where('age', 17)->find_one();
+    ORM::for_table('widget')->where('name', 'Bob')->where('age', 42)->find_one();
+    $expected = ORM::get_last_query();
+    ORM::for_table('widget')->where('name', 'Fred')->where('age', 17)->find_one(); // this shouldn't run a query!
+    Tester::check_equal("Caching, same query not run twice", $expected);
+
+
     Tester::report();
 ?>

@@ -408,3 +408,19 @@ Setting: `logging`
 Idiorm can log all queries it executes. To enable query logging, set the `logging` option to `true` (it is `false` by default).
 
 When query logging is enabled, you can use two static methods to access the log. `ORM::get_last_query()` returns the most recent query executed. `ORM::get_query_log()` returns an array of all queries executed.
+
+#### Query caching ####
+
+Setting: `caching`
+
+Idiorm can cache the queries it executes during a request. To enable query caching, set the `caching` option to `true` (it is `false` by default).
+
+When query caching is enabled, Idiorm will cache the results of every `SELECT` query it executes. If Idiorm encounters a query that has already been run, it will fetch the results directly from its cache and not perform a database query.
+
+##### Warnings and gotchas #####
+
+* Note that this is an in-memory cache that only persists data for the duration of a single request. This is *not* a replacement for a persistent cache such as [Memcached](http://www.memcached.org/).
+
+* Idiorm's cache is very simple, and does not attempt to invalidate itself when data changes. This means that if you run a query to retrieve some data, modify and save it, and then run the same query again, the results will be stale (ie, they will not reflect your modifications). This could potentially cause subtle bugs in your application. If you have caching enabled and you are experiencing odd behaviour, disable it and try again. If you do need to perform such operations but still wish to use the cache, you can call the `ORM::clear_cache()` to clear all existing cached queries.
+
+* Enabling the cache will increase the memory usage of your application, as all database rows that are fetched during each request are held in memory. If you are working with large quantities of data, you may wish to disable the cache.

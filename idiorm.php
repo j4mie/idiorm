@@ -63,6 +63,7 @@
             'driver_options' => null,
             'identifier_quote_character' => null, // if this is null, will be autodetected
             'logging' => false,
+            'caching' => false,
         );
 
         // Database connection, instance of the PDO class
@@ -73,6 +74,9 @@
 
         // Log of all queries run, only populated if logging is enabled
         protected static $_query_log = array();
+
+        // Query cache, only used if query caching is enabled
+        protected static $_query_cache = array();
 
         // --------------------------- //
         // --- INSTANCE PROPERTIES --- //
@@ -325,6 +329,17 @@
         }
 
         /**
+         * Create an ORM instance from the given row (an associative
+         * array of data fetched from the database)
+         */
+        protected function _create_instance_from_row($row) {
+            $instance = self::for_table($this->_table_name);
+            $instance->use_id_column($this->_instance_id_column);
+            $instance->hydrate($row);
+            return $instance;
+        }
+
+        /**
          * Tell the ORM that you are expecting a single result
          * back from your query, and execute it. Will return
          * a single instance of the ORM class, or false if no
@@ -334,13 +349,17 @@
          * lookup on the table.
          */
         public function find_one($id=null) {
-            if(!is_null($id)) {
+            if (!is_null($id)) {
                 $this->where_id_is($id);
             }
             $this->limit(1);
-            $statement = $this->_run();
-            $result = $statement->fetch(PDO::FETCH_ASSOC);
-            return $result ? self::for_table($this->_table_name)->use_id_column($this->_instance_id_column)->hydrate($result) : $result;
+            $rows = $this->_run();
+
+            if (empty($rows)) {
+                return false;
+            }
+
+            return $this->_create_instance_from_row($rows[0]);
         }
 
         /**
@@ -350,12 +369,8 @@
          * no rows were returned.
          */
         public function find_many() {
-            $statement = $this->_run();
-            $instances = array();
-            while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
-                $instances[] = self::for_table($this->_table_name)->use_id_column($this->_instance_id_column)->hydrate($row);
-            }
-            return $instances;
+            $rows = $this->_run();
+            return array_map(array($this, '_create_instance_from_row'), $rows);
         }
 
         /**
@@ -365,9 +380,8 @@
          */
         public function count() {
             $this->select_expr('COUNT(*)', 'count');
-            $statement = $this->_run();
-            $result = $statement->fetch(PDO::FETCH_ASSOC);
-            return isset($result['count']) ? (int) $result['count'] : 0;
+            $result = $this->find_one();
+            return ($result !== false && isset($result->count)) ? (int) $result->count : 0;
         }
 
          /**
@@ -854,15 +868,70 @@
         }
 
         /**
+         * Create a cache key for the given query and parameters.
+         */
+        protected static function _create_cache_key($query, $parameters) {
+            $parameter_string = join(',', $parameters);
+            $key = $query . ':' . $parameter_string;
+            return sha1($key);
+        }
+
+        /**
+         * Check the query cache for the given cache key. If a value
+         * is cached for the key, return the value. Otherwise, return false.
+         */
+        protected static function _check_query_cache($cache_key) {
+            if (isset(self::$_query_cache[$cache_key])) {
+                return self::$_query_cache[$cache_key];
+            }
+            return false;
+        }
+
+        /**
+         * Clear the query cache
+         */
+        public static function clear_cache() {
+            self::$_query_cache = array();
+        }
+
+        /**
+         * Add the given value to the query cache.
+         */
+        protected static function _cache_query_result($cache_key, $value) {
+            self::$_query_cache[$cache_key] = $value;
+        }
+
+        /**
          * Execute the SELECT query that has been built up by chaining methods
-         * on this class. Return the executed PDOStatement object.
+         * on this class. Return an array of rows as associative arrays.
          */
         protected function _run() {
             $query = $this->_build_select();
+            $caching_enabled = self::$_config['caching'];
+
+            if ($caching_enabled) {
+                $cache_key = self::_create_cache_key($query, $this->_values);
+                $cached_result = self::_check_query_cache($cache_key);
+
+                if ($cached_result !== false) {
+                    return $cached_result;
+                }
+            }
+
             self::_log_query($query, $this->_values);
             $statement = self::$_db->prepare($query);
             $statement->execute($this->_values);
-            return $statement;
+
+            $rows = array();
+            while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
+                $rows[] = $row;
+            }
+
+            if ($caching_enabled) {
+                self::_cache_query_result($cache_key, $rows);
+            }
+
+            return $rows;
         }
 
         /**
