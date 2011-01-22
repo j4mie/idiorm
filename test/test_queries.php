@@ -33,7 +33,7 @@
     Tester::check_equal("Filtering on ID passed into find_one method", $expected);
 
     ORM::for_table('widget')->count();
-    $expected = "SELECT COUNT(*) AS `count` FROM `widget`";
+    $expected = "SELECT COUNT(*) AS `count` FROM `widget` LIMIT 1";
     Tester::check_equal("COUNT query", $expected);
 
     ORM::for_table('widget')->where('name', 'Fred')->find_one();
