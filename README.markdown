@@ -182,6 +182,14 @@ Two methods are provided to add `ORDER BY` clauses to your query. These are `ord
 
     $people = ORM::for_table('person')->order_by_asc('gender')->order_by_desc('name')->find_many();
 
+#### Grouping ####
+
+*Note that this method **does not** escape it query parameter and so this should **not** by passed directly from user input.*
+
+To add a column to GROUP BY to your query, call the `group_by` method, passing in the column name.
+
+    $poeple = ORM::for_table('person')->where('gender', 'female')->group_by('name')->find_many();
+
 #### Result columns ####
 
 By default, all columns in the `SELECT` statement are returned from your query. That is, calling:

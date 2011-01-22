@@ -84,6 +84,14 @@
     $expected = "SELECT * FROM `widget` ORDER BY `name` ASC, `age` DESC LIMIT 1";
     Tester::check_equal("Multiple ORDER BY", $expected);
 
+    ORM::for_table('widget')->group_by('name')->find_many();
+    $expected = "SELECT * FROM `widget` GROUP BY `name`";
+    Tester::check_equal("GROUP BY", $expected);
+
+    ORM::for_table('widget')->group_by('name')->group_by('age')->find_many();
+    $expected = "SELECT * FROM `widget` GROUP BY `name`, `age`";
+    Tester::check_equal("Multiple GROUP BY", $expected);
+
     ORM::for_table('widget')->where('name', 'Fred')->limit(5)->offset(5)->order_by_asc('name')->find_many();
     $expected = "SELECT * FROM `widget` WHERE `name` = 'Fred' ORDER BY `name` ASC LIMIT 5 OFFSET 5";
     Tester::check_equal("Complex query", $expected);

@@ -124,6 +124,9 @@
         // ORDER BY
         protected $_order_by = array();
 
+        // GROUP BY
+        protected $_group_by = array();
+
         // The data for a hydrated instance of the class
         protected $_data = array();
 
@@ -746,6 +749,15 @@
         }
 
         /**
+         * Add a column to the list of columns to GROUP BY
+         */
+        public function group_by($column_name) {
+            $column_name = $this->_quote_identifier($column_name);
+            $this->_group_by[] = $column_name;
+            return $this;
+        }
+
+        /**
          * Build a SELECT statement based on the clauses that have
          * been passed to this instance by chaining method calls.
          */
@@ -763,6 +775,7 @@
                 $this->_build_select_start(),
                 $this->_build_join(),
                 $this->_build_where(),
+                $this->_build_group_by(),
                 $this->_build_order_by(),
                 $this->_build_limit(),
                 $this->_build_offset(),
@@ -814,6 +827,16 @@
             }
 
             return "WHERE " . join(" AND ", $where_conditions);
+        }
+
+        /**
+         * Build GROUP BY
+         */
+        protected function _build_group_by() {
+            if (count($this->_group_by) === 0) {
+                return '';
+            }
+            return "GROUP BY " . join(", ", $this->_group_by);
         }
 
         /**
