@@ -100,6 +100,9 @@
         // Join sources
         protected $_join_sources = array();
 
+        // Should the query include a DISTINCT keyword?
+        protected $_distinct = false;
+
         // Is this a raw query?
         protected $_is_raw_query = false;
 
@@ -465,6 +468,14 @@
         }
 
         /**
+         * Add a DISTINCT keyword before the list of columns in the SELECT query
+         */
+        public function distinct() {
+            $this->_distinct = true;
+            return $this;
+        }
+
+        /**
          * Internal method to add a JOIN source to the query.
          *
          * The join_operator should be one of INNER, LEFT OUTER, CROSS etc - this
@@ -763,7 +774,13 @@
          */
         protected function _build_select_start() {
             $result_columns = join(', ', $this->_result_columns);
+
+            if ($this->_distinct) {
+                $result_columns = 'DISTINCT ' . $result_columns;
+            }
+
             $fragment = "SELECT {$result_columns} FROM " . $this->_quote_identifier($this->_table_name);
+
             if (!is_null($this->_table_alias)) {
                 $fragment .= " " . $this->_quote_identifier($this->_table_alias);
             }

@@ -179,6 +179,10 @@
     $expected = "SELECT * FROM `widget` JOIN `widget_handle` ON widget_handle.widget_id = widget.id";
     Tester::check_equal("Join with string constraint", $expected);
 
+    ORM::for_table('widget')->distinct()->select('name')->find_many();
+    $expected = "SELECT DISTINCT `name` FROM `widget`";
+    Tester::check_equal("Select with DISTINCT", $expected);
+
     $widget = ORM::for_table('widget')->create();
     $widget->name = "Fred";
     $widget->age = 10;

@@ -225,6 +225,16 @@ Will result in the query:
 
     SELECT COUNT(*) AS `count` FROM `person`;
 
+#### DISTINCT ####
+
+To add a `DISTINCT` keyword before the list of result columns in your query, add a call to `distinct()` to your query chain.
+
+    $distinct_names = ORM::for_table('person')->distinct()->select('name')->find_many();
+
+This will result in the query:
+
+    SELECT DISTINCT `name` FROM `person`;
+
 #### Joins ####
 
 Idiorm has a family of methods for adding different types of `JOIN`s to the queries it constructs:
