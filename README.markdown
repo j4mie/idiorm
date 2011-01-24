@@ -116,7 +116,7 @@ Only a subset of the available conditions supported by SQL are available when us
 
 These limits are deliberate: these are by far the most commonly used criteria, and by avoiding support for very complex queries, the Idiorm codebase can remain small and simple.
 
-Some support for more complex conditions and queries is provided by the `where_raw` and `raw_select` methods (see below). If you find yourself regularly requiring more functionality than Idiorm can provide, it may be time to consider using a more full-featured ORM.
+Some support for more complex conditions and queries is provided by the `where_raw` and `raw_query` methods (see below). If you find yourself regularly requiring more functionality than Idiorm can provide, it may be time to consider using a more full-featured ORM.
 
 ##### Equality: `where`, `where_equal`, `where_not_equal` #####
 
