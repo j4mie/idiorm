@@ -22,6 +22,20 @@ Features
 * Consists of just one class called `ORM`. Minimal global namespace pollution.
 * Database agnostic. Currently supports SQLite and MySQL. May support others, please give it a try!
 
+Changelog
+---------
+
+#### 1.0.0 - released 2010-12-01
+
+* Initial release
+
+#### 1.0.1 - released 2011-01-24
+
+* Add `is_dirty` method
+* Add basic query caching
+* Add `distinct` method
+* Add `group_by` method
+
 Philosophy
 ----------
 
