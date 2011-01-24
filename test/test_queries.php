@@ -33,7 +33,7 @@
     Tester::check_equal("Filtering on ID passed into find_one method", $expected);
 
     ORM::for_table('widget')->count();
-    $expected = "SELECT COUNT(*) AS `count` FROM `widget`";
+    $expected = "SELECT COUNT(*) AS `count` FROM `widget` LIMIT 1";
     Tester::check_equal("COUNT query", $expected);
 
     ORM::for_table('widget')->where('name', 'Fred')->find_one();
@@ -83,6 +83,14 @@
     ORM::for_table('widget')->order_by_asc('name')->order_by_desc('age')->find_one();
     $expected = "SELECT * FROM `widget` ORDER BY `name` ASC, `age` DESC LIMIT 1";
     Tester::check_equal("Multiple ORDER BY", $expected);
+
+    ORM::for_table('widget')->group_by('name')->find_many();
+    $expected = "SELECT * FROM `widget` GROUP BY `name`";
+    Tester::check_equal("GROUP BY", $expected);
+
+    ORM::for_table('widget')->group_by('name')->group_by('age')->find_many();
+    $expected = "SELECT * FROM `widget` GROUP BY `name`, `age`";
+    Tester::check_equal("Multiple GROUP BY", $expected);
 
     ORM::for_table('widget')->where('name', 'Fred')->limit(5)->offset(5)->order_by_asc('name')->find_many();
     $expected = "SELECT * FROM `widget` WHERE `name` = 'Fred' ORDER BY `name` ASC LIMIT 5 OFFSET 5";
@@ -179,6 +187,10 @@
     $expected = "SELECT * FROM `widget` JOIN `widget_handle` ON widget_handle.widget_id = widget.id";
     Tester::check_equal("Join with string constraint", $expected);
 
+    ORM::for_table('widget')->distinct()->select('name')->find_many();
+    $expected = "SELECT DISTINCT `name` FROM `widget`";
+    Tester::check_equal("Select with DISTINCT", $expected);
+
     $widget = ORM::for_table('widget')->create();
     $widget->name = "Fred";
     $widget->age = 10;
@@ -231,6 +243,15 @@
     ORM::for_table('widget_nozzle')->use_id_column('new_id')->find_one(5);
     $expected = "SELECT * FROM `widget_nozzle` WHERE `new_id` = '5' LIMIT 1";
     Tester::check_equal("Instance ID column, third test", $expected);
+
+    // Test caching. This is a bit of a hack.
+    ORM::configure('caching', true);
+    ORM::for_table('widget')->where('name', 'Fred')->where('age', 17)->find_one();
+    ORM::for_table('widget')->where('name', 'Bob')->where('age', 42)->find_one();
+    $expected = ORM::get_last_query();
+    ORM::for_table('widget')->where('name', 'Fred')->where('age', 17)->find_one(); // this shouldn't run a query!
+    Tester::check_equal("Caching, same query not run twice", $expected);
+
 
     Tester::report();
 ?>
