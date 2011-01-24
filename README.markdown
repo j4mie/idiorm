@@ -29,7 +29,7 @@ Changelog
 
 * Initial release
 
-#### 1.0.1 - released 2011-01-24
+#### 1.1.0 - released 2011-01-24
 
 * Add `is_dirty` method
 * Add basic query caching
