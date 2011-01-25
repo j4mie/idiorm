@@ -58,9 +58,16 @@ First, `require` the Idiorm source file:
 
     require_once 'idiorm.php';
 
-Then, pass a *Data Source Name* connection string to the `configure` method of the ORM class. This is used by PDO to connect to your database. For more information, see the [PDO documentation](http://uk2.php.net/manual/en/pdo.construct.php). Particularly, if you need to pass a username and password to your database driver, use the `username` and `password` configuration options. See "Configuration" section below.
-
+Then, pass a *Data Source Name* connection string to the `configure` method of the ORM class. This is used by PDO to connect to your database. For more information, see the [PDO documentation](http://uk2.php.net/manual/en/pdo.construct.php).
     ORM::configure('sqlite:./example.db');
+
+You may also need to pass a username and password to your database driver, using the `username` and `password` configuration options. For example, if you are using MySQL:
+
+    ORM::configure('mysql:host=localhost;dbname=my_database');
+    ORM::configure('username', 'database_user');
+    ORM::configure('password', 'top_secret');
+
+Also see "Configuration" section below.
 
 ### Querying ###
 
