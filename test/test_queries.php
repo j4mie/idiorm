@@ -210,6 +210,14 @@
     $expected = "DELETE FROM `widget` WHERE `id` = '1'";
     Tester::check_equal("Delete data", $expected);
 
+    // Regression tests
+
+    $widget = ORM::for_table('widget')->select('widget.*')->find_one();
+    $expected = "SELECT `widget`.* FROM `widget` LIMIT 1";
+    Tester::check_equal("Issue #12 - incorrect quoting of column wildcard", $expected);
+
+    // Tests that alter Idiorm's config are done last
+
     ORM::configure('id_column', 'primary_key');
     ORM::for_table('widget')->find_one(5);
     $expected = "SELECT * FROM `widget` WHERE `primary_key` = '5' LIMIT 1";

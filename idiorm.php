@@ -903,6 +903,9 @@
          * character specified in the config (or autodetected).
          */
         protected function _quote_identifier_part($part) {
+            if ($part === '*') {
+                return $part;
+            }
             $quote_character = self::$_config['identifier_quote_character'];
             return $quote_character . $part . $quote_character;
         }
