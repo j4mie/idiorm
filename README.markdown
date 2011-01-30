@@ -36,6 +36,11 @@ Changelog
 * Add `distinct` method
 * Add `group_by` method
 
+#### 1.1.1 - release 2011-01-30
+
+* Fix bug in quoting column wildcard. j4mie/paris#12
+* Small documentation improvements
+
 Philosophy
 ----------
 
@@ -58,9 +63,16 @@ First, `require` the Idiorm source file:
 
     require_once 'idiorm.php';
 
-Then, pass a *Data Source Name* connection string to the `configure` method of the ORM class. This is used by PDO to connect to your database. For more information, see the [PDO documentation](http://uk2.php.net/manual/en/pdo.construct.php). Particularly, if you need to pass a username and password to your database driver, use the `username` and `password` configuration options. See "Configuration" section below.
-
+Then, pass a *Data Source Name* connection string to the `configure` method of the ORM class. This is used by PDO to connect to your database. For more information, see the [PDO documentation](http://uk2.php.net/manual/en/pdo.construct.php).
     ORM::configure('sqlite:./example.db');
+
+You may also need to pass a username and password to your database driver, using the `username` and `password` configuration options. For example, if you are using MySQL:
+
+    ORM::configure('mysql:host=localhost;dbname=my_database');
+    ORM::configure('username', 'database_user');
+    ORM::configure('password', 'top_secret');
+
+Also see "Configuration" section below.
 
 ### Querying ###
 
@@ -116,7 +128,7 @@ Only a subset of the available conditions supported by SQL are available when us
 
 These limits are deliberate: these are by far the most commonly used criteria, and by avoiding support for very complex queries, the Idiorm codebase can remain small and simple.
 
-Some support for more complex conditions and queries is provided by the `where_raw` and `raw_select` methods (see below). If you find yourself regularly requiring more functionality than Idiorm can provide, it may be time to consider using a more full-featured ORM.
+Some support for more complex conditions and queries is provided by the `where_raw` and `raw_query` methods (see below). If you find yourself regularly requiring more functionality than Idiorm can provide, it may be time to consider using a more full-featured ORM.
 
 ##### Equality: `where`, `where_equal`, `where_not_equal` #####
 

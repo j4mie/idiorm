@@ -899,10 +899,13 @@
 
         /**
          * This method performs the actual quoting of a single
-         * part of an identifier. Currently uses backticks, which
-         * are compatible with (at least) MySQL and SQLite.
+         * part of an identifier, using the identifier quote
+         * character specified in the config (or autodetected).
          */
         protected function _quote_identifier_part($part) {
+            if ($part === '*') {
+                return $part;
+            }
             $quote_character = self::$_config['identifier_quote_character'];
             return $quote_character . $part . $quote_character;
         }
