@@ -36,6 +36,11 @@ Changelog
 * Add `distinct` method
 * Add `group_by` method
 
+#### 1.1.1 - release 2011-01-30
+
+* Fix bug in quoting column wildcard. j4mie/paris#12
+* Small documentation improvements
+
 Philosophy
 ----------
 
