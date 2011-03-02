@@ -749,6 +749,14 @@
         }
 
         /**
+         * Add a raw ORDER BY clause
+         */
+        public function order_raw($clause) {
+            $this->_order_by[] = $clause;
+            return $this;
+        }
+
+        /**
          * Add a column to the list of columns to GROUP BY
          */
         public function group_by($column_name) {

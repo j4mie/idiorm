@@ -202,11 +202,15 @@ The `limit` and `offset` methods map pretty closely to their SQL equivalents.
 
 ##### Ordering #####
 
-*Note that this method **does not** escape its query parameter and so this should **not** be passed directly from user input.*
+*Note that these methods **do not** escape their query parameters and so these should **not** be passed directly from user input.*
 
-Two methods are provided to add `ORDER BY` clauses to your query. These are `order_by_desc` and `order_by_asc`, each of which takes a column name to sort by.
+Two methods are provided to add `ORDER BY` clauses to your query. These are `order_by_desc` and `order_by_asc`, each of which takes a column name to sort by. The column names will be quoted.
 
     $people = ORM::for_table('person')->order_by_asc('gender')->order_by_desc('name')->find_many();
+
+If you want to order by something other than a column name, then use the `order_raw` method to add a raw `ORDER BY` clause.
+
+    $people = ORM::for_table('person')->order_raw('SOUNDEX(`name`)')->find_many();
 
 #### Grouping ####
 
