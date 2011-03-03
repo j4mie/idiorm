@@ -749,9 +749,9 @@
         }
 
         /**
-         * Add a raw ORDER BY clause
+         * Add an unquoted expression as an ORDER BY clause
          */
-        public function order_raw($clause) {
+        public function order_by_expr($clause) {
             $this->_order_by[] = $clause;
             return $this;
         }

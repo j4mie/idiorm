@@ -208,9 +208,9 @@ Two methods are provided to add `ORDER BY` clauses to your query. These are `ord
 
     $people = ORM::for_table('person')->order_by_asc('gender')->order_by_desc('name')->find_many();
 
-If you want to order by something other than a column name, then use the `order_raw` method to add a raw `ORDER BY` clause.
+If you want to order by something other than a column name, then use the `order_by_expr` method to add an unquoted SQL expression as an `ORDER BY` clause.
 
-    $people = ORM::for_table('person')->order_raw('SOUNDEX(`name`)')->find_many();
+    $people = ORM::for_table('person')->order_by_expr('SOUNDEX(`name`)')->find_many();
 
 #### Grouping ####
 

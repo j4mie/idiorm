@@ -80,9 +80,9 @@
     $expected = "SELECT * FROM `widget` ORDER BY `name` ASC LIMIT 1";
     Tester::check_equal("ORDER BY ASC", $expected);
 
-    ORM::for_table('widget')->order_raw('SOUNDEX(`name`)')->find_one();
+    ORM::for_table('widget')->order_by_expr('SOUNDEX(`name`)')->find_one();
     $expected = "SELECT * FROM `widget` ORDER BY SOUNDEX(`name`) LIMIT 1";
-    Tester::check_equal("Raw ORDER BY", $expected);
+    Tester::check_equal("ORDER BY expression", $expected);
 
     ORM::for_table('widget')->order_by_asc('name')->order_by_desc('age')->find_one();
     $expected = "SELECT * FROM `widget` ORDER BY `name` ASC, `age` DESC LIMIT 1";
