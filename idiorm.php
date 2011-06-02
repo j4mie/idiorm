@@ -189,7 +189,7 @@
                 $driver_options = self::$_config['driver_options'];
                 $db = self::createDriver(self::$_config['driver']);
                 $db->initialize($connection_string, $username, $password, $driver_options);
-                $db->setAttribute(PDO::ATTR_ERRMODE, self::$_config['error_mode']);
+                $db->setErrorMode(self::$_config['error_mode']);
                 self::set_db($db);
             }
         }

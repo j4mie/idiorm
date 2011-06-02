@@ -21,12 +21,8 @@ class PDODatabaseDriver implements DatabaseDriver {
 		return $this->_handle->lastInsertId();
 	}
 
-	public function setAttribute($name, $value) {
-		return $this->_handle->setAttribute($name, $value);
-	}
-
-	public function getAttribute($name) {
-		return $this->_handle->getAttribute($name);
+	public function setErrorMode($value) {
+		return $this->_handle->setAttribute(PDO::ATTR_ERRMODE, $value);
 	}
 
 	public function getDriverName() {

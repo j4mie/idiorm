@@ -9,9 +9,7 @@ interface DatabaseDriver {
 
 	public function lastInsertId();
 
-	public function setAttribute($name, $value);
-
-	public function getAttribute($name);
+	public function setErrorMode($value);
 
 	public function getDriverName();
 }

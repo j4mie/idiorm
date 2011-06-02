@@ -36,16 +36,12 @@ class MySQLiDatabaseDriver implements DatabaseDriver {
 		return $this->_handle->insert_id;
 	}
 
-	public function setAttribute($name, $value) {
-		return null;
-	}
-
-	public function getAttribute($name) {
-		return null;
+	public function setErrorMode($value) {
+		return true;
 	}
 
 	public function getDriverName() {
-		return 'mysqli';
+		return 'mysql';
 	}
 }
 
@@ -80,10 +76,11 @@ class MySQLiDatabaseDriverStatement implements DatabaseDriverStatement {
 
 		$parameters = array();
 		$meta = $this->_statement->result_metadata();
-		while($field = $meta->fetch_field()) {
+		while($field = $meta->fetch_field())
 			$parameters[] = &$this->_row[$field->name];
-		}
-		call_user_func_array(array($this->_statement, 'bind_result'), $parameters);
+		
+		if(count($parameters) > 0)
+			call_user_func_array(array($this->_statement, 'bind_result'), $parameters);
 	}
 	
 	protected function internal_fetch_assoc() {  
@@ -99,11 +96,13 @@ class MySQLiDatabaseDriverStatement implements DatabaseDriverStatement {
 	}  
 
 	public function execute($values) {
-		$types = '';
-		foreach($values as $value)
-			$types .= self::_get_type($value);
-		array_unshift($values, $types);
-		call_user_func_array(array($this->_statement, 'bind_param'), self::_reference_array($values));
+		if(count($values) > 0) {
+			$types = '';
+			foreach($values as $value)
+				$types .= self::_get_type($value);
+			array_unshift($values, $types);
+			call_user_func_array(array($this->_statement, 'bind_param'), self::_reference_array($values));
+		}
 		return $this->_statement->execute();
 	}
 
