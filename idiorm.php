@@ -145,6 +145,10 @@
         // --- STATIC METHODS --- //
         // ---------------------- //
 
+        protected static function createDriver($name) {
+            return new $name;
+        }
+
         /**
          * Pass configuration settings to the class in the form of
          * key/value pairs. As a shortcut, if the second argument
@@ -183,7 +187,8 @@
                 $username = self::$_config['username'];
                 $password = self::$_config['password'];
                 $driver_options = self::$_config['driver_options'];
-                $db = new PDO($connection_string, $username, $password, $driver_options);
+                $db = self::createDriver(self::$_config['driver']);
+                $db->initialize($connection_string, $username, $password, $driver_options);
                 $db->setAttribute(PDO::ATTR_ERRMODE, self::$_config['error_mode']);
                 self::set_db($db);
             }
@@ -216,7 +221,7 @@
          * names, column names etc) by looking at the driver being used by PDO.
          */
         protected static function _detect_identifier_quote_character() {
-            switch(self::$_db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
+            switch(self::$_db->getDriverName()) {
                 case 'pgsql':
                 case 'sqlsrv':
                 case 'dblib':
