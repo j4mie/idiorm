@@ -26,7 +26,7 @@ class PDODatabaseDriver implements DatabaseDriver {
 	}
 
 	public function getDriverName() {
-		return $this->getAttribute(PDO::ATTR_DRIVER_NAME);
+		return $this->_handle->getAttribute(PDO::ATTR_DRIVER_NAME);
 	}
 }
 
