@@ -37,16 +37,16 @@ class PDODatabaseDriver implements DatabaseDriver {
 class PDODatabaseDriverStatement implements DatabaseDriverStatement {
 	private $_statement;
 
-	public function PDODatabaseDriverStatement($statement) {
+	public function __construct($statement) {
 		$this->_statement = $statement;
 	}
 
 	public function execute($values) {
-		return $this->_statement->execute($values);
+		return $this->_statement->execute();
 	}
 
-	public function fetch($type) {
-		return $this->_statement->fetch($type);
+	public function fetch_assoc() {
+		return $this->_statement->fetch(PDO::FETCH_ASSOC);
 	}
 }
 

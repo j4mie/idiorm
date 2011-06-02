@@ -19,7 +19,7 @@ interface DatabaseDriver {
 interface DatabaseDriverStatement {
 	public function execute($values);
 
-	public function fetch($type);
+	public function fetch_assoc();
 }
 
 ?>

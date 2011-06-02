@@ -971,7 +971,7 @@
             $statement->execute($this->_values);
 
             $rows = array();
-            while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
+            while ($row = $statement->fetch_assoc()) {
                 $rows[] = $row;
             }
 
@@ -1049,7 +1049,7 @@
          * to the database.
          */
         public function save() {
-            $query = array();
+            $query = null;
             $values = array_values($this->_dirty_fields);
 
             if (!$this->_is_new) { // UPDATE
