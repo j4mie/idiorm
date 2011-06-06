@@ -47,6 +47,10 @@
         // Where condition array keys
         const WHERE_FRAGMENT = 0;
         const WHERE_VALUES = 1;
+        
+        // Limit clause style
+        const LIMIT_STYLE_TOP_N = "top";
+        const LIMIT_STYLE_LIMIT = "limit";
 
         // ------------------------ //
         // --- CLASS PROPERTIES --- //
@@ -62,6 +66,7 @@
             'password' => null,
             'driver_options' => null,
             'identifier_quote_character' => null, // if this is null, will be autodetected
+            'limit_clause_style' => null, // if this is null, will be autodetected
             'logging' => false,
             'caching' => false,
         );
@@ -197,6 +202,7 @@
         public static function set_db($db) {
             self::$_db = $db;
             self::_setup_identifier_quote_character();
+            self::_setup_limit_clause_style();
         }
 
         /**
@@ -208,6 +214,17 @@
         public static function _setup_identifier_quote_character() {
             if (is_null(self::$_config['identifier_quote_character'])) {
                 self::$_config['identifier_quote_character'] = self::_detect_identifier_quote_character();
+            }
+        }
+
+        /**
+         * Detect and initialise the limit clause style ("SELECT TOP 5" /
+         * "... LIMIT 5"). If this has been specified manually using 
+         * ORM::configure('limit_clause_style', 'top'), this will do nothing.
+         */
+        public static function _setup_limit_clause_style() {
+            if (is_null(self::$_config['limit_clause_style'])) {
+                self::$_config['limit_clause_style'] = self::_detect_limit_clause_style();
             }
         }
 
@@ -228,6 +245,20 @@
                 case 'sqlite2':
                 default:
                     return '`';
+            }
+        }
+
+        /**
+         * Returns a constant for the "limit clause style" for MS Sql Server 
+         * versus grown up databases.
+         */
+        protected static function _detect_limit_clause_style() {
+            switch(self::$_db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
+                case 'sqlsrv':
+                case 'mssql':
+                    return ORM::LIMIT_STYLE_TOP_N;
+                default:
+                    return ORM::LIMIT_STYLE_LIMIT;
             }
         }
 
