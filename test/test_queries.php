@@ -13,7 +13,7 @@
     ORM::configure('logging', true);
 
     // Set up the dummy database connection
-    $db = new DummyPDO('sqlite::memory:');
+    $db = new DummyPDO();
     ORM::set_db($db);
 
     ORM::for_table('widget')->find_many();

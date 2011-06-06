@@ -27,7 +27,16 @@
      * of the PDO API.
      *
      */
-    class DummyPDO extends PDO {
+    class DummyPDO {
+        public function __construct($attributes = null) {
+            if($attributes == null) {
+                $this->attributes = array(
+                    PDO::ATTR_DRIVER_NAME => 'sqlite'
+                );
+            } else {
+                $this->attributes = $attributes;
+            }
+        }
 
         /**
          * Return a dummy PDO statement
@@ -36,7 +45,28 @@
             $this->last_query = new DummyPDOStatement($statement);
             return $this->last_query;
         }
+
+        public function getAttribute($attribute) {
+            if(array_key_exists($attribute, $this->attributes)) {
+                return $this->attributes[$attribute];
+            } else {
+                throw new Exception("No such key [$attribute]");
+            }
+        }
+
+        public function setAttribute($attribute, $val) {
+            $this->attributes[$attribute] = $val;
+        }
+
+        public function quote($value) {
+            return "'$value'";
+        }
+
+        public function lastInsertId() {
+            return 42;
+        }
     }
+
 
     /**
      *
