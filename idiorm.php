@@ -817,13 +817,18 @@
          * Build the start of the SELECT statement
          */
         protected function _build_select_start() {
+            $top = "";
             $result_columns = join(', ', $this->_result_columns);
+
+            if (self::$_config["limit_clause_style"] == ORM::LIMIT_STYLE_TOP_N && !is_null($this->_limit)) {
+              $top = "TOP {$this->_limit} ";
+            }
 
             if ($this->_distinct) {
                 $result_columns = 'DISTINCT ' . $result_columns;
             }
 
-            $fragment = "SELECT {$result_columns} FROM " . $this->_quote_identifier($this->_table_name);
+            $fragment = "SELECT {$top}{$result_columns} FROM " . $this->_quote_identifier($this->_table_name);
 
             if (!is_null($this->_table_alias)) {
                 $fragment .= " " . $this->_quote_identifier($this->_table_alias);
@@ -884,7 +889,7 @@
          * Build LIMIT
          */
         protected function _build_limit() {
-            if (!is_null($this->_limit)) {
+            if (self::$_config['limit_clause_style'] == ORM::LIMIT_STYLE_LIMIT && !is_null($this->_limit)) {
                 return "LIMIT " . $this->_limit;
             }
             return '';
