@@ -409,6 +409,12 @@ Some database adapters require (or allow) an array of driver-specific configurat
 
     ORM::configure('driver_options', array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'));
 
+To delete more than one object from the database, build a query:
+
+    $person = ORM::for_table('person')
+        ->where_equal('zipcode', 55555)
+        ->delete_many();
+
 
 #### PDO Error Mode ####
 
