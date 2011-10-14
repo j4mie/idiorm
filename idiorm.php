@@ -1043,7 +1043,7 @@
          * Save any fields which have been modified on this object
          * to the database.
          */
-        public function save() {
+        public function save($updateWhere=NULL) {
             $query = array();
             $values = array_values($this->_dirty_fields);
 
@@ -1052,8 +1052,14 @@
                 if (count($values) == 0) {
                     return true;
                 }
-                $query = $this->_build_update();
-                $values[] = $this->id();
+                $query = $this->_build_update($updateWhere);
+    			if($updateWhere===NULL)
+					$values[] = $this->id();
+				else if(is_array($updateWhere))
+				{
+					foreach($updateWhere as $k=>$v)
+						$values[] = $v;
+				}
             } else { // INSERT
                 $query = $this->_build_insert();
             }
@@ -1077,7 +1083,7 @@
         /**
          * Build an UPDATE query
          */
-        protected function _build_update() {
+        protected function _build_update($updateWhere) {
             $query = array();
             $query[] = "UPDATE {$this->_quote_identifier($this->_table_name)} SET";
 
@@ -1087,8 +1093,20 @@
             }
             $query[] = join(", ", $field_list);
             $query[] = "WHERE";
-            $query[] = $this->_quote_identifier($this->_get_id_column_name());
-            $query[] = "= ?";
+            if($updateWhere===NULL)
+    		{
+	            $query[] = $this->_quote_identifier($this->_get_id_column_name());
+    	        $query[] = "= ?";
+			}
+			else if(is_string($updateWhere))
+				$query[] = $updateWhere;
+			else if(is_array($updateWhere))
+			{
+				$qureyWhere = array();
+				foreach($updateWhere as $k=>$v)
+					$qureyWhere[] = $this->_quote_identifier($k) . "= ?";
+				$query[] = implode(' AND ',$qureyWhere);
+			}
             return join(" ", $query);
         }
 
