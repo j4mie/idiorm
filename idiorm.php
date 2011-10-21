@@ -1027,8 +1027,10 @@
          * database when save() is called.
          */
         public function set($key, $value) {
+            if ($this->_is_new || $this->_data[$key] !== $value) {
+                $this->_dirty_fields[$key] = $value;
+            }
             $this->_data[$key] = $value;
-            $this->_dirty_fields[$key] = $value;
         }
 
         /**
