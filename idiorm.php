@@ -66,7 +66,10 @@
             'caching' => false,
         );
 
-        // Database connection, instance of the PDO class
+        /**
+         * Database connection, instance of the PDO class
+         * @var PDO
+         */
         protected static $_db;
 
         // Last query run, only populated if logging is enabled
