@@ -733,7 +733,16 @@
          */
         protected function _add_order_by($column_name, $ordering) {
             $column_name = $this->_quote_identifier($column_name);
-            $this->_order_by[] = "{$column_name} {$ordering}";
+            $this->order_by_raw("{$column_name} {$ordering}");
+            return $this;
+        }
+
+        /*
+         * Add raw ORDER BY clause.
+         * Could be joined with other clauses with a comma.
+         */
+        public function order_by_raw($clause){
+            $this->_order_by[] = $clause;
             return $this;
         }
 
