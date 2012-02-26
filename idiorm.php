@@ -1073,7 +1073,52 @@
             $this->_dirty_fields = array();
             return $success;
         }
+        private function _recursive_keys($input, $unique=true){
+                if(!$unique) {
+                    $output=array_keys($input);
+                }else{
+                    $output=array();
+                };        
+                foreach($input as $sub){
+                    if(is_array($sub)){
+                        $output = array_merge($output, $this->_recursive_keys($sub,false)) ;
+                    }
+                }
+                $output=array_unique($output);
+                return $output;
+            }
+        private function _recursive_value($a,$f=array()){
+            $keys=$this->_recursive_keys($a);            
+            foreach($a as $value){
+                foreach($keys as $value2){
+                    $return[]=$value[$value2];
+                };
+            };
+            return $return;
+        }
+        /* 
+         * Build an INSERT query mulit rows in one query 
+         */
+        public function save_multi($data) {
+            $query = array();
+            $query = $this->_build_insert_many($data);
+            $values = $this->_recursive_value($data);
+            var_dump($query,$values);
+            self::_log_query($query, $values);
+            $statement = self::$_db->prepare($query);
+            $success = $statement->execute($values);
 
+            // If we've just inserted a new record, set the ID of this object
+            if ($this->_is_new) {
+                $this->_is_new = false;
+                if (is_null($this->id())) {
+                    $this->_data[$this->_get_id_column_name()] = self::$_db->lastInsertId();
+                }
+            }
+
+            $this->_dirty_fields = array();
+            return $success;
+        }
         /**
          * Build an UPDATE query
          */
@@ -1093,9 +1138,27 @@
         }
 
         /**
+         * Build an many INSERT query
+         */
+        protected function _build_insert_many($data) {
+            $query[] = "INSERT INTO";
+            $query[] = $this->_quote_identifier($this->_table_name);
+            $field_list = $this->_recursive_keys($data);
+            $field_list = array_map(array($this, '_quote_identifier'),
+                                    $field_list);
+            $query[] = "(" . join(", ", $field_list) . ")";
+            $query[] = "VALUES";
+            foreach($data as $value){
+                $placeholders=$this->_create_placeholders(count($field_list));
+                $rows[]="({$placeholders})";
+            };   
+            $query[] = join(', ',$rows);         
+            return join(" ", $query);
+        }
+        /**
          * Build an INSERT query
          */
-        protected function _build_insert() {
+        protected function _build_insert($data) {
             $query[] = "INSERT INTO";
             $query[] = $this->_quote_identifier($this->_table_name);
             $field_list = array_map(array($this, '_quote_identifier'), array_keys($this->_dirty_fields));
@@ -1106,7 +1169,6 @@
             $query[] = "({$placeholders})";
             return join(" ", $query);
         }
-
         /**
          * Delete this record from the database
          */
