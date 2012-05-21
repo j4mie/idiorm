@@ -141,6 +141,10 @@
         // this instance only. Overrides the config settings.
         protected $_instance_id_column = null;
 
+        // Keys of columns for inserts and updates, that
+        // should be kept raw.
+        protected $_keep_raw = array();
+
         // ---------------------- //
         // --- STATIC METHODS --- //
         // ---------------------- //
@@ -588,8 +592,23 @@
          * Return a string containing the given number of question marks,
          * separated by commas. Eg "?, ?, ?"
          */
-        protected function _create_placeholders($number_of_placeholders) {
-            return join(", ", array_fill(0, $number_of_placeholders, "?"));
+        protected function _create_placeholders($fields) {
+
+            // See if we want to force any given field to be raw
+            $prep_arr = array();
+            foreach ($fields as $key => $val) {
+                if(in_array($key, $this->_keep_raw)) {
+                    // We want to keep it raw
+                    $prep_arr[] = $val;
+                }else{
+                    // We want to prepare it and not keep it raw
+                    $prep_arr[] = '?';
+                }
+            }
+
+            $placeholders = join(", ", $prep_arr);
+
+            return $placeholders;
         }
 
         /**
@@ -671,7 +690,7 @@
          */
         public function where_in($column_name, $values) {
             $column_name = $this->_quote_identifier($column_name);
-            $placeholders = $this->_create_placeholders(count($values));
+            $placeholders = $this->_create_placeholders($values);
             return $this->_add_where("{$column_name} IN ({$placeholders})", $values);
         }
 
@@ -680,7 +699,7 @@
          */
         public function where_not_in($column_name, $values) {
             $column_name = $this->_quote_identifier($column_name);
-            $placeholders = $this->_create_placeholders(count($values));
+            $placeholders = $this->_create_placeholders($values);
             return $this->_add_where("{$column_name} NOT IN ({$placeholders})", $values);
         }
 
@@ -1045,7 +1064,15 @@
          */
         public function save() {
             $query = array();
-            $values = array_values($this->_dirty_fields);
+
+            // Remove any data that we set as raw since it's baked into the query already
+            $dirty_fields = $this->_dirty_fields;
+            $values = array();
+            foreach ($this->_dirty_fields as $column => $val) {
+                if ( ! in_array($column, $this->_keep_raw)) {
+                    $values[] = $val;
+                }
+            }
 
             if (!$this->_is_new) { // UPDATE
                 // If there are no dirty values, do nothing
@@ -1083,7 +1110,11 @@
 
             $field_list = array();
             foreach ($this->_dirty_fields as $key => $value) {
-                $field_list[] = "{$this->_quote_identifier($key)} = ?";
+                $q_or_val = '?';
+                if (in_array($key, $this->_keep_raw)){
+                    $q_or_val = $value;
+                }
+                $field_list[] = "{$this->_quote_identifier($key)} = $q_or_val";
             }
             $query[] = join(", ", $field_list);
             $query[] = "WHERE";
@@ -1102,9 +1133,18 @@
             $query[] = "(" . join(", ", $field_list) . ")";
             $query[] = "VALUES";
 
-            $placeholders = $this->_create_placeholders(count($this->_dirty_fields));
+            $placeholders = $this->_create_placeholders($this->_dirty_fields);
+
             $query[] = "({$placeholders})";
+
             return join(" ", $query);
+        }
+
+        /**
+         * Keep raw, for fields we don't want to prepare and then set it
+         */
+        public function keep_raw($column_list) {
+            $this->_keep_raw = (array)$column_list;
         }
 
         /**
