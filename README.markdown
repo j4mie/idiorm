@@ -59,9 +59,13 @@ The first thing you need to know about Idiorm is that *you don't need to define 
 
 ### Setup ###
 
-First, `require` the Idiorm source file:
+First, setup your autoloading classes:
 
-    require_once 'idiorm.php';
+    'Idiorm' => $vendorDir . '/idiorm/',
+
+Then, `use` the Idiorm source file:
+
+    use Idiorm\ORM;
 
 Then, pass a *Data Source Name* connection string to the `configure` method of the ORM class. This is used by PDO to connect to your database. For more information, see the [PDO documentation](http://uk2.php.net/manual/en/pdo.construct.php).
     ORM::configure('sqlite:./example.db');
