@@ -1,5 +1,9 @@
 <?php
 
+namespace Idiorm;
+
+use \PDO;
+
     /**
      *
      * Idiorm
