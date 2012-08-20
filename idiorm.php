@@ -749,6 +749,14 @@
         }
 
         /**
+         * Add an unquoted expression as an ORDER BY clause
+         */
+        public function order_by_expr($clause) {
+            $this->_order_by[] = $clause;
+            return $this;
+        }
+
+        /**
          * Add a column to the list of columns to GROUP BY
          */
         public function group_by($column_name) {
