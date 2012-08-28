@@ -148,18 +148,29 @@
         /**
          * Pass configuration settings to the class in the form of
          * key/value pairs. As a shortcut, if the second argument
-         * is omitted, the setting is assumed to be the DSN string
-         * used by PDO to connect to the database. Often, this
-         * will be the only configuration required to use Idiorm.
+         * is omitted and the key is a string, the setting is
+         * assumed to be the DSN string used by PDO to connect
+         * to the database (often, this will be the only configuration
+         * required to use Idiorm). If you have more than one setting
+         * you wish to configure, another shortcut is to pass an array
+         * of settings (and omit the second argument).
          */
         public static function configure($key, $value=null) {
-            // Shortcut: If only one argument is passed, 
-            // assume it's a connection string
-            if (is_null($value)) {
-                $value = $key;
-                $key = 'connection_string';
+            if (is_array($key)) {
+                // Shortcut: If only one array argument is passed,
+                // assume it's an array of configuration settings
+                foreach ($key as $one_key => $one_value) {
+                    self::configure($one_key, $one_value);
+                }
+            } else {
+                if (is_null($value)) {
+                    // Shortcut: If only one string argument is passed, 
+                    // assume it's a connection string
+                    $value = $key;
+                    $key = 'connection_string';
+                }
+                self::$_config[$key] = $value;
             }
-            self::$_config[$key] = $value;
         }
 
         /**
