@@ -41,6 +41,12 @@ Changelog
 * Fix bug in quoting column wildcard. j4mie/paris#12
 * Small documentation improvements
 
+#### 1.2.0 - release 2012-XX-XX
+
+* Add `order_by_expr` method [sandermarechal]
+* Add support for raw queries without parameters argument [sandermarechal]
+* Add support to set multiple properties at once by passing an associative to `set` method [sandermarechal]
+
 Philosophy
 ----------
 
@@ -348,7 +354,7 @@ To update the database, change one or more of the properties of the object, then
     // This is equivalent to the above two assignments
     $person->set(array(
         'name' => 'Bob Smith',
-        'age'  => 20,
+        'age'  => 20
     ));
 
     // Syncronise the object with the database
