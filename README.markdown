@@ -301,7 +301,7 @@ The `join` methods also take an optional third parameter, which is an `alias` fo
 
 #### Raw queries ####
 
-If you need to perform more complex queries, you can completely specify the query to execute by using the `raw_query` method. This method takes a string and an array of parameters. The string should contain placeholders, either in question mark or named placeholder syntax, which will be used to bind the parameters to the query.
+If you need to perform more complex queries, you can completely specify the query to execute by using the `raw_query` method. This method takes a string and optionally an array of parameters. The string can contain placeholders, either in question mark or named placeholder syntax, which will be used to bind the parameters to the query.
 
     $people = ORM::for_table('person')->raw_query('SELECT p.* FROM person p JOIN role r ON p.role_id = r.id WHERE r.name = :role', array('role' => 'janitor')->find_many();
 

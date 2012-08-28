@@ -411,13 +411,13 @@
         }
 
         /**
-         * Perform a raw query. The query should contain placeholders,
-         * in either named or question mark style, and the parameters
-         * should be an array of values which will be bound to the
-         * placeholders in the query. If this method is called, all
-         * other query building methods will be ignored.
+         * Perform a raw query. The query can contain placeholders in
+         * either named or question mark style. If placeholders are
+         * used, the parameters should be an array of values which will
+         * be bound to the placeholders in the query. If this method
+         * is called, all other query building methods will be ignored.
          */
-        public function raw_query($query, $parameters) {
+        public function raw_query($query, $parameters = array()) {
             $this->_is_raw_query = true;
             $this->_raw_query = $query;
             $this->_raw_parameters = $parameters;

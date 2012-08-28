@@ -128,9 +128,13 @@
     $expected = "SELECT * FROM `widget` WHERE `age` = '18' AND (`name` = 'Fred' OR `name` = 'Bob') AND `size` = 'large'";
     Tester::check_equal("Raw WHERE clause in method chain", $expected);
 
+    ORM::for_table('widget')->raw_query('SELECT `w`.* FROM `widget` w')->find_many();
+    $expected = "SELECT `w`.* FROM `widget` w";
+    Tester::check_equal("Raw query", $expected);
+
     ORM::for_table('widget')->raw_query('SELECT `w`.* FROM `widget` w WHERE `name` = ? AND `age` = ?', array('Fred', 5))->find_many();
     $expected = "SELECT `w`.* FROM `widget` w WHERE `name` = 'Fred' AND `age` = '5'";
-    Tester::check_equal("Raw query", $expected);
+    Tester::check_equal("Raw query with parameters", $expected);
 
     ORM::for_table('widget')->select('name')->find_many();
     $expected = "SELECT `name` FROM `widget`";
