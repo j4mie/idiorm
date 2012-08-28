@@ -735,6 +735,13 @@
         }
 
         /**
+         * Add an ORDER BY column, direction
+         */
+        public function order_by($column_name, $direction = 'ASC') {
+            return $this->_add_order_by($column_name, $direction);
+        }
+
+        /**
          * Add an ORDER BY column DESC clause
          */
         public function order_by_desc($column_name) {
