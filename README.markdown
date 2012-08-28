@@ -337,13 +337,19 @@ The `as_array` method takes column names as optional arguments. If one or more o
 
 ### Updating records ###
 
-To update the database, change one or more of the properties of the object, then call the `save` method to commit the changes to the database. Again, you can change the values of the object's properties either by using the `set` method or by setting the value of the property directly:
+To update the database, change one or more of the properties of the object, then call the `save` method to commit the changes to the database. Again, you can change the values of the object's properties either by using the `set` method or by setting the value of the property directly. By using the `set` method it is also possible to update multiple properties at once, by passing in an associative array:
 
     $person = ORM::for_table('person')->find_one(5);
 
     // The following two forms are equivalent
     $person->set('name', 'Bob Smith');
     $person->age = 20;
+
+    // This is equivalent to the above two assignments
+    $person->set(array(
+        'name' => 'Bob Smith',
+        'age'  => 20,
+    ));
 
     // Syncronise the object with the database
     $person->save();

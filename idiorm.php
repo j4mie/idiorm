@@ -1031,12 +1031,19 @@
 
         /**
          * Set a property to a particular value on this object.
-         * Flags that property as 'dirty' so it will be saved to the
+         * To set multiple properties at once, pass an associative array
+         * as the first parameter and leave out the second parameter.
+         * Flags the properties as 'dirty' so they will be saved to the
          * database when save() is called.
          */
-        public function set($key, $value) {
-            $this->_data[$key] = $value;
-            $this->_dirty_fields[$key] = $value;
+        public function set($key, $value = null) {
+            if (!is_array($key)) {
+                $key = array($key => $value);
+            }
+            foreach ($key as $field => $value) {
+                $this->_data[$field] = $value;
+                $this->_dirty_fields[$field] = $value;
+            }
         }
 
         /**

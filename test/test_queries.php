@@ -214,6 +214,12 @@
     Tester::check_equal("Update data", $expected);
 
     $widget = ORM::for_table('widget')->find_one(1);
+    $widget->set(array("name" => "Fred", "age" => 10));
+    $widget->save();
+    $expected = "UPDATE `widget` SET `name` = 'Fred', `age` = '10' WHERE `id` = '1'";
+    Tester::check_equal("Update multiple fields", $expected);
+
+    $widget = ORM::for_table('widget')->find_one(1);
     $widget->delete();
     $expected = "DELETE FROM `widget` WHERE `id` = '1'";
     Tester::check_equal("Delete data", $expected);
