@@ -45,7 +45,8 @@ Changelog
 
 * Add `order_by_expr` method [sandermarechal]
 * Add support for raw queries without parameters argument [sandermarechal]
-* Add support to set multiple properties at once by passing an associative to `set` method [sandermarechal]
+* Add support to set multiple properties at once by passing an associative array to `set` method [sandermarechal]
+* Allow an associative array to be passed to `configure` method [jordanlev]
 
 Philosophy
 ----------
@@ -409,7 +410,11 @@ Other than setting the DSN string for the database connection (see above), the `
 
 A shortcut is provided to allow passing multiple key/value pairs at once.
 
-    ORM::configure(array('setting_name_1' => 'value_for_setting_1', 'setting_name_2' => 'value_for_setting_2', 'etc' => 'etc'));
+    ORM::configure(array(
+        'setting_name_1' => 'value_for_setting_1', 
+        'setting_name_2' => 'value_for_setting_2', 
+        'etc' => 'etc'
+    ));
 
 #### Database authentication details ####
 
@@ -423,7 +428,11 @@ Some database adapters (such as MySQL) require a username and password to be sup
 
 Or you can combine the connection setup into a single line using the configuration array shortcut:
 
-    ORM::configure(array('connection_string' => 'mysql:host=localhost;dbname=my_database', 'username' => 'database_user', 'password' => 'top_secret'));
+    ORM::configure(array(
+        'mysql:host=localhost;dbname=my_database', 
+        'username' => 'database_user', 
+        'password' => 'top_secret'
+    ));
 
 #### PDO Driver Options ####
 

@@ -159,8 +159,8 @@
             if (is_array($key)) {
                 // Shortcut: If only one array argument is passed,
                 // assume it's an array of configuration settings
-                foreach ($key as $one_key => $one_value) {
-                    self::configure($one_key, $one_value);
+                foreach ($key as $conf_key => $conf_value) {
+                    self::configure($conf_key, $conf_value);
                 }
             } else {
                 if (is_null($value)) {
