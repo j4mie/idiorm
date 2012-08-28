@@ -63,6 +63,7 @@
             'driver_options' => null,
             'identifier_quote_character' => null, // if this is null, will be autodetected
             'logging' => false,
+            'log_table' => false,
             'caching' => false,
         );
 
@@ -242,8 +243,11 @@
         }
 
         /**
-         * Add a query to the internal query log. Only works if the
-         * 'logging' config option is set to true.
+         * Add a query to the internal query log or database log table. Only 
+         * works if the 'logging' or 'log_table' config options are set to true.
+         *
+         * log_table requires a table in the current database named 'idiorm_log'
+         * containing 'query' and 'values' columns.
          *
          * This works by manually binding the parameters to the query - the
          * query isn't executed like this (PDO normally passes the query and
@@ -252,7 +256,7 @@
          */
         protected static function _log_query($query, $parameters) {
             // If logging is not enabled, do nothing
-            if (!self::$_config['logging']) {
+            if (!self::$_config['logging'] && !self::$_config['log_table']) {
                 return false;
             }
 
@@ -269,8 +273,19 @@
                 $bound_query = $query;
             }
 
-            self::$_last_query = $bound_query;
-            self::$_query_log[] = $bound_query;
+            if (self::$_config['logging']) {
+              self::$_last_query = $bound_query;
+              self::$_query_log[] = $bound_query;
+            }
+
+            if (self::$_config['log_table']) {
+              $log_query = "INSERT INTO idiorm_log (`query`, `values`) VALUES (:query, :values);";
+              $log_values = array(':query' => $bound_query, ':values' => serialize($parameters));
+
+              $statement = self::$_db->prepare($log_query);
+              $statement->execute($log_values);
+            }
+
             return true;
         }
 
