@@ -43,10 +43,10 @@ Changelog
 
 #### 1.2.0 - release 2012-XX-XX
 
-* Add `order_by_expr` method [sandermarechal]
-* Add support for raw queries without parameters argument [sandermarechal]
-* Add support to set multiple properties at once by passing an associative array to `set` method [sandermarechal]
-* Allow an associative array to be passed to `configure` method [jordanlev]
+* Add `order_by_expr` method [[sandermarechal](http://github.com/sandermarechal)]
+* Add support for raw queries without parameters argument [[sandermarechal](http://github.com/sandermarechal)]
+* Add support to set multiple properties at once by passing an associative array to `set` method [[sandermarechal](http://github.com/sandermarechal)]
+* Allow an associative array to be passed to `configure` method [[jordanlev](http://github.com/jordanlev)]
 
 Philosophy
 ----------
