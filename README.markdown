@@ -391,6 +391,10 @@ Other than setting the DSN string for the database connection (see above), the `
 
     ORM::configure('setting_name', 'value_for_setting');
 
+A shortcut is provided to allow passing multiple key/value pairs at once.
+
+    ORM::configure(array('setting_name_1' => 'value_for_setting_1', 'setting_name_2' => 'value_for_setting_2', 'etc' => 'etc'));
+
 #### Database authentication details ####
 
 Settings: `username` and `password`
@@ -400,6 +404,10 @@ Some database adapters (such as MySQL) require a username and password to be sup
     ORM::configure('mysql:host=localhost;dbname=my_database');
     ORM::configure('username', 'database_user');
     ORM::configure('password', 'top_secret');
+
+Or you can combine the connection setup into a single line using the configuration array shortcut:
+
+    ORM::configure(array('connection_string' => 'mysql:host=localhost;dbname=my_database', 'username' => 'database_user', 'password' => 'top_secret'));
 
 #### PDO Driver Options ####
 
