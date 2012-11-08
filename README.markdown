@@ -370,6 +370,12 @@ To delete an object from the database, simply call its `delete` method.
     $person = ORM::for_table('person')->find_one(5);
     $person->delete();
 
+To delete more than one object from the database, build a query:
+
+    $person = ORM::for_table('person')
+        ->where_equal('zipcode', 55555)
+        ->delete_many();
+
 ### Transactions ###
 
 Idiorm doesn't supply any extra methods to deal with transactions, but it's very easy to use PDO's built-in methods:

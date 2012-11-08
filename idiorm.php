@@ -1124,6 +1124,21 @@
             return $statement->execute($params);
         }
 
+        /**
+         * Delete many records from the database
+         */
+        public function delete_many() {
+            // Build and return the full DELETE statement by concatenating
+            // the results of calling each separate builder method.
+            $query = $this->_join_if_not_empty(" ", array(
+                "DELETE FROM",
+                $this->_quote_identifier($this->_table_name),
+                $this->_build_where(),
+            ));
+            $statement = self::$_db->prepare($query);
+            return $statement->execute($this->_values);
+        }
+
         // --------------------- //
         // --- MAGIC METHODS --- //
         // --------------------- //
@@ -1134,6 +1149,12 @@
         public function __set($key, $value) {
             $this->set($key, $value);
         }
+
+        public function __unset($key) {
+            unset($this->_data[$key]);
+            unset($this->_dirty_fields[$key]);
+        }
+
 
         public function __isset($key) {
             return isset($this->_data[$key]);
