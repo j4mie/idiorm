@@ -374,8 +374,11 @@
          * of instances of the ORM class, or an empty array if
          * no rows were returned.
          */
-        public function find_many() {
+        public function find_many($pureArray = false) {
             $rows = $this->_run();
+            if ($pureArray) {
+                return $rows;
+            }
             return array_map(array($this, '_create_instance_from_row'), $rows);
         }
 
