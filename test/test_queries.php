@@ -116,6 +116,10 @@
     $expected = "SELECT * FROM `widget` WHERE `name` = 'Fred' AND (`age` = '5' OR `age` = '10')";
     Tester::check_equal("Raw WHERE clause", $expected);
 
+    ORM::for_table('widget')->where_raw('STRFTIME("%Y", "now") = ?', array(2012))->find_many();
+    $expected = "SELECT * FROM `widget` WHERE STRFTIME(\"%Y\", \"now\") = '2012'";
+    Tester::check_equal("Raw WHERE clause with '%'", $expected);
+
     ORM::for_table('widget')->where_raw('`name` = "Fred"')->find_many();
     $expected = "SELECT * FROM `widget` WHERE `name` = \"Fred\"";
     Tester::check_equal("Raw WHERE clause with no parameters", $expected);

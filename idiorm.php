@@ -260,6 +260,9 @@
                 // Escape the parameters
                 $parameters = array_map(array(self::$_db, 'quote'), $parameters);
 
+                // Avoid %format collision for vsprintf
+                $query = str_replace("%", "%%", $query);
+
                 // Replace placeholders in the query for vsprintf
                 $query = str_replace("?", "%s", $query);
 
