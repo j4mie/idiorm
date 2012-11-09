@@ -603,7 +603,9 @@
          * separated by commas. Eg "?, ?, ?"
          */
         protected function _create_placeholders($number_of_placeholders) {
-            return join(", ", array_fill(0, $number_of_placeholders, "?"));
+            if($number_of_placeholders) {
+                return join(", ", array_fill(0, $number_of_placeholders, "?"));
+            }
         }
 
         /**
