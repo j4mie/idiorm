@@ -32,6 +32,7 @@ Changelog
 * Add support for raw queries without parameters argument [[sandermarechal](http://github.com/sandermarechal)]
 * Add support to set multiple properties at once by passing an associative array to `set` method [[sandermarechal](http://github.com/sandermarechal)]
 * Allow an associative array to be passed to `configure` method [[jordanlev](http://github.com/jordanlev)]
+* Patch to allow empty Paris models to be saved ([[j4mie/paris](http://github.com/j4mie/paris)]) issue #58
 
 #### 1.1.1 - release 2011-01-30
 
