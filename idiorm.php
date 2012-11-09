@@ -460,6 +460,21 @@
             $column = $this->_quote_identifier($column);
             return $this->_add_result_column($column, $alias);
         }
+        
+        /**
+    	 * Add a colums to list
+		 * @example select_many('id', 'name', 'username');
+		 */
+		public function select_many() {
+			$colum = func_get_args();
+			if (!empty($colum)) {
+				foreach ($colum as $col) {
+					$this->_add_result_column($col);
+				}
+				
+				return $this;
+			}
+		}
 
         /**
          * Add an unquoted expression to the list of columns returned
