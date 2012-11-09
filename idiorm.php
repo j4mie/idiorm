@@ -1027,8 +1027,10 @@
          * database when save() is called.
          */
         public function set($key, $value) {
+            // field is dirty only if value change
+    		if($value!==$this->_data[$key])
+	            $this->_dirty_fields[$key] = $value;
             $this->_data[$key] = $value;
-            $this->_dirty_fields[$key] = $value;
         }
 
         /**
