@@ -25,9 +25,18 @@ Features
 Changelog
 ---------
 
-#### 1.0.0 - released 2010-12-01
+#### 1.2.0 - release 2012-XX-XX
 
-* Initial release
+* Setup composer for installation via packagist (j4mie/idiorm)
+* Add `order_by_expr` method [[sandermarechal](http://github.com/sandermarechal)]
+* Add support for raw queries without parameters argument [[sandermarechal](http://github.com/sandermarechal)]
+* Add support to set multiple properties at once by passing an associative array to `set` method [[sandermarechal](http://github.com/sandermarechal)]
+* Allow an associative array to be passed to `configure` method [[jordanlev](http://github.com/jordanlev)]
+
+#### 1.1.1 - release 2011-01-30
+
+* Fix bug in quoting column wildcard. j4mie/paris#12
+* Small documentation improvements
 
 #### 1.1.0 - released 2011-01-24
 
@@ -36,17 +45,10 @@ Changelog
 * Add `distinct` method
 * Add `group_by` method
 
-#### 1.1.1 - release 2011-01-30
+#### 1.0.0 - released 2010-12-01
 
-* Fix bug in quoting column wildcard. j4mie/paris#12
-* Small documentation improvements
+* Initial release
 
-#### 1.2.0 - release 2012-XX-XX
-
-* Add `order_by_expr` method [[sandermarechal](http://github.com/sandermarechal)]
-* Add support for raw queries without parameters argument [[sandermarechal](http://github.com/sandermarechal)]
-* Add support to set multiple properties at once by passing an associative array to `set` method [[sandermarechal](http://github.com/sandermarechal)]
-* Allow an associative array to be passed to `configure` method [[jordanlev](http://github.com/jordanlev)]
 
 Philosophy
 ----------
