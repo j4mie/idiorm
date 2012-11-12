@@ -36,6 +36,22 @@
     $expected = "SELECT COUNT(*) AS `count` FROM `widget` LIMIT 1";
     Tester::check_equal("COUNT query", $expected);
 
+    ORM::for_table('person')->max('height');
+    $expected = "SELECT MAX(`height`) AS `max` FROM `person` LIMIT 1";
+    Tester::check_equal("MAX query", $expected);
+
+    ORM::for_table('person')->min('height');
+    $expected = "SELECT MIN(`height`) AS `min` FROM `person` LIMIT 1";
+    Tester::check_equal("MIN query", $expected);
+
+    ORM::for_table('person')->avg('height');
+    $expected = "SELECT AVG(`height`) AS `avg` FROM `person` LIMIT 1";
+    Tester::check_equal("AVG query", $expected);
+
+    ORM::for_table('person')->sum('height');
+    $expected = "SELECT SUM(`height`) AS `sum` FROM `person` LIMIT 1";
+    Tester::check_equal("SUM query", $expected);
+
     ORM::for_table('widget')->where('name', 'Fred')->find_one();
     $expected = "SELECT * FROM `widget` WHERE `name` = 'Fred' LIMIT 1";
     Tester::check_equal("Single where clause", $expected);

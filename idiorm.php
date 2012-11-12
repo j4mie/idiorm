@@ -398,10 +398,57 @@
          * Will return an integer representing the number of
          * rows returned.
          */
-        public function count() {
-            $this->select_expr('COUNT(*)', 'count');
+        public function count($column = '*') {
+            return $this->_call_aggregate_db_function(__FUNCTION__, $column);
+        }
+
+        /**
+         * Tell the ORM that you wish to execute a MAX query.
+         * Will return the max value of the choosen column.
+         */
+        public function max($column)  {
+            return $this->_call_aggregate_db_function(__FUNCTION__, $column);
+        }
+
+        /**
+         * Tell the ORM that you wish to execute a MIN query.
+         * Will return the min value of the choosen column.
+         */
+        public function min($column)  {
+            return $this->_call_aggregate_db_function(__FUNCTION__, $column);
+        }
+
+        /**
+         * Tell the ORM that you wish to execute a AVG query.
+         * Will return the average value of the choosen column.
+         */
+        public function avg($column)  {
+            return $this->_call_aggregate_db_function(__FUNCTION__, $column);
+        }
+
+        /**
+         * Tell the ORM that you wish to execute a SUM query.
+         * Will return the sum of the choosen column.
+         */
+        public function sum($column)  {
+            return $this->_call_aggregate_db_function(__FUNCTION__, $column);
+        }
+
+        /**
+         * Execute an aggregate query on the current connection.
+         * @param string $sql_function The aggregate function to call eg. MIN, COUNT, etc
+         * @param string $column The column to execute the aggregate query against
+         * @return int
+         */
+        protected function _call_aggregate_db_function($sql_function, $column) {
+            $alias = strtolower($sql_function);
+            $sql_function = strtoupper($sql_function);
+            if('*' != $column) {
+                $column = $this->_quote_identifier($column);
+            }
+            $this->select_expr("$sql_function($column)", $alias);
             $result = $this->find_one();
-            return ($result !== false && isset($result->count)) ? (int) $result->count : 0;
+            return ($result !== false && isset($result->$alias)) ? (int) $result->$alias : 0;
         }
 
          /**

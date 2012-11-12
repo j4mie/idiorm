@@ -34,6 +34,7 @@ Changelog
 * Allow an associative array to be passed to `configure` method [[jordanlev](http://github.com/jordanlev)]
 * Patch to allow empty Paris models to be saved ([[j4mie/paris](http://github.com/j4mie/paris)]) issue #58
 * Add `select_many` and `select_many_expr` - closing issues #49 and #69
+* Add support for `MIN`, `AVG`, `MAX` and `SUM` - closes issue #16
 
 #### 1.1.1 - release 2011-01-30
 
@@ -342,6 +343,16 @@ The `join` methods also take an optional third parameter, which is an `alias` fo
         ->select('p2.name', 'parent_name')
         ->join('person', array('p1.parent', '=', 'p2.id'), 'p2')
         ->find_many();
+
+#### Aggregate functions ####
+
+There is support for `MIN`, `AVG`, `MAX` and `SUM` in addition to `COUNT` (documented earlier).
+
+To return a minimum value of column, call the `min()` method.
+
+    $min = ORM::for_table('person')->min('height');
+
+The other functions (`AVG`, `MAX` and `SUM`) work in exactly the same manner. Supply a column name to perform the aggregate function on and it will return an integer.
 
 #### Raw queries ####
 
