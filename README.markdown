@@ -40,6 +40,7 @@ Changelog
 * Prevent ambiguous column names when joining tables - issue #66 [[hellogerard](https://github.com/hellogerard)]
 * Add `delete_many` method [[CBeerta](https://github.com/CBeerta)]
 * Allow unsetting of ORM parameters [[CBeerta](https://github.com/CBeerta)]
+* Add `find_array` to get the records as associative arrays [[Surt](https://github.com/Surt)] - closes issue #17
 
 #### 1.1.1 - release 2011-01-30
 
@@ -128,6 +129,14 @@ To find all records in the table:
 To find all records where the `gender` is `female`:
 
     $females = ORM::for_table('person')->where('gender', 'female')->find_many();
+
+##### As an associative array #####
+
+You can also find many records as an associative array instead of Idiorm instances. To do this substitute any call to `find_many()` with `find_array()`.
+
+    $females = ORM::for_table('person')->where('gender', 'female')->find_array();
+
+This is useful if you need to serialise the the query output into a format like JSON and you do not need the ability to update the returned records.
 
 #### Counting results ####
 

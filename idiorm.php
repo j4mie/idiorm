@@ -397,6 +397,16 @@
         }
 
         /**
+         * Tell the ORM that you are expecting multiple results
+         * from your query, and execute it. Will return an array,
+         * or an empty array if no rows were returned.
+         * @return array
+         */
+        public function find_array() {
+            return $this->_run(); 
+        }
+
+        /**
          * Tell the ORM that you wish to execute a COUNT query.
          * Will return an integer representing the number of
          * rows returned.
