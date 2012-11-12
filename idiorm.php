@@ -914,6 +914,14 @@
         }
 
         /**
+         * Add an unquoted expression to the list of columns to GROUP BY 
+         */
+        public function group_by_expr($expr) {
+            $this->_group_by[] = $expr;
+            return $this;
+        }
+
+        /**
          * Build a SELECT statement based on the clauses that have
          * been passed to this instance by chaining method calls.
          */

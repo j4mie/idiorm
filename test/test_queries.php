@@ -112,6 +112,10 @@
     $expected = "SELECT * FROM `widget` GROUP BY `name`, `age`";
     Tester::check_equal("Multiple GROUP BY", $expected);
 
+    ORM::for_table('widget')->group_by_expr("FROM_UNIXTIME(`time`, '%Y-%m')")->find_many();
+    $expected = "SELECT * FROM `widget` GROUP BY FROM_UNIXTIME(`time`, '%Y-%m')";
+    Tester::check_equal("GROUP BY expression", $expected);
+
     ORM::for_table('widget')->where('name', 'Fred')->limit(5)->offset(5)->order_by_asc('name')->find_many();
     $expected = "SELECT * FROM `widget` WHERE `name` = 'Fred' ORDER BY `name` ASC LIMIT 5 OFFSET 5";
     Tester::check_equal("Complex query", $expected);

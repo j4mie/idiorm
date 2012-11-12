@@ -35,6 +35,7 @@ Changelog
 * Patch to allow empty Paris models to be saved ([[j4mie/paris](http://github.com/j4mie/paris)]) issue #58
 * Add `select_many` and `select_many_expr` - closing issues #49 and #69
 * Add support for `MIN`, `AVG`, `MAX` and `SUM` - closes issue #16
+* Add `group_by_expr` - closes issue #24
 
 #### 1.1.1 - release 2011-01-30
 
@@ -230,7 +231,11 @@ If you want to order by something other than a column name, then use the `order_
 
 To add a `GROUP BY` clause to your query, call the `group_by` method, passing in the column name. You can call this method multiple times to add further columns.
 
-    $poeple = ORM::for_table('person')->where('gender', 'female')->group_by('name')->find_many();
+    $people = ORM::for_table('person')->where('gender', 'female')->group_by('name')->find_many();
+
+It is also possible to `GROUP BY` a database expression:
+
+    $people = ORM::for_table('person')->where('gender', 'female')->group_by_expr("FROM_UNIXTIME(`time`, '%Y-%m')")->find_many();
 
 #### Result columns ####
 
