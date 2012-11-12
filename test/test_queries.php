@@ -238,6 +238,14 @@
     $expected = "INSERT INTO `widget` (`name`, `age`) VALUES ('Fred', '10')";
     Tester::check_equal("Insert data", $expected);
 
+    $widget = ORM::for_table('widget')->create();
+    $widget->name = "Fred";
+    $widget->age = 10;
+    $widget->set_expr('added', 'NOW()');
+    $widget->save();
+    $expected = "INSERT INTO `widget` (`name`, `age`, `added`) VALUES ('Fred', '10', NOW())";
+    Tester::check_equal("Insert data containing an expression", $expected);
+
     $widget = ORM::for_table('widget')->find_one(1);
     $widget->name = "Fred";
     $widget->age = 10;
@@ -246,10 +254,33 @@
     Tester::check_equal("Update data", $expected);
 
     $widget = ORM::for_table('widget')->find_one(1);
+    $widget->name = "Fred";
+    $widget->age = 10;
+    $widget->set_expr('added', 'NOW()');
+    $widget->save();
+    $expected = "UPDATE `widget` SET `name` = 'Fred', `age` = '10', `added` = NOW() WHERE `id` = '1'";
+    Tester::check_equal("Update data containing an expression", $expected);
+
+    $widget = ORM::for_table('widget')->find_one(1);
     $widget->set(array("name" => "Fred", "age" => 10));
     $widget->save();
     $expected = "UPDATE `widget` SET `name` = 'Fred', `age` = '10' WHERE `id` = '1'";
     Tester::check_equal("Update multiple fields", $expected);
+
+    $widget = ORM::for_table('widget')->find_one(1);
+    $widget->set(array("name" => "Fred", "age" => 10));
+    $widget->set_expr(array("added" => "NOW()", "lat_long" => "GeomFromText('POINT(1.2347 2.3436)')"));
+    $widget->save();
+    $expected = "UPDATE `widget` SET `name` = 'Fred', `age` = '10', `added` = NOW(), `lat_long` = GeomFromText('POINT(1.2347 2.3436)') WHERE `id` = '1'";
+    Tester::check_equal("Update multiple fields containing an expression", $expected);
+
+    $widget = ORM::for_table('widget')->find_one(1);
+    $widget->set(array("name" => "Fred", "age" => 10));
+    $widget->set_expr(array("added" => "NOW()", "lat_long" => "GeomFromText('POINT(1.2347 2.3436)')"));
+    $widget->lat_long = 'unknown';
+    $widget->save();
+    $expected = "UPDATE `widget` SET `name` = 'Fred', `age` = '10', `added` = NOW(), `lat_long` = 'unknown' WHERE `id` = '1'";
+    Tester::check_equal("Update multiple fields containing an expression (override previously set expression with plain value)", $expected);
 
     $widget = ORM::for_table('widget')->find_one(1);
     $widget->delete();

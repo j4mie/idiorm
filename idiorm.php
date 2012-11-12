@@ -134,6 +134,9 @@
         // lifetime of the object
         protected $_dirty_fields = array();
 
+        // Fields that are to be inserted in the DB raw
+        protected $_expr_fields = array();
+
         // Is this a new object (has create() been called)?
         protected $_is_new = false;
 
@@ -734,9 +737,18 @@
          * Return a string containing the given number of question marks,
          * separated by commas. Eg "?, ?, ?"
          */
-        protected function _create_placeholders($number_of_placeholders) {
-            if($number_of_placeholders) {
-                return join(", ", array_fill(0, $number_of_placeholders, "?"));
+        protected function _create_placeholders($fields) {
+            if(!empty($fields)) {
+                $db_fields = array();
+                foreach($fields as $key => $value) {
+                    // Process expression fields directly into the query
+                    if(array_key_exists($key, $this->_expr_fields)) {
+                        $db_fields[] = $value;
+                    } else {
+                        $db_fields[] = '?';
+                    }
+                }
+                return implode(', ', $db_fields);
             }
         }
 
@@ -819,7 +831,7 @@
          */
         public function where_in($column_name, $values) {
             $column_name = $this->_quote_identifier($column_name);
-            $placeholders = $this->_create_placeholders(count($values));
+            $placeholders = $this->_create_placeholders($values);
             return $this->_add_where("{$column_name} IN ({$placeholders})", $values);
         }
 
@@ -828,7 +840,7 @@
          */
         public function where_not_in($column_name, $values) {
             $column_name = $this->_quote_identifier($column_name);
-            $placeholders = $this->_create_placeholders(count($values));
+            $placeholders = $this->_create_placeholders($values);
             return $this->_add_where("{$column_name} NOT IN ({$placeholders})", $values);
         }
 
@@ -1193,12 +1205,31 @@
          * database when save() is called.
          */
         public function set($key, $value = null) {
+            $this->_set_orm_property($key, $value);
+        }
+
+        public function set_expr($key, $value = null) {
+            $this->_set_orm_property($key, $value, true);
+        }
+
+        /**
+         * Set a property on the ORM object.
+         * @param string|array $key
+         * @param string|null $value
+         * @param bool $raw Whether this value should be treated as raw or not
+         */
+        protected function _set_orm_property($key, $value = null, $expr = false) {
             if (!is_array($key)) {
                 $key = array($key => $value);
             }
             foreach ($key as $field => $value) {
                 $this->_data[$field] = $value;
                 $this->_dirty_fields[$field] = $value;
+                if (false === $expr and isset($this->_expr_fields[$field])) {
+                    unset($this->_expr_fields[$field]);
+                } else if (true === $expr) {
+                    $this->_expr_fields[$field] = true;
+                }
             }
         }
 
@@ -1216,7 +1247,9 @@
          */
         public function save() {
             $query = array();
-            $values = array_values($this->_dirty_fields);
+
+            // remove any expression fields as they are already baked into the query
+            $values = array_diff_key($this->_dirty_fields, $this->_expr_fields);
 
             if (!$this->_is_new) { // UPDATE
                 // If there are no dirty values, do nothing
@@ -1254,7 +1287,10 @@
 
             $field_list = array();
             foreach ($this->_dirty_fields as $key => $value) {
-                $field_list[] = "{$this->_quote_identifier($key)} = ?";
+                if(!array_key_exists($key, $this->_expr_fields)) {
+                    $value = '?';
+                }
+                $field_list[] = "{$this->_quote_identifier($key)} = $value";
             }
             $query[] = join(", ", $field_list);
             $query[] = "WHERE";
@@ -1273,7 +1309,7 @@
             $query[] = "(" . join(", ", $field_list) . ")";
             $query[] = "VALUES";
 
-            $placeholders = $this->_create_placeholders(count($this->_dirty_fields));
+            $placeholders = $this->_create_placeholders($this->_dirty_fields);
             $query[] = "({$placeholders})";
             return join(" ", $query);
         }
