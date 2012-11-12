@@ -729,6 +729,10 @@
          * of the call to _quote_identifier
          */
         protected function _add_simple_where($column_name, $separator, $value) {
+            // Add the table name in case of ambiguous columns
+            if (count($this->_join_sources) > 0 && strpos($column_name, '.') === false) {
+                $column_name = "{$this->_table_name}.{$column_name}";
+            }
             $column_name = $this->_quote_identifier($column_name);
             return $this->_add_where("{$column_name} {$separator} ?", $value);
         }

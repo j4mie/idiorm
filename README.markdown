@@ -37,6 +37,7 @@ Changelog
 * Add support for `MIN`, `AVG`, `MAX` and `SUM` - closes issue #16
 * Add `group_by_expr` - closes issue #24
 * Add `set_expr` to allow database expressions to be set as ORM properties - closes issues #59 and #43 [[brianherbert](https://github.com/brianherbert)]
+* Prevent ambiguous column names when joining tables - issue #66 [[hellogerard](https://github.com/hellogerard)]
 
 #### 1.1.1 - release 2011-01-30
 
