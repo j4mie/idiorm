@@ -160,6 +160,14 @@
     $expected = "SELECT COUNT(*) AS `count` FROM `widget`";
     Tester::check_equal("Literal expression in result columns", $expected);
 
+    ORM::for_table('widget')->select_many(array('widget_name' => 'widget.name'), 'widget_handle')->find_many();
+    $expected = "SELECT `widget`.`name` AS `widget_name`, `widget_handle` FROM `widget`";
+    Tester::check_equal("Aliases in select many result columns", $expected);
+
+    ORM::for_table('widget')->select_many_expr(array('count' => 'COUNT(*)'), 'SUM(widget_order)')->find_many();
+    $expected = "SELECT COUNT(*) AS `count`, SUM(widget_order) FROM `widget`";
+    Tester::check_equal("Literal expression in select many result columns", $expected);
+
     ORM::for_table('widget')->join('widget_handle', array('widget_handle.widget_id', '=', 'widget.id'))->find_many();
     $expected = "SELECT * FROM `widget` JOIN `widget_handle` ON `widget_handle`.`widget_id` = `widget`.`id`";
     Tester::check_equal("Simple join", $expected);

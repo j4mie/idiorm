@@ -33,6 +33,7 @@ Changelog
 * Add support to set multiple properties at once by passing an associative array to `set` method [[sandermarechal](http://github.com/sandermarechal)]
 * Allow an associative array to be passed to `configure` method [[jordanlev](http://github.com/jordanlev)]
 * Patch to allow empty Paris models to be saved ([[j4mie/paris](http://github.com/j4mie/paris)]) issue #58
+* Add `select_many` and `select_many_expr` - closing issues #49 and #69
 
 #### 1.1.1 - release 2011-01-30
 
@@ -240,7 +241,7 @@ Will result in the query:
 
     SELECT * FROM `person`;
 
-The `select` method gives you control over which columns are returned. Call `select` multiple times to specify columns to return.
+The `select` method gives you control over which columns are returned. Call `select` multiple times to specify columns to return or use [`select_many`](#shortcuts-for-specifying-many-columns) to specify many columns at once.
 
     $people = ORM::for_table('person')->select('name')->select('age')->find_many();
 
@@ -264,14 +265,47 @@ Will result in the query:
 
     SELECT `person`.`name` AS `person_name` FROM `person`;
 
-If you wish to override this behaviour (for example, to supply a database expression) you should instead use the `select_expr` method. Again, this takes the alias as an optional second argument.
+If you wish to override this behaviour (for example, to supply a database expression) you should instead use the `select_expr` method. Again, this takes the alias as an optional second argument. You can specify multiple expressions by calling `select_expr` multiple times or use [`select_many_expr`](#shortcuts-for-specifying-many-columns) to specify many expressions at once.
 
     // NOTE: For illustrative purposes only. To perform a count query, use the count() method.
-    $people_count = ORM::for_table('person')->select('COUNT(*)', 'count')->find_many();
+    $people_count = ORM::for_table('person')->select_expr('COUNT(*)', 'count')->find_many();
 
 Will result in the query:
 
     SELECT COUNT(*) AS `count` FROM `person`;
+
+##### Shortcuts for specifying many columns #####
+
+`select_many` and `select_many_expr` are very similar, but they allow you to specify more than one column at once. For example:
+
+    $people = ORM::for_table('person')->select_many('name', 'age')->find_many();
+
+Will result in the query:
+
+    SELECT `name`, `age` FROM `person`;
+
+To specify aliases you need to pass in an array (aliases are set as the key in an associative array):
+
+    $people = ORM::for_table('person')->select_many(array('first_name' => 'name', 'age'), 'height')->find_many();
+
+Will result in the query:
+
+    SELECT `name` AS `first_name`, `age`, `height` FROM `person`;
+
+You can pass the the following styles into `select_many` and `select_many_expr` by mixing and matching arrays and parameters:
+
+    select_many(array('alias' => 'column', 'column2', 'alias2' => 'column3'), 'column4', 'column5')
+    select_many('column', 'column2', 'column3')
+    select_many(array('column', 'column2', 'column3'), 'column4', 'column5')
+
+All the select methods can also be chained with each other so you could do the following to get a neat select query including an expression:
+
+    $people = ORM::for_table('person')->select_many('name', 'age', 'height')->select_expr('NOW()', 'timestamp')->find_many();
+
+Will result in the query:
+
+    SELECT `name`, `age`, `height`, NOW() AS `timestamp` FROM `person`;
+
 
 #### DISTINCT ####
 
