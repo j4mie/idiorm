@@ -25,7 +25,7 @@ Features
 Changelog
 ---------
 
-#### 1.2.0 - release 2012-XX-XX
+#### 1.2.0 - release 2012-11-14
 
 * Setup composer for installation via packagist (j4mie/idiorm)
 * Add `order_by_expr` method [[sandermarechal](http://github.com/sandermarechal)]
@@ -41,6 +41,7 @@ Changelog
 * Add `delete_many` method [[CBeerta](https://github.com/CBeerta)]
 * Allow unsetting of ORM parameters [[CBeerta](https://github.com/CBeerta)]
 * Add `find_array` to get the records as associative arrays [[Surt](https://github.com/Surt)] - closes issue #17
+* Fix bug in `_log_query` with `?` and `%` supplied in raw where statements etc. - closes issue #57 [[ridgerunner](https://github.com/ridgerunner)]
 
 #### 1.1.1 - release 2011-01-30
 
