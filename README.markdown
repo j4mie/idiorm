@@ -71,6 +71,19 @@ You might think of **Idiorm** as a *micro-ORM*. It could, perhaps, be "the tie t
 
 **Idiorm** might also provide a good base upon which to build higher-level, more complex database abstractions. For example, [Paris](http://github.com/j4mie/paris) is an implementation of the [Active Record pattern](http://martinfowler.com/eaaCatalog/activeRecord.html) built on top of Idiorm.
 
+Installation
+------------
+
+### Packagist ###
+
+This library is available through Packagist with the vendor and package identifier of `j4mie/idiorm`
+
+Please see the [Packagist documentation](http://packagist.org/) for further information.
+
+### Download ###
+
+You can clone the git repository, download idiorm.php or a release tag and then drop the idiorm.php file in the vendors/3rd party/libs directory of your project.
+
 Let's See Some Code
 -------------------
 
