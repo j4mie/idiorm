@@ -25,6 +25,10 @@ Features
 Changelog
 ---------
 
+#### 1.2.2 - release 2012-11-15
+
+* Fix bug where input parameters were sent as part-indexed, part associative
+
 #### 1.2.1 - release 2012-11-15
 
 * Fix minor bug caused by IdiormStringException not extending Exception
