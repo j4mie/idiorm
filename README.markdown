@@ -25,6 +25,10 @@ Features
 Changelog
 ---------
 
+#### 1.2.1 - release 2012-11-15
+
+* Fix minor bug caused by IdiormStringException not extending Exception
+
 #### 1.2.0 - release 2012-11-14
 
 * Setup composer for installation via packagist (j4mie/idiorm)
