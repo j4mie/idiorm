@@ -1267,7 +1267,7 @@
             $query = array();
 
             // remove any expression fields as they are already baked into the query
-            $values = array_diff_key($this->_dirty_fields, $this->_expr_fields);
+            $values = array_values(array_diff_key($this->_dirty_fields, $this->_expr_fields));
 
             if (!$this->_is_new) { // UPDATE
                 // If there are no dirty values, do nothing
