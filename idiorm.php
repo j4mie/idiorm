@@ -1360,6 +1360,7 @@
                 $this->_quote_identifier($this->_table_name),
                 $this->_build_where(),
             ));
+            self::_log_query($query, $this->_values);
             $statement = self::$_db->prepare($query);
             return $statement->execute($this->_values);
         }
