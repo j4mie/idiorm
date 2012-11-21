@@ -295,6 +295,10 @@
     $expected = "DELETE FROM `widget` WHERE `age` = '10'";
     Tester::check_equal("Delete many", $expected);
 
+    ORM::raw_execute("INSERT OR IGNORE INTO `widget` (`id`, `name`) VALUES (?, ?)", array(1, 'Tolstoy'));
+    $expected = "INSERT OR IGNORE INTO `widget` (`id`, `name`) VALUES ('1', 'Tolstoy')";
+    Tester::check_equal("Raw execute", $expected); // A bit of a silly test, as query is passed through
+
     // Regression tests
 
     $widget = ORM::for_table('widget')->select('widget.*')->find_one();
