@@ -291,20 +291,28 @@
     $expected = "DELETE FROM `widget` WHERE `id` = '1'";
     Tester::check_equal("Delete data", $expected);
 
+    $widget = ORM::for_table('widget')->where_equal('age', 10)->delete_many();
+    $expected = "DELETE FROM `widget` WHERE `age` = '10'";
+    Tester::check_equal("Delete many", $expected);
+
+    ORM::raw_execute("INSERT OR IGNORE INTO `widget` (`id`, `name`) VALUES (?, ?)", array(1, 'Tolstoy'));
+    $expected = "INSERT OR IGNORE INTO `widget` (`id`, `name`) VALUES ('1', 'Tolstoy')";
+    Tester::check_equal("Raw execute", $expected); // A bit of a silly test, as query is passed through
+
     // Regression tests
 
     $widget = ORM::for_table('widget')->select('widget.*')->find_one();
     $expected = "SELECT `widget`.* FROM `widget` LIMIT 1";
     Tester::check_equal("Issue #12 - incorrect quoting of column wildcard", $expected);
-    
+
     $widget = ORM::for_table('widget')->where_raw('username LIKE "ben%"')->find_many();
     $expected = 'SELECT * FROM `widget` WHERE username LIKE "ben%"';
     Tester::check_equal('Issue #57 - _log_query method raises a warning when query contains "%"', $expected);
-    
+
     $widget = ORM::for_table('widget')->where_raw('comments LIKE "has been released?%"')->find_many();
     $expected = 'SELECT * FROM `widget` WHERE comments LIKE "has been released?%"';
     Tester::check_equal('Issue #57 - _log_query method raises a warning when query contains "?"', $expected);
-    
+
     // Tests that alter Idiorm's config are done last
 
     ORM::configure('id_column', 'primary_key');

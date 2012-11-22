@@ -256,6 +256,24 @@
         }
 
         /**
+         * Executes a raw query as a wrapper for PDOStatement::execute.
+         * Useful for queries that can't be accomplished through Idiorm,
+         * particularly those using engine-specific features.
+         * @example raw_execute('SELECT `name`, AVG(`order`) FROM `customer` GROUP BY `name` HAVING AVG(`order`) > 10')
+         * @example raw_execute('INSERT OR REPLACE INTO `widget` (`id`, `name`) SELECT `id`, `name` FROM `other_table`')
+         * @param string $query The raw SQL query
+         * @param array  $parameters Optional bound parameters
+         * @return bool Success
+         */
+        public static function raw_execute($query, $parameters = array()) {
+            self::_setup_db();
+
+            self::_log_query($query, $parameters);
+            $statement = self::$_db->prepare($query);
+            return $statement->execute($parameters);
+        }
+
+        /**
          * Add a query to the internal query log. Only works if the
          * 'logging' config option is set to true.
          *
@@ -1360,6 +1378,7 @@
                 $this->_quote_identifier($this->_table_name),
                 $this->_build_where(),
             ));
+            self::_log_query($query, $this->_values);
             $statement = self::$_db->prepare($query);
             return $statement->execute($this->_values);
         }
