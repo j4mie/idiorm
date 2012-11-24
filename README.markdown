@@ -620,3 +620,54 @@ When query caching is enabled, Idiorm will cache the results of every `SELECT` q
 * Idiorm's cache is very simple, and does not attempt to invalidate itself when data changes. This means that if you run a query to retrieve some data, modify and save it, and then run the same query again, the results will be stale (ie, they will not reflect your modifications). This could potentially cause subtle bugs in your application. If you have caching enabled and you are experiencing odd behaviour, disable it and try again. If you do need to perform such operations but still wish to use the cache, you can call the `ORM::clear_cache()` to clear all existing cached queries.
 
 * Enabling the cache will increase the memory usage of your application, as all database rows that are fetched during each request are held in memory. If you are working with large quantities of data, you may wish to disable the cache.
+
+### Mulitple Connections ###
+Idiorm now works with multiple conections. Most of the static functions work with an optional connection name as an extra parameter. For the `ORM::configure` method, this means that when passing connection strings for a new connection, the second parameter, which is typically omitted, should be `null`. In all cases, if a connection name is no provided, it defaults to `ORM::DEFAULT_CONNECTION`.
+
+When chaining, once `for_table()` has been used in the chain, remaining calls use the correct connection.
+
+```php
+    // Default connection
+    ORM::configure('sqlite:./example.db');
+
+    // A named connection, where 'remote' is an arbitrary key name
+    ORM::configure('mysql:host=localhost;dbname=my_database', null, 'remote');
+    ORM::configure('username', 'database_user', 'remote');
+    ORM::configure('password', 'top_secret', 'remote');
+    
+    // Using default connection
+    $person = ORM::for_table('person')->find_one(5);
+    
+    // Using default connection, explicitly
+    $person = ORM::for_table('person', ORM::DEFAULT_CONNECTION)->find_one(5);
+    
+    // Using named connection
+    $person = ORM::for_table('different_person', 'remote')->find_one(5);
+    
+    
+    // Last query on *any* connection
+    ORM::get_last_query(); // returns query on 'different_person' using 'remote'
+    
+    // returns query on 'person' using default
+    ORM::get_last_query(ORM::DEFAULT_CONNECTION);
+
+```
+
+* **There is no support for joins across connections**
+
+* Multiple connections do not share configuration settings. This means if one connection has `logging` set to `true` and the other does not, only queries from the logged connection will be available via `ORM::get_last_query()` and `ORM::get_query_log()`
+
+* A new method has been added, `ORM::get_connection_keys()`, which returns an array of connection names.
+
+* Cachine *should* work with multiple connections (remember to turn caching on for each connection), but the unit tests are not robust. Please report any errors.
+
+##### Supported Methods #####
+In each of these cases, the `$which` parameter is optional.
+
+* `ORM::configure($key, $value, $which)`
+* `ORM::for_table($table_name, $which)`
+* `ORM::set_db($pdo, $which)`
+* `ORM::get_db($which)`
+* `ORM::raw_execute($query, $parameters, $which)`
+* `ORM::get_last_query($which)`
+* `ORM::get_query_log($which)`
