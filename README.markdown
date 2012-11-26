@@ -624,7 +624,7 @@ When query caching is enabled, Idiorm will cache the results of every `SELECT` q
 ### Mulitple Connections ###
 Idiorm now works with multiple conections. Most of the static functions work with an optional connection name as an extra parameter. For the `ORM::configure` method, this means that when passing connection strings for a new connection, the second parameter, which is typically omitted, should be `null`. In all cases, if a connection name is no provided, it defaults to `ORM::DEFAULT_CONNECTION`.
 
-When chaining, once `for_table()` has been used in the chain, remaining calls use the correct connection.
+When chaining, once `for_table()` has been used in the chain, remaining calls in the chain use the correct connection.
 
 ```php
     // Default connection
@@ -659,10 +659,10 @@ When chaining, once `for_table()` has been used in the chain, remaining calls us
 
 * A new method has been added, `ORM::get_connection_keys()`, which returns an array of connection names.
 
-* Cachine *should* work with multiple connections (remember to turn caching on for each connection), but the unit tests are not robust. Please report any errors.
+* Caching *should* work with multiple connections (remember to turn caching on for each connection), but the unit tests are not robust. Please report any errors.
 
 ##### Supported Methods #####
-In each of these cases, the `$which` parameter is optional.
+In each of these cases, the `$which` parameter is optional, and is an arbitrary key identifying the named connection.
 
 * `ORM::configure($key, $value, $which)`
 * `ORM::for_table($table_name, $which)`
