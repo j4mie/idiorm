@@ -25,6 +25,11 @@ Features
 Changelog
 ---------
 
+#### 1.3.0 - release XXXX-XX-XX
+
+* Add in raw_execute - closes issue 40 [[tag](https://github.com/tag)]
+* Add query logging to `delete_many` [[tag](https://github.com/tag)]
+
 #### 1.2.1 - release 2012-11-15
 
 * Fix minor bug caused by IdiormStringException not extending Exception
@@ -393,6 +398,8 @@ The other functions (`AVG`, `MAX` and `SUM`) work in exactly the same manner. Su
 
 #### Raw queries ####
 
+##### Return Idiorm instances #####
+
 If you need to perform more complex queries, you can completely specify the query to execute by using the `raw_query` method. This method takes a string and optionally an array of parameters. The string can contain placeholders, either in question mark or named placeholder syntax, which will be used to bind the parameters to the query.
 
     $people = ORM::for_table('person')->raw_query('SELECT p.* FROM person p JOIN role r ON p.role_id = r.id WHERE r.name = :role', array('role' => 'janitor'))->find_many();
@@ -400,6 +407,12 @@ If you need to perform more complex queries, you can completely specify the quer
 The ORM class instance(s) returned will contain data for all the columns returned by the query. Note that you still must call `for_table` to bind the instances to a particular table, even though there is nothing to stop you from specifying a completely different table in the query. This is because if you wish to later called `save`, the ORM will need to know which table to update.
 
 Note that using `raw_query` is advanced and possibly dangerous, and Idiorm does not make any attempt to protect you from making errors when using this method. If you find yourself calling `raw_query` often, you may have misunderstood the purpose of using an ORM, or your application may be too complex for Idiorm. Consider using a more full-featured database abstraction system.
+
+##### Direct PDO access raw queries #####
+
+It is possible to skip Idiorm's query building system altogether by using `raw_execute`. You will not get an Idiorm instance as a result and it is also potentially dangerous just like the method above.
+
+    $people = ORM::raw_execute('INSERT OR REPLACE INTO `widget` (`id`, `name`) SELECT `id`, `name` FROM `other_table` WHERE id = ?', array(10));
 
 ### Getting data from objects ###
 
