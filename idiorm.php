@@ -617,7 +617,7 @@
          */
         public function none() {
             $this->_none = true;
-            $this->where_raw('0');
+            $this->where_raw(0);
             return $this;
         }
 
