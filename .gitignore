@@ -1,2 +1,3 @@
 *.swp
 *.sqlite
+docs/_build
