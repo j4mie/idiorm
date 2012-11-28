@@ -241,6 +241,19 @@ Note that this method only supports "question mark placeholder" syntax, and NOT 
 
 If you require yet more flexibility, you can manually specify the entire query. See *Raw queries* below.
 
+##### Empty sets #####
+
+Occasionally you may find you need to always return an empty set. This could be useful when validating non-database values but an instance of ORM needs to be returned (e.g. a custom Paris filter).
+
+    $people = ORM::for_table('person')->none()->find_many();
+
+    // Creates SQL:
+    SELECT * FROM `person` WHERE 0;
+
+Note: By default if a none function is present in the chain the query will never actually be run against the database (although the query will still be logged). This behaviour can be changed by setting the `optimise_none` config to `false`:
+
+    ORM::configure('optimise_none', false);
+
 ##### Limits and offsets #####
 
 *Note that these methods **do not** escape their query parameters and so these should **not** be passed directly from user input.*
