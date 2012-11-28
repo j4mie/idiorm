@@ -64,6 +64,7 @@
             'identifier_quote_character' => null, // if this is null, will be autodetected
             'logging' => false,
             'caching' => false,
+            'optimise_none' => true,
         );
 
         // Database connection, instance of the PDO class
@@ -144,6 +145,10 @@
         // this instance only. Overrides the config settings.
         protected $_instance_id_column = null;
 
+        // Whether the none function has been used.
+        // Allows us to avoid querying the database.
+        protected $_none = false;
+
         // ---------------------- //
         // --- STATIC METHODS --- //
         // ---------------------- //
@@ -167,7 +172,7 @@
                 }
             } else {
                 if (is_null($value)) {
-                    // Shortcut: If only one string argument is passed, 
+                    // Shortcut: If only one string argument is passed,
                     // assume it's a connection string
                     $value = $key;
                     $key = 'connection_string';
@@ -407,7 +412,7 @@
          * @return array
          */
         public function find_array() {
-            return $this->_run(); 
+            return $this->_run();
         }
 
         /**
@@ -552,14 +557,14 @@
          * Add columns to the list of columns returned by the SELECT
          * query. This defaults to '*'. Many columns can be supplied
          * as either an array or as a list of parameters to the method.
-         * 
+         *
          * Note that the alias must not be numeric - if you want a
          * numeric alias then prepend it with some alpha chars. eg. a1
-         * 
+         *
          * @example select_many(array('alias' => 'column', 'column2', 'alias2' => 'column3'), 'column4', 'column5');
          * @example select_many('column', 'column2', 'column3');
          * @example select_many(array('column', 'column2', 'column3'), 'column4', 'column5');
-         * 
+         *
          * @return \ORM
          */
         public function select_many() {
@@ -578,16 +583,16 @@
 
         /**
          * Add an unquoted expression to the list of columns returned
-         * by the SELECT query. Many columns can be supplied as either 
+         * by the SELECT query. Many columns can be supplied as either
          * an array or as a list of parameters to the method.
-         * 
+         *
          * Note that the alias must not be numeric - if you want a
          * numeric alias then prepend it with some alpha chars. eg. a1
-         * 
+         *
          * @example select_many_expr(array('alias' => 'column', 'column2', 'alias2' => 'column3'), 'column4', 'column5')
          * @example select_many_expr('column', 'column2', 'column3')
          * @example select_many_expr(array('column', 'column2', 'column3'), 'column4', 'column5')
-         * 
+         *
          * @return \ORM
          */
         public function select_many_expr() {
@@ -604,14 +609,26 @@
             return $this;
         }
 
+
+        /**
+         * Makes sure that an empty set is returned by the ORM
+         *
+         * @return \ORM
+         */
+        public function none() {
+            $this->_none = true;
+            $this->where_raw(0);
+            return $this;
+        }
+
         /**
          * Take a column specification for the select many methods and convert it
          * into a normalised array of columns and aliases.
-         * 
+         *
          * It is designed to turn the following styles into a normalised array:
-         * 
+         *
          * array(array('alias' => 'column', 'column2', 'alias2' => 'column3'), 'column4', 'column5'))
-         * 
+         *
          * @param array $columns
          * @return array
          */
@@ -635,6 +652,8 @@
 
         /**
          * Add a DISTINCT keyword before the list of columns in the SELECT query
+         *
+         * @return \ORM
          */
         public function distinct() {
             $this->_distinct = true;
@@ -944,7 +963,7 @@
         }
 
         /**
-         * Add an unquoted expression to the list of columns to GROUP BY 
+         * Add an unquoted expression to the list of columns to GROUP BY
          */
         public function group_by_expr($expr) {
             $this->_group_by[] = $expr;
@@ -1156,6 +1175,12 @@
             }
 
             self::_log_query($query, $this->_values);
+
+            $none_optimised = self::$_config['optimise_none'];
+            if ($none_optimised && $this->_none) {
+                return array();
+            }
+
             $statement = self::$_db->prepare($query);
             $statement->execute($this->_values);
 

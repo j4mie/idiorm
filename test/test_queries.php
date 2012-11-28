@@ -80,6 +80,10 @@
     $expected = "SELECT * FROM `widget` WHERE `name` NOT IN ('Fred', 'Joe')";
     Tester::check_equal("where_not_in method", $expected);
 
+    ORM::for_table('widget')->none()->find_many();
+    $expected = "SELECT * FROM `widget` WHERE 0";
+    Tester::check_equal("None function", $expected);
+
     ORM::for_table('widget')->limit(5)->find_many();
     $expected = "SELECT * FROM `widget` LIMIT 5";
     Tester::check_equal("LIMIT clause", $expected);
@@ -296,15 +300,15 @@
     $widget = ORM::for_table('widget')->select('widget.*')->find_one();
     $expected = "SELECT `widget`.* FROM `widget` LIMIT 1";
     Tester::check_equal("Issue #12 - incorrect quoting of column wildcard", $expected);
-    
+
     $widget = ORM::for_table('widget')->where_raw('username LIKE "ben%"')->find_many();
     $expected = 'SELECT * FROM `widget` WHERE username LIKE "ben%"';
     Tester::check_equal('Issue #57 - _log_query method raises a warning when query contains "%"', $expected);
-    
+
     $widget = ORM::for_table('widget')->where_raw('comments LIKE "has been released?%"')->find_many();
     $expected = 'SELECT * FROM `widget` WHERE comments LIKE "has been released?%"';
     Tester::check_equal('Issue #57 - _log_query method raises a warning when query contains "?"', $expected);
-    
+
     // Tests that alter Idiorm's config are done last
 
     ORM::configure('id_column', 'primary_key');
