@@ -71,7 +71,7 @@ Changelog
 Philosophy
 ----------
 
-The [Pareto Principle](http://en.wikipedia.org/wiki/Pareto_principle) states that *roughly 80% of the effects come from 20% of the causes.* In software development terms, this could be translated into something along the lines of *80% of the results come from 20% of the complexity*. In other words, you can get pretty far by being pretty stupid. 
+The [Pareto Principle](http://en.wikipedia.org/wiki/Pareto_principle) states that *roughly 80% of the effects come from 20% of the causes.* In software development terms, this could be translated into something along the lines of *80% of the results come from 20% of the complexity*. In other words, you can get pretty far by being pretty stupid.
 
 **Idiorm is deliberately simple**. Where other ORMs consist of dozens of classes with complex inheritance hierarchies, Idiorm has only one class, `ORM`, which functions as both a fluent `SELECT` query API and a simple CRUD model class. If my hunch is correct, this should be quite enough for many real-world applications. Let's face it: most of us aren't building Facebook. We're working on small-to-medium-sized projects, where the emphasis is on simplicity and rapid development rather than infinite flexibility and features.
 
@@ -119,7 +119,7 @@ Also see "Configuration" section below.
 
 Idiorm provides a [*fluent interface*](http://en.wikipedia.org/wiki/Fluent_interface) to enable simple queries to be built without writing a single character of SQL. If you've used [jQuery](http://jquery.com) at all, you'll be familiar with the concept of a fluent interface. It just means that you can *chain* method calls together, one after another. This can make your code more readable, as the method calls strung together in order can start to look a bit like a sentence.
 
-All Idiorm queries start with a call to the `for_table` static method on the ORM class. This tells the ORM which table to use when making the query. 
+All Idiorm queries start with a call to the `for_table` static method on the ORM class. This tells the ORM which table to use when making the query.
 
 *Note that this method **does not** escape its query parameter and so the table name should **not** be passed directly from user input.*
 
@@ -240,6 +240,19 @@ This method may be used in a method chain alongside other `where_*` methods as w
 Note that this method only supports "question mark placeholder" syntax, and NOT "named placeholder" syntax. This is because PDO does not allow queries that contain a mixture of placeholder types. Also, you should ensure that the number of question mark placeholders in the string exactly matches the number of elements in the array.
 
 If you require yet more flexibility, you can manually specify the entire query. See *Raw queries* below.
+
+##### Empty sets #####
+
+Occasionally you may find you need to always return an empty set. This is useful when validating non-database values (e.g. a custom Paris filter)
+
+    $people = ORM::for_table('person')->none()->find_many();
+
+    // Creates SQL:
+    SELECT * FROM `person` WHERE 0;
+
+Note: By default if a none function is present in the chain the query will never actually be run against the database (although the query will still be logged). This behaviour can be changed by setting the `optimise_none` config to `false`:
+
+    ORM::configure('optimise_none', false);
 
 ##### Limits and offsets #####
 
@@ -530,8 +543,8 @@ Other than setting the DSN string for the database connection (see above), the `
 A shortcut is provided to allow passing multiple key/value pairs at once.
 
     ORM::configure(array(
-        'setting_name_1' => 'value_for_setting_1', 
-        'setting_name_2' => 'value_for_setting_2', 
+        'setting_name_1' => 'value_for_setting_1',
+        'setting_name_2' => 'value_for_setting_2',
         'etc' => 'etc'
     ));
 
@@ -548,8 +561,8 @@ Some database adapters (such as MySQL) require a username and password to be sup
 Or you can combine the connection setup into a single line using the configuration array shortcut:
 
     ORM::configure(array(
-        'mysql:host=localhost;dbname=my_database', 
-        'username' => 'database_user', 
+        'mysql:host=localhost;dbname=my_database',
+        'username' => 'database_user',
         'password' => 'top_secret'
     ));
 

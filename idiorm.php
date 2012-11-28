@@ -64,6 +64,7 @@
             'identifier_quote_character' => null, // if this is null, will be autodetected
             'logging' => false,
             'caching' => false,
+            'optimise_none' => true,
         );
 
         // Database connection, instance of the PDO class
@@ -143,6 +144,10 @@
         // Name of the column to use as the primary key for
         // this instance only. Overrides the config settings.
         protected $_instance_id_column = null;
+
+        // Whether the none function has been used.
+        // Allows us to avoid querying the database.
+        protected $_none = false;
 
         // ---------------------- //
         // --- STATIC METHODS --- //
@@ -611,6 +616,7 @@
          * @return \ORM
          */
         public function none() {
+            $this->_none = true;
             $this->where_raw('0');
             return $this;
         }
@@ -1169,6 +1175,12 @@
             }
 
             self::_log_query($query, $this->_values);
+
+            $none_optimised = self::$_config['optimise_none'];
+            if ($none_optimised && $this->_none) {
+                return array();
+            }
+
             $statement = self::$_db->prepare($query);
             $statement->execute($this->_values);
 
