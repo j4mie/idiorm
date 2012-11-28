@@ -243,7 +243,7 @@ If you require yet more flexibility, you can manually specify the entire query. 
 
 ##### Empty sets #####
 
-Occasionally you may find you need to always return an empty set. This is useful when validating non-database values (e.g. a custom Paris filter)
+Occasionally you may find you need to always return an empty set. This could be useful when validating non-database values but an instance of ORM needs to be returned (e.g. a custom Paris filter).
 
     $people = ORM::for_table('person')->none()->find_many();
 
