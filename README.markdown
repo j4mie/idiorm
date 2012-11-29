@@ -31,6 +31,14 @@ Changelog
 * Add query logging to `delete_many` [[tag](https://github.com/tag)]
 * Add `is_new` method - closes issue #85
 
+#### 1.2.3 - release 2012-11-28
+
+* Fix issue #78 - remove use of PHP 5.3 static call
+
+#### 1.2.2 - release 2012-11-15
+
+* Fix bug where input parameters were sent as part-indexed, part associative
+
 #### 1.2.1 - release 2012-11-15
 
 * Fix minor bug caused by IdiormStringException not extending Exception
