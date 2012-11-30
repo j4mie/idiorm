@@ -1244,6 +1244,15 @@
             $this->_set_orm_property($key, $value);
         }
 
+        /**
+         * Set a property to a particular value on this object.
+         * To set multiple properties at once, pass an associative array
+         * as the first parameter and leave out the second parameter.
+         * Flags the properties as 'dirty' so they will be saved to the
+         * database when save() is called. 
+         * @param string|array $key
+         * @param string|null $value
+         */
         public function set_expr($key, $value = null) {
             $this->_set_orm_property($key, $value, true);
         }
@@ -1275,6 +1284,14 @@
          */
         public function is_dirty($key) {
             return isset($this->_dirty_fields[$key]);
+        }
+
+        /**
+         * Check whether the model was the result of a call to create() or not
+         * @return bool
+         */
+        public function is_new() {
+            return $this->_is_new;
         }
 
         /**
