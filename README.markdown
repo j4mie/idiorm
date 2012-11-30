@@ -590,7 +590,12 @@ This can be used to set the `PDO::ATTR_ERRMODE` setting on the database connecti
 
     ORM::configure('error_mode', PDO::ERRMODE_WARNING);
 
-The default setting is `PDO::ERRMODE_EXCEPTION`. For full details of the error modes available, see [the PDO documentation](http://uk2.php.net/manual/en/pdo.setattribute.php).
+The default setting is `PDO::ERRMODE_EXCEPTION`. For full details of the error modes available, see [the PDO documentation](http://www.php.net/manual/en/pdo.setattribute.php).
+
+#### PDO object access ####
+Should it ever be necessary, the PDO object used by Idiorm may be accessed directly through `ORM::get_db()`, or set directly via `ORM::set_db()`. This should be an unusual occurance.
+
+After a statement has been executed by any means, such as `::save()` or `::raw_execute()`, the `PDOStatement` instance used may be accessed via `ORM::get_last_statement()`. This may be useful in order to access `PDOStatement::errorCode()`, if PDO exceptions are turned off, or to access the `PDOStatement::rowCount()` method, which returns differing results based on the underlying database. For more information, see the [PDOStatement documentation](http://www.php.net/manual/en/class.pdostatement.php).
 
 #### Identifier quote character ####
 
