@@ -78,6 +78,9 @@
         // Query cache, only used if query caching is enabled
         protected static $_query_cache = array();
 
+        // Reference to previously used PDOStatement object to enable low-level access, if needed
+        protected static $_last_statement = null;
+
         // --------------------------- //
         // --- INSTANCE PROPERTIES --- //
         // --------------------------- //
@@ -256,6 +259,14 @@
         }
 
         /**
+         * Returns the PDOSatemen instance last used by the the ORM.
+         * Useful for access to PDOStatement::rowCount() or error information
+         */
+        public static function get_last_statement() {
+            return self::_last_statement;
+        }
+
+        /**
          * Executes a raw query as a wrapper for PDOStatement::execute.
          * Useful for queries that can't be accomplished through Idiorm,
          * particularly those using engine-specific features.
@@ -268,8 +279,21 @@
         public static function raw_execute($query, $parameters = array()) {
             self::_setup_db();
 
+            return self::_execute($query, $parameters);
+        }
+
+        /**
+        * Internal helper method for executing statments. Logs queries, and
+        * stores statement object in ::_last_statment, accessible publicly
+        * through ::get_last_statement()
+        * @return bool Response of PDOStatement::execute()
+        **/
+        protected static function _execute($query, $parameters = array()) {
             self::_log_query($query, $parameters);
             $statement = self::$_db->prepare($query);
+
+            self::$_last_statement = $statement;
+
             return $statement->execute($parameters);
         }
 
@@ -1173,9 +1197,8 @@
                 }
             }
 
-            self::_log_query($query, $this->_values);
-            $statement = self::$_db->prepare($query);
-            $statement->execute($this->_values);
+            self::_execute($query, $this->_values);
+            $statement = self::$_last_statement;
 
             $rows = array();
             while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
@@ -1315,9 +1338,7 @@
                 $query = $this->_build_insert();
             }
 
-            self::_log_query($query, $values);
-            $statement = self::$_db->prepare($query);
-            $success = $statement->execute($values);
+            $success = self::_execute($query, $values);
 
             // If we've just inserted a new record, set the ID of this object
             if ($this->_is_new) {
@@ -1378,10 +1399,8 @@
                 $this->_quote_identifier($this->_get_id_column_name()),
                 "= ?",
             ));
-            $params = array($this->id());
-            self::_log_query($query, $params);
-            $statement = self::$_db->prepare($query);
-            return $statement->execute($params);
+
+            return self::_execute($query, array($this->id()));
         }
 
         /**
@@ -1395,9 +1414,8 @@
                 $this->_quote_identifier($this->_table_name),
                 $this->_build_where(),
             ));
-            self::_log_query($query, $this->_values);
-            $statement = self::$_db->prepare($query);
-            return $statement->execute($this->_values);
+
+            return self::_execute($query, $this->_values);
         }
 
         // --------------------- //
