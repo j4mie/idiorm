@@ -25,6 +25,10 @@ Features
 Changelog
 ---------
 
+#### 1.2.3 - release 2012-11-28
+
+* Fix issue #78 - remove use of PHP 5.3 static call
+
 #### 1.2.2 - release 2012-11-15
 
 * Fix bug where input parameters were sent as part-indexed, part associative

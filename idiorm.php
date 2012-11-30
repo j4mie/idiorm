@@ -1436,7 +1436,7 @@
          * @return string
          */
         public static function str_replace_outside_quotes($search, $replace, $subject) {
-            return static::value($subject)->replace_outside_quotes($search, $replace);
+            return self::value($subject)->replace_outside_quotes($search, $replace);
         }
 
         /**
