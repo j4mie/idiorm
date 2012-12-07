@@ -263,7 +263,7 @@
          * Useful for access to PDOStatement::rowCount() or error information
          */
         public static function get_last_statement() {
-            return self::_last_statement;
+            return self::$_last_statement;
         }
 
         /**
