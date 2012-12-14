@@ -11,6 +11,10 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   philosophy
+   installation
+   configuration
+
 
 
 Indices and tables
