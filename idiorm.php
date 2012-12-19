@@ -1288,7 +1288,11 @@
             if ($this->_is_new) {
                 $this->_is_new = false;
                 if (is_null($this->id())) {
-                    $this->_data[$this->_get_id_column_name()] = self::$_db->lastInsertId();
+                    if (self::$_db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql') {
+                        $this->_data[$this->_get_id_column_name()] = $statement->fetchColumn();
+                    } else {
+                        $this->_data[$this->_get_id_column_name()] = self::$_db->lastInsertId();
+                    }
                 }
             }
 
@@ -1329,6 +1333,11 @@
 
             $placeholders = $this->_create_placeholders($this->_dirty_fields);
             $query[] = "({$placeholders})";
+
+            if (self::$_db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql') {
+                $query[] = 'RETURNING ' . $this->_quote_identifier($this->_get_id_column_name());
+            }
+
             return join(" ", $query);
         }
 
