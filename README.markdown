@@ -43,6 +43,7 @@ Changelog
 * Add in raw_execute - closes issue #40 [[tag](https://github.com/tag)]
 * Add query logging to `delete_many` [[tag](https://github.com/tag)]
 * Add `is_new` method - closes issue #85
+* Fix last insert ID for PostgreSQL using RETURNING - closes issues #62 and #89 [[laacz](https://github.com/laacz)]
 
 #### 1.2.3 - release 2012-11-28
 
