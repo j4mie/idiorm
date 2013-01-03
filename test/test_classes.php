@@ -5,7 +5,7 @@
      * Mock version of the PDOStatement class.
      *
      */
-    class DummyPDOStatement extends PDOStatement {
+    class MockPDOStatement extends PDOStatement {
 
         private $current_row = 0;
         /**
@@ -27,13 +27,13 @@
      * of the PDO API.
      *
      */
-    class DummyPDO extends PDO {
+    class MockPDO extends PDO {
 
         /**
          * Return a dummy PDO statement
          */
         public function prepare($statement, $driver_options=array()) {
-            $this->last_query = new DummyPDOStatement($statement);
+            $this->last_query = new MockPDOStatement($statement);
             return $this->last_query;
         }
     }
@@ -77,7 +77,7 @@
         /**
          * Report a passed test
          */
-        private static function report_pass($test_name) {
+        public static function report_pass($test_name) {
             echo self::format_line("PASS: $test_name", 'GREEN');
             self::$passed_tests[] = $test_name;
         }
@@ -85,7 +85,7 @@
         /**
          * Report a failed test
          */
-        private static function report_failure($test_name, $expected, $actual) {
+        public static function report_failure($test_name, $expected, $actual) {
             echo self::format_line("FAIL: $test_name", 'RED');
             echo self::format_line("Expected: $expected", 'RED');
             echo self::format_line("Actual: $actual", 'RED');

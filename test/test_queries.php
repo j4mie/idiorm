@@ -13,7 +13,7 @@
     ORM::configure('logging', true);
 
     // Set up the dummy database connection
-    $db = new DummyPDO('sqlite::memory:');
+    $db = new MockPDO('sqlite::memory:');
     ORM::set_db($db);
 
     ORM::for_table('widget')->find_many();
@@ -299,6 +299,19 @@
     $expected = "INSERT OR IGNORE INTO `widget` (`id`, `name`) VALUES ('1', 'Tolstoy')";
     Tester::check_equal("Raw execute", $expected); // A bit of a silly test, as query is passed through
 
+    ORM::for_table('widget')->where('name', 'Fred')->find_one();
+    $statement = ORM::get_last_statement();
+    $test_name = 'get_last_statement() returned MockPDOStatement';
+    if($statement instanceOf MockPDOStatement) {
+        Tester::report_pass($test_name);
+    } else {
+        $actual = gettype($statement);
+        if('object' == $actual) {
+            $actual = get_class($statement);
+        }
+        Tester::report_failure($test_name, 'MockPDOStatement', $actual);
+    }
+
     // Regression tests
 
     $widget = ORM::for_table('widget')->select('widget.*')->find_one();
@@ -359,4 +372,3 @@
 
 
     Tester::report();
-?>
