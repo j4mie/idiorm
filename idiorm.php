@@ -1260,6 +1260,20 @@
         }
 
         /**
+         * Returns lastInsertId(), taking PostgreSQL in account.
+         */
+        public function last_insert_id() {
+            switch(self::$_db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
+                case 'pgsql':
+                    $this->_data[$this->_get_id_column_name()] = self::$_db->query('SELECT LASTVAL()')->fetchColumn();
+                    break;
+                default:
+                    $this->_data[$this->_get_id_column_name()] = self::$_db->lastInsertId();;
+            }
+            return $this->_data[$this->_get_id_column_name()];
+        }
+
+        /**
          * Save any fields which have been modified on this object
          * to the database.
          */
@@ -1288,7 +1302,7 @@
             if ($this->_is_new) {
                 $this->_is_new = false;
                 if (is_null($this->id())) {
-                    $this->_data[$this->_get_id_column_name()] = self::$_db->lastInsertId();
+                    $this->_data[$this->_get_id_column_name()] = self::last_insert_id();
                 }
             }
 
