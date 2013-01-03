@@ -116,7 +116,7 @@ class constants defined by PDO. For example:
     ORM::configure('error_mode', PDO::ERRMODE_WARNING);
 
 The default setting is ``PDO::ERRMODE_EXCEPTION``. For full details of
-the error modes available, see `the PDO documentation`_.
+the error modes available, see `the PDO set attribute documentation`_.
 
 Identifier quote character
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -208,5 +208,5 @@ Warnings and gotchas
 
 .. _PDO documentation: http://php.net/manual/en/pdo.construct.php
 .. _the PDO documentation: http://www.php.net/manual/en/pdo.construct.php
-.. _the PDO documentation: http://uk2.php.net/manual/en/pdo.setattribute.php
+.. _the PDO set attribute documentation: http://uk2.php.net/manual/en/pdo.setattribute.php
 .. _Memcached: http://www.memcached.org/
