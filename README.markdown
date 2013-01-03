@@ -22,6 +22,19 @@ Features
 * Consists of just one class called `ORM`. Minimal global namespace pollution.
 * Database agnostic. Currently supports SQLite and MySQL. May support others, please give it a try!
 
+Documentation
+-------------
+
+The documentation is hosted on Read the Docs: [idiorm.rtfd.org](http://idiorm.rtfd.org)
+
+## Building the Docs ##
+
+You will need to install [Sphinx](http://sphinx-doc.org/) and then in the docs folder run:
+
+    make html
+
+The documentation will now be in docs/_build/html/index.html
+
 Changelog
 ---------
 
