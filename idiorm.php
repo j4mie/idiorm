@@ -1198,7 +1198,7 @@
             }
 
             self::_execute($query, $this->_values);
-            $statement = self::$_last_statement;
+            $statement = self::get_last_statement();
 
             $rows = array();
             while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
@@ -1345,7 +1345,7 @@
                 $this->_is_new = false;
                 if (is_null($this->id())) {
                     if (self::$_db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql') {
-                        $this->_data[$this->_get_id_column_name()] = $statement->fetchColumn();
+                        $this->_data[$this->_get_id_column_name()] = self::get_last_statement()->fetchColumn();
                     } else {
                         $this->_data[$this->_get_id_column_name()] = self::$_db->lastInsertId();
                     }
