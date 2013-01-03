@@ -45,6 +45,7 @@ Changelog
 * Add `is_new` method - closes issue #85
 * Fix last insert ID for PostgreSQL using RETURNING - closes issues #62 and #89 [[laacz](https://github.com/laacz)]
 * Add `get_last_statement()` - closes issue #84 [[tag](https://github.com/tag)]
+* Fix when using `set_expr` alone it doesn't trigger query creation - closes issue #90
 
 #### 1.2.3 - release 2012-11-28
 

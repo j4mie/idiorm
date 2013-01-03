@@ -1329,7 +1329,7 @@
 
             if (!$this->_is_new) { // UPDATE
                 // If there are no dirty values, do nothing
-                if (count($values) == 0) {
+                if (empty($values) && empty($this->_expr_fields)) {
                     return true;
                 }
                 $query = $this->_build_update();

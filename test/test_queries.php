@@ -326,6 +326,12 @@
     $expected = 'SELECT * FROM `widget` WHERE comments LIKE "has been released?%"';
     Tester::check_equal('Issue #57 - _log_query method raises a warning when query contains "?"', $expected);
 
+    $widget = ORM::for_table('widget')->find_one(1);
+    $widget->set_expr('added', 'NOW()');
+    $widget->save();
+    $expected = "UPDATE `widget` SET `added` = NOW() WHERE `id` = '1'";
+    Tester::check_equal("Issue #90 - When using set_expr alone it doesn't trigger query creation", $expected);
+
     // Tests that alter Idiorm's config are done last
 
     ORM::configure('id_column', 'primary_key');
