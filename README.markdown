@@ -47,6 +47,7 @@ Changelog
 * Add `get_last_statement()` - closes issue #84 [[tag](https://github.com/tag)]
 * Fix when using `set_expr` alone it doesn't trigger query creation - closes issue #90
 * Escape quote symbols in "_quote_identifier_part" - close issue #74
+* Add HAVING clause functionality
 
 #### 1.2.3 - release 2012-11-28
 

@@ -48,6 +48,10 @@
         const WHERE_FRAGMENT = 0;
         const WHERE_VALUES = 1;
 
+        // Having condition array keys
+        const HAVING_FRAGMENT = 0;
+        const HAVING_VALUES = 1;
+
         // ------------------------ //
         // --- CLASS PROPERTIES --- //
         // ------------------------ //
@@ -129,6 +133,9 @@
 
         // GROUP BY
         protected $_group_by = array();
+
+        // HAVING
+        protected $_having_conditions = array();
 
         // The data for a hydrated instance of the class
         protected $_data = array();
@@ -794,6 +801,35 @@
         }
 
         /**
+         * Internal method to add a HAVING condition to the query
+         */
+        protected function _add_having($fragment, $values=array()) {
+            if (!is_array($values)) {
+                $values = array($values);
+            }
+            $this->_having_conditions[] = array(
+                self::HAVING_FRAGMENT => $fragment,
+                self::HAVING_VALUES => $values,
+            );
+            return $this;
+        }
+
+        /**
+         * Helper method to compile a simple COLUMN SEPARATOR VALUE
+         * style HAVING condition into a string and value ready to
+         * be passed to the _add_having method. Avoids duplication
+         * of the call to _quote_identifier
+         */
+        protected function _add_simple_having($column_name, $separator, $value) {
+            // Add the table name in case of ambiguous columns
+            if (count($this->_join_sources) > 0 && strpos($column_name, '.') === false) {
+                $column_name = "{$this->_table_name}.{$column_name}";
+            }
+            $column_name = $this->_quote_identifier($column_name);
+            return $this->_add_having("{$column_name} {$separator} ?", $value);
+        }
+
+        /**
          * Return a string containing the given number of question marks,
          * separated by commas. Eg "?, ?, ?"
          */
@@ -994,6 +1030,123 @@
         }
 
         /**
+         * Add a HAVING column = value clause to your query. Each time
+         * this is called in the chain, an additional HAVING will be
+         * added, and these will be ANDed together when the final query
+         * is built.
+         */
+        public function having($column_name, $value) {
+            return $this->having_equal($column_name, $value);
+        }
+
+        /**
+         * More explicitly named version of for the having() method.
+         * Can be used if preferred.
+         */
+        public function having_equal($column_name, $value) {
+            return $this->_add_simple_having($column_name, '=', $value);
+        }
+
+        /**
+         * Add a HAVING column != value clause to your query.
+         */
+        public function having_not_equal($column_name, $value) {
+            return $this->_add_simple_having($column_name, '!=', $value);
+        }
+
+        /**
+         * Special method to query the table by its primary key
+         */
+        public function having_id_is($id) {
+            return $this->having($this->_get_id_column_name(), $id);
+        }
+
+        /**
+         * Add a HAVING ... LIKE clause to your query.
+         */
+        public function having_like($column_name, $value) {
+            return $this->_add_simple_having($column_name, 'LIKE', $value);
+        }
+
+        /**
+         * Add where HAVING ... NOT LIKE clause to your query.
+         */
+        public function having_not_like($column_name, $value) {
+            return $this->_add_simple_having($column_name, 'NOT LIKE', $value);
+        }
+
+        /**
+         * Add a HAVING ... > clause to your query
+         */
+        public function having_gt($column_name, $value) {
+            return $this->_add_simple_having($column_name, '>', $value);
+        }
+
+        /**
+         * Add a HAVING ... < clause to your query
+         */
+        public function having_lt($column_name, $value) {
+            return $this->_add_simple_having($column_name, '<', $value);
+        }
+
+        /**
+         * Add a HAVING ... >= clause to your query
+         */
+        public function having_gte($column_name, $value) {
+            return $this->_add_simple_having($column_name, '>=', $value);
+        }
+
+        /**
+         * Add a HAVING ... <= clause to your query
+         */
+        public function having_lte($column_name, $value) {
+            return $this->_add_simple_having($column_name, '<=', $value);
+        }
+
+        /**
+         * Add a HAVING ... IN clause to your query
+         */
+        public function having_in($column_name, $values) {
+            $column_name = $this->_quote_identifier($column_name);
+            $placeholders = $this->_create_placeholders($values);
+            return $this->_add_having("{$column_name} IN ({$placeholders})", $values);
+        }
+
+        /**
+         * Add a HAVING ... NOT IN clause to your query
+         */
+        public function having_not_in($column_name, $values) {
+            $column_name = $this->_quote_identifier($column_name);
+            $placeholders = $this->_create_placeholders($values);
+            return $this->_add_having("{$column_name} NOT IN ({$placeholders})", $values);
+        }
+
+        /**
+         * Add a HAVING column IS NULL clause to your query
+         */
+        public function having_null($column_name) {
+            $column_name = $this->_quote_identifier($column_name);
+            return $this->_add_having("{$column_name} IS NULL");
+        }
+
+        /**
+         * Add a HAVING column IS NOT NULL clause to your query
+         */
+        public function having_not_null($column_name) {
+            $column_name = $this->_quote_identifier($column_name);
+            return $this->_add_having("{$column_name} IS NOT NULL");
+        }
+
+        /**
+         * Add a raw HAVING clause to the query. The clause should
+         * contain question mark placeholders, which will be bound
+         * to the parameters supplied in the second argument.
+         */
+        public function having_raw($clause, $parameters=array()) {
+            return $this->_add_having($clause, $parameters);
+        }
+
+        /**
          * Build a SELECT statement based on the clauses that have
          * been passed to this instance by chaining method calls.
          */
@@ -1012,6 +1165,7 @@
                 $this->_build_join(),
                 $this->_build_where(),
                 $this->_build_group_by(),
+                $this->_build_having(),
                 $this->_build_order_by(),
                 $this->_build_limit(),
                 $this->_build_offset(),
@@ -1073,6 +1227,24 @@
                 return '';
             }
             return "GROUP BY " . join(", ", $this->_group_by);
+        }
+
+        /**
+         * Build the HAVING clause(s)
+         */
+        protected function _build_having() {
+            // If there are no WHERE clauses, return empty string
+            if (count($this->_having_conditions) === 0) {
+                return '';
+            }
+
+            $having_conditions = array();
+            foreach ($this->_having_conditions as $condition) {
+                $having_conditions[] = $condition[self::HAVING_FRAGMENT];
+                $this->_values = array_merge($this->_values, $condition[self::HAVING_VALUES]);
+            }
+
+            return "HAVING " . join(" AND ", $having_conditions);
         }
 
         /**

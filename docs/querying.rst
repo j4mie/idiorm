@@ -283,6 +283,21 @@ It is also possible to ``GROUP BY`` a database expression:
 
     $people = ORM::for_table('person')->where('gender', 'female')->group_by_expr("FROM_UNIXTIME(`time`, '%Y-%m')")->find_many();
 
+Having
+^^^^^^
+
+When using aggregate functions in combination with a ``GROUP BY`` you can use
+``HAVING`` to filter based on those values.
+
+``HAVING`` works in exactly the same way as all of the ``where*`` functions in Idiorm.
+Substitute ``where_`` for ``having_`` to make use of these functions.
+
+For example:
+
+::
+
+    $people = ORM::for_table('person')->group_by('name')->having_not_like('name', '%bob%')->find_many();
+
 Result columns
 ^^^^^^^^^^^^^^
 

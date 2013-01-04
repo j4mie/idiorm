@@ -116,6 +116,54 @@
     $expected = "SELECT * FROM `widget` GROUP BY FROM_UNIXTIME(`time`, '%Y-%m')";
     Tester::check_equal("GROUP BY expression", $expected);
 
+    ORM::for_table('widget')->group_by('name')->having('name', 'Fred')->find_one();
+    $expected = "SELECT * FROM `widget` GROUP BY `name` HAVING `name` = 'Fred' LIMIT 1";
+    Tester::check_equal("Single having clause", $expected);
+
+    ORM::for_table('widget')->group_by('name')->having('name', 'Fred')->having('age', 10)->find_one();
+    $expected = "SELECT * FROM `widget` GROUP BY `name` HAVING `name` = 'Fred' AND `age` = '10' LIMIT 1";
+    Tester::check_equal("Multiple HAVING clauses", $expected);
+
+    ORM::for_table('widget')->group_by('name')->having_not_equal('name', 'Fred')->find_many();
+    $expected = "SELECT * FROM `widget` GROUP BY `name` HAVING `name` != 'Fred'";
+    Tester::check_equal("having_not_equal method", $expected);
+
+    ORM::for_table('widget')->group_by('name')->having_like('name', '%Fred%')->find_one();
+    $expected = "SELECT * FROM `widget` GROUP BY `name` HAVING `name` LIKE '%Fred%' LIMIT 1";
+    Tester::check_equal("having_like method", $expected);
+
+    ORM::for_table('widget')->group_by('name')->having_not_like('name', '%Fred%')->find_one();
+    $expected = "SELECT * FROM `widget` GROUP BY `name` HAVING `name` NOT LIKE '%Fred%' LIMIT 1";
+    Tester::check_equal("having_not_like method", $expected);
+
+    ORM::for_table('widget')->group_by('name')->having_in('name', array('Fred', 'Joe'))->find_many();
+    $expected = "SELECT * FROM `widget` GROUP BY `name` HAVING `name` IN ('Fred', 'Joe')";
+    Tester::check_equal("having_in method", $expected);
+
+    ORM::for_table('widget')->group_by('name')->having_not_in('name', array('Fred', 'Joe'))->find_many();
+    $expected = "SELECT * FROM `widget` GROUP BY `name` HAVING `name` NOT IN ('Fred', 'Joe')";
+    Tester::check_equal("having_not_in method", $expected);
+
+    ORM::for_table('widget')->group_by('name')->having_lt('age', 10)->having_gt('age', 5)->find_many();
+    $expected = "SELECT * FROM `widget` GROUP BY `name` HAVING `age` < '10' AND `age` > '5'";
+    Tester::check_equal("HAVING less than and greater than", $expected);
+
+    ORM::for_table('widget')->group_by('name')->having_lte('age', 10)->having_gte('age', 5)->find_many();
+    $expected = "SELECT * FROM `widget` GROUP BY `name` HAVING `age` <= '10' AND `age` >= '5'";
+    Tester::check_equal("HAVING less than or equal and greater than or equal", $expected);
+
+    ORM::for_table('widget')->group_by('name')->having_null('name')->find_many();
+    $expected = "SELECT * FROM `widget` GROUP BY `name` HAVING `name` IS NULL";
+    Tester::check_equal("having_null method", $expected);
+
+    ORM::for_table('widget')->group_by('name')->having_not_null('name')->find_many();
+    $expected = "SELECT * FROM `widget` GROUP BY `name` HAVING `name` IS NOT NULL";
+    Tester::check_equal("having_not_null method", $expected);
+
+    ORM::for_table('widget')->group_by('name')->having_raw('`name` = ? AND (`age` = ? OR `age` = ?)', array('Fred', 5, 10))->find_many();
+    $expected = "SELECT * FROM `widget` GROUP BY `name` HAVING `name` = 'Fred' AND (`age` = '5' OR `age` = '10')";
+    Tester::check_equal("Raw HAVING clause", $expected);
+
     ORM::for_table('widget')->where('name', 'Fred')->limit(5)->offset(5)->order_by_asc('name')->find_many();
     $expected = "SELECT * FROM `widget` WHERE `name` = 'Fred' ORDER BY `name` ASC LIMIT 5 OFFSET 5";
     Tester::check_equal("Complex query", $expected);
