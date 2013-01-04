@@ -74,7 +74,7 @@ expressions using the ``set_expr`` method.
 
 ::
 
-    $person = ORM::for_table('person')->find_one(5);;
+    $person = ORM::for_table('person')->find_one(5);
     $person->set('name', 'Bob Smith');
     $person->age = 20;
     $person->set_expr('updated', 'NOW()');
