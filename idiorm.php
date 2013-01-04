@@ -1143,7 +1143,12 @@
                 return $part;
             }
             $quote_character = self::$_config['identifier_quote_character'];
-            return $quote_character . $part . $quote_character;
+            // double up any identifier quotes to escape them
+            return $quote_character .
+                   str_replace($quote_character,
+                               $quote_character . $quote_character,
+                               $part
+                   ) . $quote_character;
         }
 
         /**

@@ -327,6 +327,12 @@
     Tester::check_equal('Issue #57 - _log_query method raises a warning when query contains "?"', $expected);
 
     $widget = ORM::for_table('widget')->find_one(1);
+    $widget->set('ad`ded', '2013-01-04');
+    $widget->save();
+    $expected = "UPDATE `widget` SET `ad``ded` = '2013-01-04' WHERE `id` = '1'";
+    Tester::check_equal('Issue #74 - escaping quote symbols in "_quote_identifier_part"', $expected);
+
+    $widget = ORM::for_table('widget')->find_one(1);
     $widget->set_expr('added', 'NOW()');
     $widget->save();
     $expected = "UPDATE `widget` SET `added` = NOW() WHERE `id` = '1'";
