@@ -80,6 +80,10 @@
     $expected = "SELECT * FROM `widget` WHERE `name` NOT IN ('Fred', 'Joe')";
     Tester::check_equal("where_not_in method", $expected);
 
+    ORM::for_table('widget')->none()->find_many();
+    $expected = "SELECT * FROM `widget` WHERE 0";
+    Tester::check_equal("None function", $expected);
+
     ORM::for_table('widget')->limit(5)->find_many();
     $expected = "SELECT * FROM `widget` LIMIT 5";
     Tester::check_equal("LIMIT clause", $expected);

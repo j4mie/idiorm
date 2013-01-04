@@ -64,6 +64,7 @@
             'identifier_quote_character' => null, // if this is null, will be autodetected
             'logging' => false,
             'caching' => false,
+            'optimise_none' => true,
         );
 
         // Database connection, instance of the PDO class
@@ -143,6 +144,10 @@
         // Name of the column to use as the primary key for
         // this instance only. Overrides the config settings.
         protected $_instance_id_column = null;
+
+        // Whether the none function has been used.
+        // Allows us to avoid querying the database.
+        protected $_none = false;
 
         // ---------------------- //
         // --- STATIC METHODS --- //
@@ -601,6 +606,17 @@
                     $this->select_expr($column, $alias);
                 }
             }
+            return $this;
+        }
+
+        /**
+         * Makes sure that an empty set is returned by the ORM
+         *
+         * @return \ORM
+         */
+        public function none() {
+            $this->_none = true;
+            $this->where_raw(0);
             return $this;
         }
 
@@ -1145,6 +1161,7 @@
         protected function _run() {
             $query = $this->_build_select();
             $caching_enabled = self::$_config['caching'];
+            $none_optimised = self::$_config['optimise_none'];
 
             if ($caching_enabled) {
                 $cache_key = self::_create_cache_key($query, $this->_values);
@@ -1156,12 +1173,15 @@
             }
 
             self::_log_query($query, $this->_values);
-            $statement = self::$_db->prepare($query);
-            $statement->execute($this->_values);
 
             $rows = array();
-            while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
-                $rows[] = $row;
+            if (!($none_optimised && $this->_none)) {
+                $statement = self::$_db->prepare($query);
+                $statement->execute($this->_values);
+
+                while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
+                    $rows[] = $row;
+                }
             }
 
             if ($caching_enabled) {
