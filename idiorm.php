@@ -465,7 +465,9 @@
             }
             $this->select_expr("$sql_function($column)", $alias);
             $result = $this->find_one();
-            return ($result !== false && isset($result->$alias)) ? (int) $result->$alias : 0;
+            if($result !== false && isset($result->$alias)) {
+                return ((int) $result->$alias == floatval($result->$alias)) ? (int) $result->$alias : floatval($result->$alias);
+            } else { return 0; }
         }
 
          /**
