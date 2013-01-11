@@ -514,7 +514,16 @@
             }
             $this->select_expr("$sql_function($column)", $alias);
             $result = $this->find_one();
-            return ($result !== false && isset($result->$alias)) ? (int) $result->$alias : 0;
+
+            $return_value = 0;
+            if($result !== false && isset($result->$alias)) {
+                if((int) $result->$alias == (float) $result->$alias) {
+                    $return_value = (int) $result->$alias;
+                } else {
+                    $return_value = (float) $result->$alias;
+                }
+            }
+            return $return_value;
         }
 
          /**

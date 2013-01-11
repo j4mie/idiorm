@@ -48,6 +48,7 @@ Changelog
 * Fix when using `set_expr` alone it doesn't trigger query creation - closes issue #90
 * Escape quote symbols in "_quote_identifier_part" - close issue #74
 * Add HAVING clause functionality
+* Fix issue with aggregate functions always returning `int` when is `float` sometimes required - closes issue #92
 
 #### 1.2.3 - release 2012-11-28
 
