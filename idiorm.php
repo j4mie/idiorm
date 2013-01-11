@@ -44,13 +44,9 @@
         // --- CLASS CONSTANTS --- //
         // ----------------------- //
 
-        // Where condition array keys
-        const WHERE_FRAGMENT = 0;
-        const WHERE_VALUES = 1;
-
-        // Having condition array keys
-        const HAVING_FRAGMENT = 0;
-        const HAVING_VALUES = 1;
+        // WHERE and HAVING condition array keys
+        const CONDITION_FRAGMENT = 0;
+        const CONDITION_VALUES = 1;
 
         // ------------------------ //
         // --- CLASS PROPERTIES --- //
@@ -266,7 +262,7 @@
         }
 
         /**
-         * Returns the PDOSatemen instance last used by the the ORM.
+         * Returns the PDOSatement instance last used by the the ORM.
          * Useful for access to PDOStatement::rowCount() or error information
          */
         public static function get_last_statement() {
@@ -781,62 +777,62 @@
         }
 
         /**
-         * Internal method to add a WHERE condition to the query
+         * Internal method to add a HAVING condition to the query
          */
-        protected function _add_where($fragment, $values=array()) {
-            if (!is_array($values)) {
-                $values = array($values);
-            }
-            $this->_where_conditions[] = array(
-                self::WHERE_FRAGMENT => $fragment,
-                self::WHERE_VALUES => $values,
-            );
-            return $this;
-        }
-
-        /**
-         * Helper method to compile a simple COLUMN SEPARATOR VALUE
-         * style WHERE condition into a string and value ready to
-         * be passed to the _add_where method. Avoids duplication
-         * of the call to _quote_identifier
-         */
-        protected function _add_simple_where($column_name, $separator, $value) {
-            // Add the table name in case of ambiguous columns
-            if (count($this->_join_sources) > 0 && strpos($column_name, '.') === false) {
-                $column_name = "{$this->_table_name}.{$column_name}";
-            }
-            $column_name = $this->_quote_identifier($column_name);
-            return $this->_add_where("{$column_name} {$separator} ?", $value);
+        protected function _add_having($fragment, $values=array()) {
+            return $this->_add_condition('having', $fragment, $values);
         }
 
         /**
          * Internal method to add a HAVING condition to the query
          */
-        protected function _add_having($fragment, $values=array()) {
-            if (!is_array($values)) {
-                $values = array($values);
-            }
-            $this->_having_conditions[] = array(
-                self::HAVING_FRAGMENT => $fragment,
-                self::HAVING_VALUES => $values,
-            );
-            return $this;
+        protected function _add_simple_having($column_name, $separator, $value) {
+            return $this->_add_simple_condition('having', $column_name, $separator, $value);
         }
 
         /**
+         * Internal method to add a WHERE condition to the query
+         */
+        protected function _add_where($fragment, $values=array()) {
+            return $this->_add_condition('where', $fragment, $values);
+        }
+
+        /**
+         * Internal method to add a WHERE condition to the query
+         */
+        protected function _add_simple_where($column_name, $separator, $value) {
+            return $this->_add_simple_condition('where', $column_name, $separator, $value);
+        }
+
+        /**
+         * Internal method to add a HAVING or WHERE condition to the query
+         */
+        protected function _add_condition($type, $fragment, $values=array()) {
+            $conditions_class_property_name = "_{$type}_conditions";
+            if (!is_array($values)) {
+                $values = array($values);
+            }
+            array_push($this->$conditions_class_property_name, array(
+                self::CONDITION_FRAGMENT => $fragment,
+                self::CONDITION_VALUES => $values,
+            ));
+            return $this;
+        }
+
+       /**
          * Helper method to compile a simple COLUMN SEPARATOR VALUE
-         * style HAVING condition into a string and value ready to
-         * be passed to the _add_having method. Avoids duplication
+         * style HAVING or WHERE condition into a string and value ready to
+         * be passed to the _add_condition method. Avoids duplication
          * of the call to _quote_identifier
          */
-        protected function _add_simple_having($column_name, $separator, $value) {
+        protected function _add_simple_condition($type, $column_name, $separator, $value) {
             // Add the table name in case of ambiguous columns
             if (count($this->_join_sources) > 0 && strpos($column_name, '.') === false) {
                 $column_name = "{$this->_table_name}.{$column_name}";
             }
             $column_name = $this->_quote_identifier($column_name);
-            return $this->_add_having("{$column_name} {$separator} ?", $value);
-        }
+            return $this->_add_condition($type, "{$column_name} {$separator} ?", $value);
+        } 
 
         /**
          * Return a string containing the given number of question marks,
@@ -1214,18 +1210,14 @@
          * Build the WHERE clause(s)
          */
         protected function _build_where() {
-            // If there are no WHERE clauses, return empty string
-            if (count($this->_where_conditions) === 0) {
-                return '';
-            }
+            return $this->_build_conditions('where');
+        }
 
-            $where_conditions = array();
-            foreach ($this->_where_conditions as $condition) {
-                $where_conditions[] = $condition[self::WHERE_FRAGMENT];
-                $this->_values = array_merge($this->_values, $condition[self::WHERE_VALUES]);
-            }
-
-            return "WHERE " . join(" AND ", $where_conditions);
+        /**
+         * Build the HAVING clause(s)
+         */
+        protected function _build_having() {
+            return $this->_build_conditions('having');
         }
 
         /**
@@ -1239,21 +1231,24 @@
         }
 
         /**
-         * Build the HAVING clause(s)
+         * Build a WHERE or HAVING clause
+         * @param string $type
+         * @return string
          */
-        protected function _build_having() {
-            // If there are no WHERE clauses, return empty string
-            if (count($this->_having_conditions) === 0) {
+        protected function _build_conditions($type) {
+            $conditions_class_property_name = "_{$type}_conditions";
+            // If there are no clauses, return empty string
+            if (count($this->$conditions_class_property_name) === 0) {
                 return '';
             }
 
-            $having_conditions = array();
-            foreach ($this->_having_conditions as $condition) {
-                $having_conditions[] = $condition[self::HAVING_FRAGMENT];
-                $this->_values = array_merge($this->_values, $condition[self::HAVING_VALUES]);
+            $conditions = array();
+            foreach ($this->$conditions_class_property_name as $condition) {
+                $conditions[] = $condition[self::CONDITION_FRAGMENT];
+                $this->_values = array_merge($this->_values, $condition[self::CONDITION_VALUES]);
             }
 
-            return "HAVING " . join(" AND ", $having_conditions);
+            return strtoupper($type) . " " . join(" AND ", $conditions);
         }
 
         /**

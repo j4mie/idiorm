@@ -49,6 +49,7 @@ Changelog
 * Escape quote symbols in "_quote_identifier_part" - close issue #74
 * Add HAVING clause functionality
 * Fix issue with aggregate functions always returning `int` when is `float` sometimes required - closes issue #92
+* Documentation moved to [idiorm.rtfd.org](http://idiorm.rtfd.org) and built using [Sphinx](http://sphinx-doc.org/)
 
 #### 1.2.3 - release 2012-11-28
 
