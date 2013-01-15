@@ -38,7 +38,7 @@
      *
      */
 
-    class ORM {
+    class ORM implements ArrayAccess {
 
         // ----------------------- //
         // --- CLASS CONSTANTS --- //
@@ -1609,24 +1609,47 @@
         }
 
         // --------------------- //
-        // --- MAGIC METHODS --- //
+        // ---  ArrayAccess  --- //
         // --------------------- //
-        public function __get($key) {
+
+        public function offsetExists($key) {
+            return isset($this->_data[$key]);
+        }
+
+        public function offsetGet($key) {
             return $this->get($key);
         }
 
-        public function __set($key, $value) {
+        public function offsetSet($key, $value) {
+            if(is_null($key)) {
+                throw new InvalidArgumentException('You must specify a key/array index.');
+            }
             $this->set($key, $value);
         }
 
-        public function __unset($key) {
+        public function offsetUnset($key) {
             unset($this->_data[$key]);
             unset($this->_dirty_fields[$key]);
         }
 
+        // --------------------- //
+        // --- MAGIC METHODS --- //
+        // --------------------- //
+        public function __get($key) {
+            return $this->offsetGet($key);
+        }
+
+        public function __set($key, $value) {
+            $this->offsetSet($key, $value);
+        }
+
+        public function __unset($key) {
+            $this->offsetUnset($key);
+        }
+
 
         public function __isset($key) {
-            return isset($this->_data[$key]);
+            return $this->offsetExists($key);
         }
     }
 

@@ -347,6 +347,13 @@
     $expected = "INSERT OR IGNORE INTO `widget` (`id`, `name`) VALUES ('1', 'Tolstoy')";
     Tester::check_equal("Raw execute", $expected); // A bit of a silly test, as query is passed through
 
+    $widget = ORM::for_table('widget')->create();
+    $widget['name'] = "Fred";
+    $widget['age'] = 10;
+    $widget->save();
+    $expected = "INSERT INTO `widget` (`name`, `age`) VALUES ('Fred', '10')";
+    Tester::check_equal("Insert data using ArrayAccess", $expected);
+
     ORM::for_table('widget')->where('name', 'Fred')->find_one();
     $statement = ORM::get_last_statement();
     $test_name = 'get_last_statement() returned MockPDOStatement';
