@@ -1,0 +1,11 @@
+<phpunit backupGlobals="true"
+         backupStaticAttributes="false"
+         bootstrap="test/bootstrap.php"
+         cacheTokens="false"
+         colors="true">
+    <testsuites>
+        <testsuite name="Idiorm Test Suite">
+            <directory suffix="Test.php">test</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>
