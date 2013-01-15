@@ -87,6 +87,24 @@ configuration array shortcut:
         'password' => 'top_secret'
     ));
 
+Result sets
+^^^^^^^^^^^
+
+Setting: ``return_result_sets``
+
+Collections of results can be returned as an array (default) or as a result set.
+See the `find_result_set()` documentation for more information.
+
+::
+
+    ORM::configure('return_result_sets', true); // returns result sets
+
+
+.. note::
+
+   It is recommended that you setup your projects to use result sets as they
+   are more flexible.
+
 PDO Driver Options
 ^^^^^^^^^^^^^^^^^^
 

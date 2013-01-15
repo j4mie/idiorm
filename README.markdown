@@ -21,6 +21,7 @@ Features
 * Requires no model classes, no XML configuration and no code generation: works out of the box, given only a connection string.
 * Consists of just one class called `ORM`. Minimal global namespace pollution.
 * Database agnostic. Currently supports SQLite and MySQL. May support others, please give it a try!
+* Supports collections of models with method chaining to filter or apply actions to multiple results at once.
 
 Documentation
 -------------
@@ -50,6 +51,9 @@ Changelog
 * Add HAVING clause functionality
 * Fix issue with aggregate functions always returning `int` when is `float` sometimes required - closes issue #92
 * Documentation moved to [idiorm.rtfd.org](http://idiorm.rtfd.org) and built using [Sphinx](http://sphinx-doc.org/)
+* Add `ArrayAccess` support to the model instances allowing property access via `$model['field']` as well as `$model->field` - issue #51
+* Add a result set object for collections of models that can support method chains to filter or apply actions to multiple results at once - issue #51 and #22
+* Add some PHPUnit tests for newer features
 
 #### 1.2.3 - release 2012-11-28
 

@@ -64,6 +64,7 @@
             'identifier_quote_character' => null, // if this is null, will be autodetected
             'logging' => false,
             'caching' => false,
+            'return_result_sets' => false,
         );
 
         // Database connection, instance of the PDO class
@@ -439,10 +440,35 @@
          * from your query, and execute it. Will return an array
          * of instances of the ORM class, or an empty array if
          * no rows were returned.
+         * @return array|\IdiormResultSet
          */
         public function find_many() {
+            if(self::$_config['return_result_sets']) {
+                return $this->find_result_set();
+            }
+            return $this->_find_many();
+        }
+
+        /**
+         * Tell the ORM that you are expecting multiple results
+         * from your query, and execute it. Will return an array
+         * of instances of the ORM class, or an empty array if
+         * no rows were returned.
+         * @return array
+         */
+        protected function _find_many() {
             $rows = $this->_run();
             return array_map(array($this, '_create_instance_from_row'), $rows);
+        }
+
+        /**
+         * Tell the ORM that you are expecting multiple results
+         * from your query, and execute it. Will return a result set object
+         * containing instances of the ORM class.
+         * @return \IdiormResultSet
+         */
+        public function find_result_set() {
+            return new IdiormResultSet($this->_find_many());
         }
 
         /**
@@ -1754,6 +1780,83 @@
             // Process only unquoted chunks (in group $2).
             return preg_replace('/'. preg_quote($this->search, '/') .'/',
                 $this->replace, $matches[2]);
+        }
+    }
+
+    /**
+     * A result set class for working with collections of model instances
+     * @author Simon Holywell <treffynnon@php.net>
+     */
+    class IdiormResultSet implements Countable, IteratorAggregate {
+        /**
+         * The current result set as an array
+         * @var array
+         */
+        protected $_results = array();
+
+        /**
+         * Optionally set the contents of the result set by passing in array
+         * @param array $results
+         */
+        public function __construct(array $results = array()) {
+            $this->set_results($results);
+        }
+
+        /**
+         * Set the contents of the result set by passing in array
+         * @param array $results
+         */
+        public function set_results(array $results) {
+            $this->_results = $results;
+        }
+
+        /**
+         * Get the current result set as an array
+         * @return array
+         */
+        public function get_results() {
+            return $this->_results;
+        }
+
+        /**
+         * Get the current result set as an array
+         * @return array
+         */
+        public function as_array() {
+            return $this->get_results();
+        }
+        
+        /**
+         * Get the number of records in the result set
+         * @return int
+         */
+        public function count() {
+            return count($this->_results);
+        }
+
+        /**
+         * Get an iterator for this object. In this case it supports foreaching
+         * over the result set.
+         * @return \ArrayIterator
+         */
+        public function getIterator() {
+            return new ArrayIterator($this->_results);
+        }
+
+        /**
+         * Call a method on all models in a result set. This allows for method
+         * chaining such as setting a property on all models in a result set or
+         * any other batch operation across models.
+         * @example ORM::for_table('Widget')->find_many()->set('field', 'value')->save();
+         * @param string $method
+         * @param array $params
+         * @return \IdiormResultSet
+         */
+        public function __call($method, $params = array()) {
+            foreach($this->_results as $model) {
+                call_user_func_array(array($model, $method), $params);
+            }
+            return $this;
         }
     }
 

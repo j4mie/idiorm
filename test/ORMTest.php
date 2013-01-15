@@ -1,6 +1,17 @@
 <?php
 
+require_once 'test_classes.php';
+
 class ORMTest extends PHPUnit_Framework_TestCase {
+
+    public function setUp() {
+        // Enable logging
+        ORM::configure('logging', true);
+
+        // Set up the dummy database connection
+        $db = new MockPDO('sqlite::memory:');
+        ORM::set_db($db);
+    }
 
     public function testStaticAtrributes() {
         $this->assertEquals('0', ORM::CONDITION_FRAGMENT);
@@ -42,6 +53,26 @@ class ORMTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals($model['test'], $value);
         unset($model['test']);
         $this->assertFalse(isset($model['test']));
+    }
+
+    public function testFindResultSet() {
+        $result_set = ORM::for_table('test')->find_result_set();
+        $this->assertInstanceOf('IdiormResultSet', $result_set);
+        $this->assertSame(count($result_set), 5);
+    }
+
+    public function testFindResultSetByDefault() {
+        ORM::configure('return_result_sets', true);
+
+        $result_set = ORM::for_table('test')->find_many();
+        $this->assertInstanceOf('IdiormResultSet', $result_set);
+        $this->assertSame(count($result_set), 5);
+        
+        ORM::configure('return_result_sets', false);
+        
+        $result_set = ORM::for_table('test')->find_many();
+        $this->assertInternalType('array', $result_set);
+        $this->assertSame(count($result_set), 5);
     }
 
 }

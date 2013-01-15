@@ -54,6 +54,11 @@ To find a single record by ID, you can pass the ID directly to the
 Multiple records
 ^^^^^^^^^^^^^^^^
 
+.. note::
+
+   It is recommended that you use results sets over arrays - see `As a result set`
+   below.
+
 Any method chain that ends in ``find_many()`` will return an *array* of
 ORM class instances, one for each row matched by your query. If no rows
 were found, an empty array will be returned.
@@ -69,6 +74,62 @@ To find all records where the ``gender`` is ``female``:
 ::
 
     $females = ORM::for_table('person')->where('gender', 'female')->find_many();
+
+As a result set
+'''''''''''''''
+
+.. note::
+
+   There is a configuration setting ``return_result_sets`` that will cause
+   ``find_many()`` to return result sets by default. It is recommended that you
+   turn this setting on:
+
+   ::
+
+       ORM::configure('return_result_sets', true);
+
+You can also find many records as a result set instead of an array of Idiorm
+instances. This gives you the advantage that you can run batch operations on a
+set of results.
+
+So for example instead of running this:
+
+::
+
+    $people = ORM::for_table('person')->find_many();
+    foreach ($people as $person) {
+        $person->age = 50;
+        $person->save();
+    }
+
+You can simple do this instead:
+
+::
+
+    ORM::for_table('person')->find_result_set()
+    ->set('age', 50)
+    ->save();
+
+To do this substitute any call to ``find_many()`` with
+``find_result_set()``.
+
+A result set will also behave like an array so you can `count()` it and `foreach`
+over it just like an array.
+
+::
+
+    foreach(ORM::for_table('person')->find_result_set() as $record) {
+        echo $person->name;
+    }
+
+::
+
+    echo count(ORM::for_table('person')->find_result_set());
+
+.. note::
+   
+   For deleting many records it is recommended that you use `delete_many()` as it
+   is more efficient than calling `delete()` on a result set.
 
 As an associative array
 '''''''''''''''''''''''
