@@ -1787,7 +1787,7 @@
      * A result set class for working with collections of model instances
      * @author Simon Holywell <treffynnon@php.net>
      */
-    class IdiormResultSet implements Countable, IteratorAggregate {
+    class IdiormResultSet implements Countable, IteratorAggregate, ArrayAccess, Serializable {
         /**
          * The current result set as an array
          * @var array
@@ -1841,6 +1841,58 @@
          */
         public function getIterator() {
             return new ArrayIterator($this->_results);
+        }
+
+        /**
+         * ArrayAccess
+         * @param int|string $offset
+         * @return bool
+         */
+        public function offsetExists($offset) {
+            return isset($this->_results[$offset]);
+        }
+
+        /**
+         * ArrayAccess
+         * @param int|string $offset
+         * @return mixed
+         */
+        public function offsetGet($offset) {
+            return $this->_results[$offset];
+        }
+        
+        /**
+         * ArrayAccess
+         * @param int|string $offset
+         * @param mixed $value
+         */
+        public function offsetSet($offset, $value) {
+            $this->_results[$offset] = $value;
+        }
+
+        /**
+         * ArrayAccess
+         * @param int|string $offset
+         */
+        public function offsetUnset($offset) {
+            unset($this->_results[$offset]);
+        }
+
+        /**
+         * Serializable
+         * @return string
+         */
+        public function serialize() {
+            return serialize($this->_results);
+        }
+
+        /**
+         * Serializable
+         * @param string $serialized
+         * @return array
+         */
+        public function unserialize($serialized) {
+            return unserialize($serialized);
         }
 
         /**
