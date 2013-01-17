@@ -1,7 +1,5 @@
 <?php
 
-require_once 'test_classes.php';
-
 class ORMTest extends PHPUnit_Framework_TestCase {
 
     public function setUp() {
