@@ -104,6 +104,8 @@
     $expected = "SELECT * FROM `widget` ORDER BY `name` ASC, `age` DESC LIMIT 1";
     Tester::check_equal("Multiple ORDER BY", $expected);
 
+        ///////////////////////////////////////////
+
     ORM::for_table('widget')->group_by('name')->find_many();
     $expected = "SELECT * FROM `widget` GROUP BY `name`";
     Tester::check_equal("GROUP BY", $expected);

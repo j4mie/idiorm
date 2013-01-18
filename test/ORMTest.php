@@ -11,6 +11,11 @@ class ORMTest extends PHPUnit_Framework_TestCase {
         ORM::set_db($db);
     }
 
+    public function tearDown() {
+        ORM::configure('logging', false);
+        ORM::set_db(null);
+    }
+
     public function testStaticAtrributes() {
         $this->assertEquals('0', ORM::CONDITION_FRAGMENT);
         $this->assertEquals('1', ORM::CONDITION_VALUES);
