@@ -78,4 +78,10 @@ class ORMTest extends PHPUnit_Framework_TestCase {
         $this->assertSame(count($result_set), 5);
     }
 
+    public function testGetLastPdoStatement() {
+        ORM::for_table('widget')->where('name', 'Fred')->find_one();
+        $statement = ORM::get_last_statement();
+        $this->assertInstanceOf('MockPDOStatement', $statement);
+    }
+
 }
