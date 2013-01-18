@@ -106,7 +106,7 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals($expected, ORM::get_last_query());
     }
 
-    public function testOrderByExpr() {
+    public function testOrderByExpression() {
         ORM::for_table('widget')->order_by_expr('SOUNDEX(`name`)')->find_one();
         $expected = "SELECT * FROM `widget` ORDER BY SOUNDEX(`name`) LIMIT 1";
         $this->assertEquals($expected, ORM::get_last_query());
@@ -115,6 +115,72 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
     public function testMultipleOrderBy() {
         ORM::for_table('widget')->order_by_asc('name')->order_by_desc('age')->find_one();
         $expected = "SELECT * FROM `widget` ORDER BY `name` ASC, `age` DESC LIMIT 1";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testGroupBy() {
+        ORM::for_table('widget')->group_by('name')->find_many();
+        $expected = "SELECT * FROM `widget` GROUP BY `name`";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testMultipleGroupBy() {
+        ORM::for_table('widget')->group_by('name')->group_by('age')->find_many();
+        $expected = "SELECT * FROM `widget` GROUP BY `name`, `age`";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testGroupByExpression() {
+        ORM::for_table('widget')->group_by_expr("FROM_UNIXTIME(`time`, '%Y-%m')")->find_many();
+        $expected = "SELECT * FROM `widget` GROUP BY FROM_UNIXTIME(`time`, '%Y-%m')";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testHaving() {
+        ORM::for_table('widget')->group_by('name')->having('name', 'Fred')->find_one();
+        $expected = "SELECT * FROM `widget` GROUP BY `name` HAVING `name` = 'Fred' LIMIT 1";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testMultipleHaving() {
+        ORM::for_table('widget')->group_by('name')->having('name', 'Fred')->having('age', 10)->find_one();
+        $expected = "SELECT * FROM `widget` GROUP BY `name` HAVING `name` = 'Fred' AND `age` = '10' LIMIT 1";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testHavingNotEqual() {
+        ORM::for_table('widget')->group_by('name')->having_not_equal('name', 'Fred')->find_many();
+        $expected = "SELECT * FROM `widget` GROUP BY `name` HAVING `name` != 'Fred'";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testHavingLike() {
+        ORM::for_table('widget')->group_by('name')->having_like('name', '%Fred%')->find_one();
+        $expected = "SELECT * FROM `widget` GROUP BY `name` HAVING `name` LIKE '%Fred%' LIMIT 1";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testHavingNotLike() {
+        ORM::for_table('widget')->group_by('name')->having_not_like('name', '%Fred%')->find_one();
+        $expected = "SELECT * FROM `widget` GROUP BY `name` HAVING `name` NOT LIKE '%Fred%' LIMIT 1";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testHavingIn() {
+        ORM::for_table('widget')->group_by('name')->having_in('name', array('Fred', 'Joe'))->find_many();
+        $expected = "SELECT * FROM `widget` GROUP BY `name` HAVING `name` IN ('Fred', 'Joe')";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testHavingNotIn() {
+        ORM::for_table('widget')->group_by('name')->having_not_in('name', array('Fred', 'Joe'))->find_many();
+        $expected = "SELECT * FROM `widget` GROUP BY `name` HAVING `name` NOT IN ('Fred', 'Joe')";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testHavingLessThan() {
+        ORM::for_table('widget')->group_by('name')->having_lt('age', 10)->having_gt('age', 5)->find_many();
+        $expected = "SELECT * FROM `widget` GROUP BY `name` HAVING `age` < '10' AND `age` > '5'";
         $this->assertEquals($expected, ORM::get_last_query());
     }
 

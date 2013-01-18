@@ -104,8 +104,6 @@
     $expected = "SELECT * FROM `widget` ORDER BY `name` ASC, `age` DESC LIMIT 1";
     Tester::check_equal("Multiple ORDER BY", $expected);
 
-        ///////////////////////////////////////////
-
     ORM::for_table('widget')->group_by('name')->find_many();
     $expected = "SELECT * FROM `widget` GROUP BY `name`";
     Tester::check_equal("GROUP BY", $expected);
@@ -149,6 +147,8 @@
     ORM::for_table('widget')->group_by('name')->having_lt('age', 10)->having_gt('age', 5)->find_many();
     $expected = "SELECT * FROM `widget` GROUP BY `name` HAVING `age` < '10' AND `age` > '5'";
     Tester::check_equal("HAVING less than and greater than", $expected);
+
+        ///////////////////////////////////////////
 
     ORM::for_table('widget')->group_by('name')->having_lte('age', 10)->having_gte('age', 5)->find_many();
     $expected = "SELECT * FROM `widget` GROUP BY `name` HAVING `age` <= '10' AND `age` >= '5'";
