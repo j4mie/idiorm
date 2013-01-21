@@ -87,7 +87,7 @@
         // --------------------------- //
 
         // Key name of the connections in self::$_db used by this instance
-        protected $_which_db;
+        protected $_connection_name;
 
         // The name of the table the current ORM instance is associated with
         protected $_table_name;
@@ -165,14 +165,18 @@
          * you wish to configure, another shortcut is to pass an array
          * of settings (and omit the second argument).
          */
-        public static function configure($key, $value = null, $which = self::DEFAULT_CONNECTION) {
-            self::_setup_db_config($which); //ensures at least default config is set
+        public static function configure(
+            $key,
+            $value = null,
+            $connection_name = self::DEFAULT_CONNECTION
+        ) {
+            self::_setup_db_config($connection_name); //ensures at least default config is set
 
             if (is_array($key)) {
                 // Shortcut: If only one array argument is passed,
                 // assume it's an array of configuration settings
                 foreach ($key as $conf_key => $conf_value) {
-                    self::configure($conf_key, $conf_value, $which);
+                    self::configure($conf_key, $conf_value, $connection_name);
                 }
             } else {
                 if (empty($value)) {
@@ -181,7 +185,7 @@
                     $value = $key;
                     $key = 'connection_string';
                 }
-                self::$_config[$which][$key] = $value;
+                self::$_config[$connection_name][$key] = $value;
             }
         }
 
@@ -192,10 +196,10 @@
          * ORM::for_table('table_name')->find_one()-> etc. As such,
          * this will normally be the first method called in a chain.
          */
-        public static function for_table($table_name, $which = self::DEFAULT_CONNECTION)
+        public static function for_table($table_name, $connection_name = self::DEFAULT_CONNECTION)
         {
-            self::_setup_db($which);
-            return new self($table_name, array(), $which);
+            self::_setup_db($connection_name);
+            return new self($table_name, array(), $connection_name);
         }
 
         /**
@@ -203,28 +207,28 @@
          * Default value of parameter used for compatibility with Paris, until it can be updated
          * @todo After paris is updated to support multiple connections, remove default value of parameter
          */
-        protected static function _setup_db($which = self::DEFAULT_CONNECTION)
+        protected static function _setup_db($connection_name = self::DEFAULT_CONNECTION)
         {
-            if (!is_object(self::$_db[$which])) {
-                self::_setup_db_config($which);
+            if (!is_object(self::$_db[$connection_name])) {
+                self::_setup_db_config($connection_name);
 
                 $db = new PDO(
-                    self::$_config[$which]['connection_string'],
-                    self::$_config[$which]['username'],
-                    self::$_config[$which]['password'],
-                    self::$_config[$which]['driver_options']);
+                    self::$_config[$connection_name]['connection_string'],
+                    self::$_config[$connection_name]['username'],
+                    self::$_config[$connection_name]['password'],
+                    self::$_config[$connection_name]['driver_options']);
 
-                $db->setAttribute(PDO::ATTR_ERRMODE, self::$_config[$which]['error_mode']);
-                self::set_db($db, $which);
+                $db->setAttribute(PDO::ATTR_ERRMODE, self::$_config[$connection_name]['error_mode']);
+                self::set_db($db, $connection_name);
             }
         }
 
         /**
         * Ensures configuration (mulitple connections) is at least set to default.
         */
-        protected static function _setup_db_config($which) {
-            if (!array_key_exists($which, self::$_config)) {
-                self::$_config[$which] = self::$_default_config;
+        protected static function _setup_db_config($connection_name) {
+            if (!array_key_exists($connection_name, self::$_config)) {
+                self::$_config[$connection_name] = self::$_default_config;
             }
         }
 
@@ -234,10 +238,10 @@
          * PDO object as its database connection. Accepts an optional string key
          * to identify the connection if multiple connections are used.
          */
-        public static function set_db($db, $which = self::DEFAULT_CONNECTION) {
-            self::_setup_db_config($which);
-            self::$_db[$which] = $db;
-            self::_setup_identifier_quote_character($which);
+        public static function set_db($db, $connection_name = self::DEFAULT_CONNECTION) {
+            self::_setup_db_config($connection_name);
+            self::$_db[$connection_name] = $db;
+            self::_setup_identifier_quote_character($connection_name);
         }
 
         /**
@@ -246,10 +250,10 @@
          * manually using ORM::configure('identifier_quote_character', 'some-char'),
          * this will do nothing.
          */
-        protected static function _setup_identifier_quote_character($which) {
-            if (is_null(self::$_config[$which]['identifier_quote_character'])) {
-                self::$_config[$which]['identifier_quote_character'] =
-                     self::_detect_identifier_quote_character($which);
+        protected static function _setup_identifier_quote_character($connection_name) {
+            if (is_null(self::$_config[$connection_name]['identifier_quote_character'])) {
+                self::$_config[$connection_name]['identifier_quote_character'] =
+                     self::_detect_identifier_quote_character($connection_name);
             }
         }
 
@@ -257,8 +261,8 @@
          * Return the correct character used to quote identifiers (table
          * names, column names etc) by looking at the driver being used by PDO.
          */
-        protected static function _detect_identifier_quote_character($which) {
-            switch(self::$_db[$which]->getAttribute(PDO::ATTR_DRIVER_NAME)) {
+        protected static function _detect_identifier_quote_character($connection_name) {
+            switch(self::$_db[$connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME)) {
                 case 'pgsql':
                 case 'sqlsrv':
                 case 'dblib':
@@ -279,9 +283,9 @@
          * required outside the class. If multiple connections are used,
          * accepts an optional key name for the connection.
          */
-        public static function get_db($which = self::DEFAULT_CONNECTION) {
-            self::_setup_db($which); // required in case this is called before Idiorm is instantiated
-            return self::$_db[$which];
+        public static function get_db($connection_name = self::DEFAULT_CONNECTION) {
+            self::_setup_db($connection_name); // required in case this is called before Idiorm is instantiated
+            return self::$_db[$connection_name];
         }
 
         /**
@@ -298,12 +302,12 @@
         public static function raw_execute(
             $query,
             $parameters = array(),
-            $which = self::DEFAULT_CONNECTION
+            $connection_name = self::DEFAULT_CONNECTION
         ) {
-            self::_setup_db($which);
+            self::_setup_db($connection_name);
 
-            self::_log_query($query, $parameters, $which);
-            $statement = self::$_db[$which]->prepare($query);
+            self::_log_query($query, $parameters, $connection_name);
+            $statement = self::$_db[$connection_name]->prepare($query);
             return $statement->execute($parameters);
         }
 
@@ -316,19 +320,19 @@
          * parameters to the database which takes care of the binding) but
          * doing it this way makes the logged queries more readable.
          */
-        protected static function _log_query($query, $parameters, $which) {
+        protected static function _log_query($query, $parameters, $connection_name) {
             // If logging is not enabled, do nothing
-            if (!self::$_config[$which]['logging']) {
+            if (!self::$_config[$connection_name]['logging']) {
                 return false;
             }
 
-            if (!isset(self::$_query_log[$which])) {
-                self::$_query_log[$which] = array();
+            if (!isset(self::$_query_log[$connection_name])) {
+                self::$_query_log[$connection_name] = array();
             }
 
             if (count($parameters) > 0) {
                 // Escape the parameters
-                $parameters = array_map(array(self::$_db[$which], 'quote'), $parameters);
+                $parameters = array_map(array(self::$_db[$connection_name], 'quote'), $parameters);
 
                 // Avoid %format collision for vsprintf
                 $query = str_replace("%", "%%", $query);
@@ -347,7 +351,7 @@
             }
 
             self::$_last_query = $bound_query;
-            self::$_query_log[$which][] = $bound_query;
+            self::$_query_log[$connection_name][] = $bound_query;
             return true;
         }
 
@@ -356,15 +360,15 @@
          * 'logging' config option is set to true. Otherwise
          * this will return null. Returns last query from all connections
          */
-        public static function get_last_query($which = null) {
-            if ($which === null) {
+        public static function get_last_query($connection_name = null) {
+            if ($connection_name === null) {
                 return self::$_last_query;
             }
-            if (!isset(self::$_query_log[$which])) {
+            if (!isset(self::$_query_log[$connection_name])) {
                 return '';
             }
 
-            return implode('', array_slice(self::$_query_log[$which], -1));
+            return implode('', array_slice(self::$_query_log[$connection_name], -1));
             // Used implode(array_slice()) instead of end() to avoid resetting interal array pointer
         }
 
@@ -373,10 +377,13 @@
          * specified connection up to now.
          * Only works if the 'logging' config option is
          * set to true. Otherwise, returned array will be empty.
-         * @param string $which Key of database connection
+         * @param String $connection_name Key of database connection
          */
-        public static function get_query_log($which = self::DEFAULT_CONNECTION) {
-            return isset(self::$_query_log[$which]) ? self::$_query_log[$which] : array();
+        public static function get_query_log($connection_name = self::DEFAULT_CONNECTION) {
+            if (isset(self::$_query_log[$connection_name])) {
+                return self::$_query_log[$connection_name];
+            }
+            return array();
         }
 
         public static function get_connection_keys()
@@ -395,13 +402,13 @@
         protected function __construct(
             $table_name,
             $data = array(),
-            $which = self::DEFAULT_CONNECTION
+            $connection_name = self::DEFAULT_CONNECTION
         ) {
             $this->_table_name = $table_name;
             $this->_data = $data;
 
-            $this->_which_db = $which;
-            self::_setup_db_config($which);
+            $this->_connection_name = $connection_name;
+            self::_setup_db_config($connection_name);
         }
 
         /**
@@ -438,7 +445,7 @@
          * array of data fetched from the database)
          */
         protected function _create_instance_from_row($row) {
-            $instance = self::for_table($this->_table_name, $this->_which_db);
+            $instance = self::for_table($this->_table_name, $this->_connection_name);
             $instance->use_id_column($this->_instance_id_column);
             $instance->hydrate($row);
             return $instance;
@@ -1178,7 +1185,7 @@
             if ($part === '*') {
                 return $part;
             }
-            $quote_character = self::$_config[$this->_which_db]['identifier_quote_character'];
+            $quote_character = self::$_config[$this->_connection_name]['identifier_quote_character'];
             return $quote_character . $part . $quote_character;
         }
 
@@ -1195,9 +1202,11 @@
          * Check the query cache for the given cache key. If a value
          * is cached for the key, return the value. Otherwise, return false.
          */
-        protected static function _check_query_cache($cache_key, $which = self::DEFAULT_CONNECTION)
-        {
-            if (isset(self::$_query_cache[$which][$cache_key])) {
+        protected static function _check_query_cache(
+            $cache_key,
+            $connection_name = self::DEFAULT_CONNECTION
+        ) {
+            if (isset(self::$_query_cache[$connection_name][$cache_key])) {
                 return self::$_query_cache[$cache_key];
             }
             return false;
@@ -1216,12 +1225,12 @@
         protected static function _cache_query_result(
             $cache_key,
             $value,
-            $which = self::DEFAULT_CONNECTION
+            $connection_name = self::DEFAULT_CONNECTION
         ) {
-            if (!isset(self::$_query_cache[$which])) {
-                self::$_query_cache[$which] = array();
+            if (!isset(self::$_query_cache[$connection_name])) {
+                self::$_query_cache[$connection_name] = array();
             }
-            self::$_query_cache[$which][$cache_key] = $value;
+            self::$_query_cache[$connection_name][$cache_key] = $value;
         }
 
         /**
@@ -1230,19 +1239,19 @@
          */
         protected function _run() {
             $query = $this->_build_select();
-            $caching_enabled = self::$_config[$this->_which_db]['caching'];
+            $caching_enabled = self::$_config[$this->_connection_name]['caching'];
 
             if ($caching_enabled) {
                 $cache_key = self::_create_cache_key($query, $this->_values);
-                $cached_result = self::_check_query_cache($cache_key, $this->_which_db);
+                $cached_result = self::_check_query_cache($cache_key, $this->_connection_name);
 
                 if ($cached_result !== false) {
                     return $cached_result;
                 }
             }
 
-            self::_log_query($query, $this->_values, $this->_which_db);
-            $statement = self::$_db[$this->_which_db]->prepare($query);
+            self::_log_query($query, $this->_values, $this->_connection_name);
+            $statement = self::$_db[$this->_connection_name]->prepare($query);
             $statement->execute($this->_values);
 
             $rows = array();
@@ -1251,7 +1260,7 @@
             }
 
             if ($caching_enabled) {
-                self::_cache_query_result($cache_key, $rows, $this->_which_db);
+                self::_cache_query_result($cache_key, $rows, $this->_connection_name);
             }
 
             return $rows;
@@ -1287,11 +1296,10 @@
             if (!is_null($this->_instance_id_column)) {
                 return $this->_instance_id_column;
             }
-            if (isset(self::$_config[$this->_which_db]['id_column_overrides'][$this->_table_name])) {
-                return self::$_config[$this->_which_db]['id_column_overrides'][$this->_table_name];
-            } else {
-                return self::$_config[$this->_which_db]['id_column'];
+            if (isset(self::$_config[$this->_connection_name]['id_column_overrides'][$this->_table_name])) {
+                return self::$_config[$this->_connection_name]['id_column_overrides'][$this->_table_name];
             }
+            return self::$_config[$this->_connection_name]['id_column'];
         }
 
         /**
@@ -1366,8 +1374,8 @@
                 $query = $this->_build_insert();
             }
 
-            self::_log_query($query, $values, $this->_which_db);
-            $statement = self::$_db[$this->_which_db]->prepare($query);
+            self::_log_query($query, $values, $this->_connection_name);
+            $statement = self::$_db[$this->_connection_name]->prepare($query);
             $success = $statement->execute($values);
 
             // If we've just inserted a new record, set the ID of this object
@@ -1375,7 +1383,7 @@
                 $this->_is_new = false;
                 if (is_null($this->id())) {
                     $this->_data[$this->_get_id_column_name()] =
-                        self::$_db[$this->_which_db]->lastInsertId();
+                        self::$_db[$this->_connection_name]->lastInsertId();
                 }
             }
 
@@ -1431,8 +1439,8 @@
                 "= ?",
             ));
             $params = array($this->id());
-            self::_log_query($query, $params, $this->_which_db);
-            $statement = self::$_db[$this->_which_db]->prepare($query);
+            self::_log_query($query, $params, $this->_connection_name);
+            $statement = self::$_db[$this->_connection_name]->prepare($query);
             return $statement->execute($params);
         }
 
@@ -1447,8 +1455,8 @@
                 $this->_quote_identifier($this->_table_name),
                 $this->_build_where(),
             ));
-            self::_log_query($query, $this->_values, $this->_which_db);
-            $statement = self::$_db[$this->_which_db]->prepare($query);
+            self::_log_query($query, $this->_values, $this->_connection_name);
+            $statement = self::$_db[$this->_connection_name]->prepare($query);
             return $statement->execute($this->_values);
         }
 
