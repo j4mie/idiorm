@@ -184,6 +184,48 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals($expected, ORM::get_last_query());
     }
 
+    public function testHavingLessThanOrEqualAndGreaterThanOrEqual() {
+        ORM::for_table('widget')->group_by('name')->having_lte('age', 10)->having_gte('age', 5)->find_many();
+        $expected = "SELECT * FROM `widget` GROUP BY `name` HAVING `age` <= '10' AND `age` >= '5'";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testHavingNull() {
+        ORM::for_table('widget')->group_by('name')->having_null('name')->find_many();
+        $expected = "SELECT * FROM `widget` GROUP BY `name` HAVING `name` IS NULL";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testHavingNotNull() {
+        ORM::for_table('widget')->group_by('name')->having_not_null('name')->find_many();
+        $expected = "SELECT * FROM `widget` GROUP BY `name` HAVING `name` IS NOT NULL";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testRawHaving() {
+        ORM::for_table('widget')->group_by('name')->having_raw('`name` = ? AND (`age` = ? OR `age` = ?)', array('Fred', 5, 10))->find_many();
+        $expected = "SELECT * FROM `widget` GROUP BY `name` HAVING `name` = 'Fred' AND (`age` = '5' OR `age` = '10')";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testComplexQuery() {
+        ORM::for_table('widget')->where('name', 'Fred')->limit(5)->offset(5)->order_by_asc('name')->find_many();
+        $expected = "SELECT * FROM `widget` WHERE `name` = 'Fred' ORDER BY `name` ASC LIMIT 5 OFFSET 5";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testWhereLessThanAndGreaterThan() {
+        ORM::for_table('widget')->where_lt('age', 10)->where_gt('age', 5)->find_many();
+        $expected = "SELECT * FROM `widget` WHERE `age` < '10' AND `age` > '5'";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testWhereLessThanAndEqualAndGreaterThanAndEqual() {
+        ORM::for_table('widget')->where_lte('age', 10)->where_gte('age', 5)->find_many();
+        $expected = "SELECT * FROM `widget` WHERE `age` <= '10' AND `age` >= '5'";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
     public function testCount() {
         ORM::for_table('widget')->count();
         $expected = "SELECT COUNT(*) AS `count` FROM `widget` LIMIT 1";

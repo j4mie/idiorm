@@ -148,7 +148,6 @@
     $expected = "SELECT * FROM `widget` GROUP BY `name` HAVING `age` < '10' AND `age` > '5'";
     Tester::check_equal("HAVING less than and greater than", $expected);
 
-        ///////////////////////////////////////////
 
     ORM::for_table('widget')->group_by('name')->having_lte('age', 10)->having_gte('age', 5)->find_many();
     $expected = "SELECT * FROM `widget` GROUP BY `name` HAVING `age` <= '10' AND `age` >= '5'";
@@ -177,6 +176,8 @@
     ORM::for_table('widget')->where_lte('age', 10)->where_gte('age', 5)->find_many();
     $expected = "SELECT * FROM `widget` WHERE `age` <= '10' AND `age` >= '5'";
     Tester::check_equal("Less than or equal and greater than or equal", $expected);
+
+        ///////////////////////////////////////////
 
     ORM::for_table('widget')->where_null('name')->find_many();
     $expected = "SELECT * FROM `widget` WHERE `name` IS NULL";
