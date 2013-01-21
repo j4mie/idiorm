@@ -53,7 +53,8 @@ Changelog
 * Documentation moved to [idiorm.rtfd.org](http://idiorm.rtfd.org) and built using [Sphinx](http://sphinx-doc.org/)
 * Add `ArrayAccess` support to the model instances allowing property access via `$model['field']` as well as `$model->field` - issue #51
 * Add a result set object for collections of models that can support method chains to filter or apply actions to multiple results at once - issue #51 and #22
-* Add some PHPUnit tests for newer features
+* Move testing into PHPUnit to unify method testing and query generation testing
+* Change Composer to use a classmap so that autoloading is better supported [[javierd](https://github.com/javiervd)] - issue #96
 
 #### 1.2.3 - release 2012-11-28
 
