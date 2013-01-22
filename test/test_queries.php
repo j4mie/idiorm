@@ -227,6 +227,8 @@
     $expected = "SELECT `widget`.`name` AS `widget_name` FROM `widget`";
     Tester::check_equal("Aliases in result columns", $expected);
 
+    /////@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
     ORM::for_table('widget')->select_expr('COUNT(*)', 'count')->find_many();
     $expected = "SELECT COUNT(*) AS `count` FROM `widget`";
     Tester::check_equal("Literal expression in result columns", $expected);

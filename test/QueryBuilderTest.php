@@ -226,6 +226,78 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals($expected, ORM::get_last_query());
     }
 
+    public function testWhereNull() {
+        ORM::for_table('widget')->where_null('name')->find_many();
+        $expected = "SELECT * FROM `widget` WHERE `name` IS NULL";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testWhereNotNull() {
+        ORM::for_table('widget')->where_not_null('name')->find_many();
+        $expected = "SELECT * FROM `widget` WHERE `name` IS NOT NULL";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testRawWhereClause() {
+        ORM::for_table('widget')->where_raw('`name` = ? AND (`age` = ? OR `age` = ?)', array('Fred', 5, 10))->find_many();
+        $expected = "SELECT * FROM `widget` WHERE `name` = 'Fred' AND (`age` = '5' OR `age` = '10')";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testRawWhereClauseWithPercentSign() {
+        ORM::for_table('widget')->where_raw('STRFTIME("%Y", "now") = ?', array(2012))->find_many();
+        $expected = "SELECT * FROM `widget` WHERE STRFTIME(\"%Y\", \"now\") = '2012'";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testRawWhereClauseWithNoParameters() {
+        ORM::for_table('widget')->where_raw('`name` = "Fred"')->find_many();
+        $expected = "SELECT * FROM `widget` WHERE `name` = \"Fred\"";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testRawWhereClauseInMethodChain() {
+        ORM::for_table('widget')->where('age', 18)->where_raw('(`name` = ? OR `name` = ?)', array('Fred', 'Bob'))->where('size', 'large')->find_many();
+        $expected = "SELECT * FROM `widget` WHERE `age` = '18' AND (`name` = 'Fred' OR `name` = 'Bob') AND `size` = 'large'";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testRawQuery() {
+        ORM::for_table('widget')->raw_query('SELECT `w`.* FROM `widget` w')->find_many();
+        $expected = "SELECT `w`.* FROM `widget` w";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testRawQueryWithParameters() {
+        ORM::for_table('widget')->raw_query('SELECT `w`.* FROM `widget` w WHERE `name` = ? AND `age` = ?', array('Fred', 5))->find_many();
+        $expected = "SELECT `w`.* FROM `widget` w WHERE `name` = 'Fred' AND `age` = '5'";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testSimpleResultColumn() {
+        ORM::for_table('widget')->select('name')->find_many();
+        $expected = "SELECT `name` FROM `widget`";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testMultipleSimpleResultColumns() {
+        ORM::for_table('widget')->select('name')->select('age')->find_many();
+        $expected = "SELECT `name`, `age` FROM `widget`";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testSpecifyTableNameAndColumnInResultColumns() {
+        ORM::for_table('widget')->select('widget.name')->find_many();
+        $expected = "SELECT `widget`.`name` FROM `widget`";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testAliasesInResultColumns() {
+        ORM::for_table('widget')->select('widget.name', 'widget_name')->find_many();
+        $expected = "SELECT `widget`.`name` AS `widget_name` FROM `widget`";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
     public function testCount() {
         ORM::for_table('widget')->count();
         $expected = "SELECT COUNT(*) AS `count` FROM `widget` LIMIT 1";
