@@ -45,7 +45,7 @@
     /**
      * Another mock PDOStatement class, for testing multiple connections
      */
-    class DummyDifferentPDOStatement extends PDOStatement {
+    class MockDifferentPDOStatement extends PDOStatement {
 
         private $current_row = 0;
         /**
@@ -69,13 +69,13 @@
      * A different mock database class, for testing multiple connections
      * Mock database class implementing a subset of the PDO API.
      */
-    class DummyDifferentPDO extends PDO {
+    class MockDifferentPDO extends PDO {
 
         /**
          * Return a dummy PDO statement
          */
         public function prepare($statement, $driver_options = array()) {
-            $this->last_query = new DummyDifferentPDOStatement($statement);
+            $this->last_query = new MockDifferentPDOStatement($statement);
             return $this->last_query;
         }
     }

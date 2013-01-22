@@ -30,16 +30,11 @@ calls in the chain use the correct connection.
     $person = ORM::for_table('different_person', 'remote')->find_one(5);
     
     
-    // Last query on *any* connection
-    ORM::get_last_query(); // returns query on 'different_person' using 'remote'
-    
-    // returns query on 'person' using default
-    ORM::get_last_query(ORM::DEFAULT_CONNECTION);
 
 Supported Methods
 ^^^^^^^^^^^^^^^^^
-In each of these cases, the ``$connection_name`` parameter is optional, and is an arbitrary 
-key identifying the named connection.
+In each of these cases, the ``$connection_name`` parameter is optional, and is
+an arbitrary key identifying the named connection.
 
 * ``ORM::configure($key, $value, $connection_name)``
 * ``ORM::for_table($table_name, $connection_name)``
@@ -48,6 +43,19 @@ key identifying the named connection.
 * ``ORM::raw_execute($query, $parameters, $connection_name)``
 * ``ORM::get_last_query($connection_name)``
 * ``ORM::get_query_log($connection_name)``
+
+Of these methods, only ``ORM::get_last_query($connection_name)`` does *not*
+fallback to the default connection when no connection name is passed.
+Instead, passing no connection name (or ``null``) returns the most recent
+query on *any* connection.
+
+::
+
+    // Last query on *any* connection
+    ORM::get_last_query(); // returns query on 'different_person' using 'remote'
+    
+    // returns query on 'person' using default
+    ORM::get_last_query(ORM::DEFAULT_CONNECTION);
 
 Notes
 ~~~~~

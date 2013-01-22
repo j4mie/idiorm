@@ -69,6 +69,7 @@
             'return_result_sets' => false,
         );
 
+        // Map of configuration settings
         protected static $_config = array();
 
         // Map of database connections, instances of the PDO class
@@ -172,7 +173,7 @@
          * you wish to configure, another shortcut is to pass an array
          * of settings (and omit the second argument).
          */
-        public static function configure(
+        public static function  configure(
             $key,
             $value = null,
             $connection_name = self::DEFAULT_CONNECTION
@@ -186,7 +187,7 @@
                     self::configure($conf_key, $conf_value, $connection_name);
                 }
             } else {
-                if (empty($value)) {
+                if (is_null($value)) {
                     // Shortcut: If only one string argument is passed, 
                     // assume it's a connection string
                     $value = $key;
@@ -512,7 +513,7 @@
          * @return array|\IdiormResultSet
          */
         public function find_many() {
-            if(self::$_config['return_result_sets']) {
+            if(self::$_config[$this->_connection_name]['return_result_sets']) {
                 return $this->find_result_set();
             }
             return $this->_find_many();
