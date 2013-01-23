@@ -48,12 +48,14 @@
         const CONDITION_FRAGMENT = 0;
         const CONDITION_VALUES = 1;
 
+        const DEFAULT_CONNECTION = 'default';
+
         // ------------------------ //
         // --- CLASS PROPERTIES --- //
         // ------------------------ //
 
         // Class configuration
-        protected static $_config = array(
+        protected static $_default_config = array(
             'connection_string' => 'sqlite::memory:',
             'id_column' => 'id',
             'id_column_overrides' => array(),
@@ -67,13 +69,16 @@
             'return_result_sets' => false,
         );
 
-        // Database connection, instance of the PDO class
-        protected static $_db;
+        // Map of configuration settings
+        protected static $_config = array();
+
+        // Map of database connections, instances of the PDO class
+        protected static $_db = array();
 
         // Last query run, only populated if logging is enabled
         protected static $_last_query;
 
-        // Log of all queries run, only populated if logging is enabled
+        // Log of all queries run, mapped by connection key, only populated if logging is enabled
         protected static $_query_log = array();
 
         // Query cache, only used if query caching is enabled
@@ -85,6 +90,9 @@
         // --------------------------- //
         // --- INSTANCE PROPERTIES --- //
         // --------------------------- //
+
+        // Key name of the connections in self::$_db used by this instance
+        protected $_connection_name;
 
         // The name of the table the current ORM instance is associated with
         protected $_table_name;
@@ -165,12 +173,18 @@
          * you wish to configure, another shortcut is to pass an array
          * of settings (and omit the second argument).
          */
-        public static function configure($key, $value=null) {
+        public static function  configure(
+            $key,
+            $value = null,
+            $connection_name = self::DEFAULT_CONNECTION
+        ) {
+            self::_setup_db_config($connection_name); //ensures at least default config is set
+
             if (is_array($key)) {
                 // Shortcut: If only one array argument is passed,
                 // assume it's an array of configuration settings
                 foreach ($key as $conf_key => $conf_value) {
-                    self::configure($conf_key, $conf_value);
+                    self::configure($conf_key, $conf_value, $connection_name);
                 }
             } else {
                 if (is_null($value)) {
@@ -179,7 +193,7 @@
                     $value = $key;
                     $key = 'connection_string';
                 }
-                self::$_config[$key] = $value;
+                self::$_config[$connection_name][$key] = $value;
             }
         }
 
@@ -190,34 +204,52 @@
          * ORM::for_table('table_name')->find_one()-> etc. As such,
          * this will normally be the first method called in a chain.
          */
-        public static function for_table($table_name) {
-            self::_setup_db();
-            return new self($table_name);
+        public static function for_table($table_name, $connection_name = self::DEFAULT_CONNECTION)
+        {
+            self::_setup_db($connection_name);
+            return new self($table_name, array(), $connection_name);
         }
 
         /**
          * Set up the database connection used by the class.
+         * Default value of parameter used for compatibility with Paris, until it can be updated
+         * @todo After paris is updated to support multiple connections, remove default value of parameter
          */
-        protected static function _setup_db() {
-            if (!is_object(self::$_db)) {
-                $connection_string = self::$_config['connection_string'];
-                $username = self::$_config['username'];
-                $password = self::$_config['password'];
-                $driver_options = self::$_config['driver_options'];
-                $db = new PDO($connection_string, $username, $password, $driver_options);
-                $db->setAttribute(PDO::ATTR_ERRMODE, self::$_config['error_mode']);
-                self::set_db($db);
+        protected static function _setup_db($connection_name = self::DEFAULT_CONNECTION)
+        {
+            if (!is_object(self::$_db[$connection_name])) {
+                self::_setup_db_config($connection_name);
+
+                $db = new PDO(
+                    self::$_config[$connection_name]['connection_string'],
+                    self::$_config[$connection_name]['username'],
+                    self::$_config[$connection_name]['password'],
+                    self::$_config[$connection_name]['driver_options']);
+
+                $db->setAttribute(PDO::ATTR_ERRMODE, self::$_config[$connection_name]['error_mode']);
+                self::set_db($db, $connection_name);
+            }
+        }
+
+        /**
+        * Ensures configuration (mulitple connections) is at least set to default.
+        */
+        protected static function _setup_db_config($connection_name) {
+            if (!array_key_exists($connection_name, self::$_config)) {
+                self::$_config[$connection_name] = self::$_default_config;
             }
         }
 
         /**
          * Set the PDO object used by Idiorm to communicate with the database.
          * This is public in case the ORM should use a ready-instantiated
-         * PDO object as its database connection.
+         * PDO object as its database connection. Accepts an optional string key
+         * to identify the connection if multiple connections are used.
          */
-        public static function set_db($db) {
-            self::$_db = $db;
-            self::_setup_identifier_quote_character();
+        public static function set_db($db, $connection_name = self::DEFAULT_CONNECTION) {
+            self::_setup_db_config($connection_name);
+            self::$_db[$connection_name] = $db;
+            self::_setup_identifier_quote_character($connection_name);
         }
 
         /**
@@ -226,9 +258,10 @@
          * manually using ORM::configure('identifier_quote_character', 'some-char'),
          * this will do nothing.
          */
-        public static function _setup_identifier_quote_character() {
-            if (is_null(self::$_config['identifier_quote_character'])) {
-                self::$_config['identifier_quote_character'] = self::_detect_identifier_quote_character();
+        protected static function _setup_identifier_quote_character($connection_name) {
+            if (is_null(self::$_config[$connection_name]['identifier_quote_character'])) {
+                self::$_config[$connection_name]['identifier_quote_character'] =
+                     self::_detect_identifier_quote_character($connection_name);
             }
         }
 
@@ -236,8 +269,8 @@
          * Return the correct character used to quote identifiers (table
          * names, column names etc) by looking at the driver being used by PDO.
          */
-        protected static function _detect_identifier_quote_character() {
-            switch(self::$_db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
+        protected static function _detect_identifier_quote_character($connection_name) {
+            switch(self::$_db[$connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME)) {
                 case 'pgsql':
                 case 'sqlsrv':
                 case 'dblib':
@@ -255,19 +288,12 @@
         /**
          * Returns the PDO instance used by the the ORM to communicate with
          * the database. This can be called if any low-level DB access is
-         * required outside the class.
+         * required outside the class. If multiple connections are used,
+         * accepts an optional key name for the connection.
          */
-        public static function get_db() {
-            self::_setup_db(); // required in case this is called before Idiorm is instantiated
-            return self::$_db;
-        }
-
-        /**
-         * Returns the PDOSatement instance last used by the the ORM.
-         * Useful for access to PDOStatement::rowCount() or error information
-         */
-        public static function get_last_statement() {
-            return self::$_last_statement;
+        public static function get_db($connection_name = self::DEFAULT_CONNECTION) {
+            self::_setup_db($connection_name); // required in case this is called before Idiorm is instantiated
+            return self::$_db[$connection_name];
         }
 
         /**
@@ -278,12 +304,27 @@
          * @example raw_execute('INSERT OR REPLACE INTO `widget` (`id`, `name`) SELECT `id`, `name` FROM `other_table`')
          * @param string $query The raw SQL query
          * @param array  $parameters Optional bound parameters
+         * @param array
          * @return bool Success
          */
-        public static function raw_execute($query, $parameters = array()) {
-            self::_setup_db();
+        public static function raw_execute(
+            $query,
+            $parameters = array(),
+            $connection_name = self::DEFAULT_CONNECTION
+        ) {
+            self::_setup_db($connection_name);
 
-            return self::_execute($query, $parameters);
+            self::_log_query($query, $parameters, $connection_name);
+            $statement = self::$_db[$connection_name]->prepare($query);
+            return $statement->execute($parameters);
+        }
+
+        /**
+         * Returns the PDOStatement instance last used by any connection wrapped by the ORM.
+         * Useful for access to PDOStatement::rowCount() or error information
+         */
+        public static function get_last_statement() {
+            return self::$_last_statement;
         }
 
         /**
@@ -292,9 +333,9 @@
         * through ::get_last_statement()
         * @return bool Response of PDOStatement::execute()
         **/
-        protected static function _execute($query, $parameters = array()) {
-            self::_log_query($query, $parameters);
-            $statement = self::$_db->prepare($query);
+        protected static function _execute($query, $parameters = array(), $connection_name = self::DEFAULT_CONNECTION) {
+            self::_log_query($query, $parameters, $connection_name);
+            $statement = self::$_db[$connection_name]->prepare($query);
 
             self::$_last_statement = $statement;
 
@@ -310,15 +351,19 @@
          * parameters to the database which takes care of the binding) but
          * doing it this way makes the logged queries more readable.
          */
-        protected static function _log_query($query, $parameters) {
+        protected static function _log_query($query, $parameters, $connection_name) {
             // If logging is not enabled, do nothing
-            if (!self::$_config['logging']) {
+            if (!self::$_config[$connection_name]['logging']) {
                 return false;
+            }
+
+            if (!isset(self::$_query_log[$connection_name])) {
+                self::$_query_log[$connection_name] = array();
             }
 
             if (count($parameters) > 0) {
                 // Escape the parameters
-                $parameters = array_map(array(self::$_db, 'quote'), $parameters);
+                $parameters = array_map(array(self::$_db[$connection_name], 'quote'), $parameters);
 
                 // Avoid %format collision for vsprintf
                 $query = str_replace("%", "%%", $query);
@@ -337,26 +382,44 @@
             }
 
             self::$_last_query = $bound_query;
-            self::$_query_log[] = $bound_query;
+            self::$_query_log[$connection_name][] = $bound_query;
             return true;
         }
 
         /**
          * Get the last query executed. Only works if the
          * 'logging' config option is set to true. Otherwise
-         * this will return null.
+         * this will return null. Returns last query from all connections
          */
-        public static function get_last_query() {
-            return self::$_last_query;
+        public static function get_last_query($connection_name = null) {
+            if ($connection_name === null) {
+                return self::$_last_query;
+            }
+            if (!isset(self::$_query_log[$connection_name])) {
+                return '';
+            }
+
+            return implode('', array_slice(self::$_query_log[$connection_name], -1));
+            // Used implode(array_slice()) instead of end() to avoid resetting interal array pointer
         }
 
         /**
-         * Get an array containing all the queries run up to
-         * now. Only works if the 'logging' config option is
-         * set to true. Otherwise returned array will be empty.
+         * Get an array containing all the queries run on a
+         * specified connection up to now.
+         * Only works if the 'logging' config option is
+         * set to true. Otherwise, returned array will be empty.
+         * @param String $connection_name Key of database connection
          */
-        public static function get_query_log() {
-            return self::$_query_log;
+        public static function get_query_log($connection_name = self::DEFAULT_CONNECTION) {
+            if (isset(self::$_query_log[$connection_name])) {
+                return self::$_query_log[$connection_name];
+            }
+            return array();
+        }
+
+        public static function get_connection_keys()
+        {
+            return array_keys(self::$_db);
         }
 
         // ------------------------ //
@@ -367,9 +430,16 @@
          * "Private" constructor; shouldn't be called directly.
          * Use the ORM::for_table factory method instead.
          */
-        protected function __construct($table_name, $data=array()) {
+        protected function __construct(
+            $table_name,
+            $data = array(),
+            $connection_name = self::DEFAULT_CONNECTION
+        ) {
             $this->_table_name = $table_name;
             $this->_data = $data;
+
+            $this->_connection_name = $connection_name;
+            self::_setup_db_config($connection_name);
         }
 
         /**
@@ -406,7 +476,7 @@
          * array of data fetched from the database)
          */
         protected function _create_instance_from_row($row) {
-            $instance = self::for_table($this->_table_name);
+            $instance = self::for_table($this->_table_name, $this->_connection_name);
             $instance->use_id_column($this->_instance_id_column);
             $instance->hydrate($row);
             return $instance;
@@ -443,7 +513,7 @@
          * @return array|\IdiormResultSet
          */
         public function find_many() {
-            if(self::$_config['return_result_sets']) {
+            if(self::$_config[$this->_connection_name]['return_result_sets']) {
                 return $this->find_result_set();
             }
             return $this->_find_many();
@@ -1344,7 +1414,8 @@
             if ($part === '*') {
                 return $part;
             }
-            $quote_character = self::$_config['identifier_quote_character'];
+
+            $quote_character = self::$_config[$this->_connection_name]['identifier_quote_character'];
             // double up any identifier quotes to escape them
             return $quote_character .
                    str_replace($quote_character,
@@ -1366,8 +1437,11 @@
          * Check the query cache for the given cache key. If a value
          * is cached for the key, return the value. Otherwise, return false.
          */
-        protected static function _check_query_cache($cache_key) {
-            if (isset(self::$_query_cache[$cache_key])) {
+        protected static function _check_query_cache(
+            $cache_key,
+            $connection_name = self::DEFAULT_CONNECTION
+        ) {
+            if (isset(self::$_query_cache[$connection_name][$cache_key])) {
                 return self::$_query_cache[$cache_key];
             }
             return false;
@@ -1383,8 +1457,15 @@
         /**
          * Add the given value to the query cache.
          */
-        protected static function _cache_query_result($cache_key, $value) {
-            self::$_query_cache[$cache_key] = $value;
+        protected static function _cache_query_result(
+            $cache_key,
+            $value,
+            $connection_name = self::DEFAULT_CONNECTION
+        ) {
+            if (!isset(self::$_query_cache[$connection_name])) {
+                self::$_query_cache[$connection_name] = array();
+            }
+            self::$_query_cache[$connection_name][$cache_key] = $value;
         }
 
         /**
@@ -1393,18 +1474,18 @@
          */
         protected function _run() {
             $query = $this->_build_select();
-            $caching_enabled = self::$_config['caching'];
+            $caching_enabled = self::$_config[$this->_connection_name]['caching'];
 
             if ($caching_enabled) {
                 $cache_key = self::_create_cache_key($query, $this->_values);
-                $cached_result = self::_check_query_cache($cache_key);
+                $cached_result = self::_check_query_cache($cache_key, $this->_connection_name);
 
                 if ($cached_result !== false) {
                     return $cached_result;
                 }
             }
 
-            self::_execute($query, $this->_values);
+            self::_execute($query, $this->_values, $this->_connection_name);
             $statement = self::get_last_statement();
 
             $rows = array();
@@ -1413,7 +1494,7 @@
             }
 
             if ($caching_enabled) {
-                self::_cache_query_result($cache_key, $rows);
+                self::_cache_query_result($cache_key, $rows, $this->_connection_name);
             }
 
             return $rows;
@@ -1449,11 +1530,10 @@
             if (!is_null($this->_instance_id_column)) {
                 return $this->_instance_id_column;
             }
-            if (isset(self::$_config['id_column_overrides'][$this->_table_name])) {
-                return self::$_config['id_column_overrides'][$this->_table_name];
-            } else {
-                return self::$_config['id_column'];
+            if (isset(self::$_config[$this->_connection_name]['id_column_overrides'][$this->_table_name])) {
+                return self::$_config[$this->_connection_name]['id_column_overrides'][$this->_table_name];
             }
+            return self::$_config[$this->_connection_name]['id_column'];
         }
 
         /**
@@ -1545,17 +1625,16 @@
                 $query = $this->_build_insert();
             }
 
-            $success = self::_execute($query, $values);
+            $success = self::_execute($query, $values, $this->_connection_name);
 
             // If we've just inserted a new record, set the ID of this object
             if ($this->_is_new) {
                 $this->_is_new = false;
                 if (is_null($this->id())) {
-                    if (self::$_db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql') {
-                        $this->_data[$this->_get_id_column_name()] = self::get_last_statement()->fetchColumn();
-                    } else {
-                        $this->_data[$this->_get_id_column_name()] = self::$_db->lastInsertId();
-                    }
+                    $this->_data[$this->_get_id_column_name()] =
+                        self::$_db[$this->_connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql' ?
+                        self::get_last_statement()->fetchColumn() :
+                        self::$_db[$this->_connection_name]->lastInsertId();
                 }
             }
 
@@ -1597,7 +1676,7 @@
             $placeholders = $this->_create_placeholders($this->_dirty_fields);
             $query[] = "({$placeholders})";
 
-            if (self::$_db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql') {
+            if (self::$_db[$this->_connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql') {
                 $query[] = 'RETURNING ' . $this->_quote_identifier($this->_get_id_column_name());
             }
 
@@ -1616,7 +1695,7 @@
                 "= ?",
             ));
 
-            return self::_execute($query, array($this->id()));
+            return self::_execute($query, array($this->id()), $this->_connection_name);
         }
 
         /**
@@ -1631,7 +1710,7 @@
                 $this->_build_where(),
             ));
 
-            return self::_execute($query, $this->_values);
+            return self::_execute($query, $this->_values, $this->_connection_name);
         }
 
         // --------------------- //

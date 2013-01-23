@@ -17,7 +17,7 @@ Contents:
    querying
    models
    transactions
-
+   connections
 
 
 Indices and tables
