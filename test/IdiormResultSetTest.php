@@ -2,6 +2,20 @@
 
 class IdiormResultSetTest extends PHPUnit_Framework_TestCase {
 
+    public function setUp() {
+        // Enable logging
+        ORM::configure('logging', true);
+
+        // Set up the dummy database connection
+        $db = new MockPDO('sqlite::memory:');
+        ORM::set_db($db);
+    }
+
+    public function tearDown() {
+        ORM::configure('logging', false);
+        ORM::set_db(null);
+    }
+
     public function testGet() {
         $IdiormResultSet = new IdiormResultSet();
         $this->assertInternalType('array', $IdiormResultSet->get_results());
