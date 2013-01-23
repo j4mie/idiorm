@@ -292,9 +292,183 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals($expected, ORM::get_last_query());
     }
 
+    public function testMainTableAlias() {
+        ORM::for_table('widget')->table_alias('w')->find_many();
+        $expected = "SELECT * FROM `widget` `w`";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
     public function testAliasesInResultColumns() {
         ORM::for_table('widget')->select('widget.name', 'widget_name')->find_many();
         $expected = "SELECT `widget`.`name` AS `widget_name` FROM `widget`";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testAliasesInSelectManyResults() {
+        ORM::for_table('widget')->select_many(array('widget_name' => 'widget.name'), 'widget_handle')->find_many();
+        $expected = "SELECT `widget`.`name` AS `widget_name`, `widget_handle` FROM `widget`";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testLiteralExpressionInResultColumn() {
+        ORM::for_table('widget')->select_expr('COUNT(*)', 'count')->find_many();
+        $expected = "SELECT COUNT(*) AS `count` FROM `widget`";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testLiteralExpressionInSelectManyResultColumns() {
+        ORM::for_table('widget')->select_many_expr(array('count' => 'COUNT(*)'), 'SUM(widget_order)')->find_many();
+        $expected = "SELECT COUNT(*) AS `count`, SUM(widget_order) FROM `widget`";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testSimpleJoin() {
+        ORM::for_table('widget')->join('widget_handle', array('widget_handle.widget_id', '=', 'widget.id'))->find_many();
+        $expected = "SELECT * FROM `widget` JOIN `widget_handle` ON `widget_handle`.`widget_id` = `widget`.`id`";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testSimpleJoinWithWhereIdIsMethod() {
+        ORM::for_table('widget')->join('widget_handle', array('widget_handle.widget_id', '=', 'widget.id'))->find_one(5);
+        $expected = "SELECT * FROM `widget` JOIN `widget_handle` ON `widget_handle`.`widget_id` = `widget`.`id` WHERE `widget`.`id` = '5' LIMIT 1";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testInnerJoin() {
+        ORM::for_table('widget')->inner_join('widget_handle', array('widget_handle.widget_id', '=', 'widget.id'))->find_many();
+        $expected = "SELECT * FROM `widget` INNER JOIN `widget_handle` ON `widget_handle`.`widget_id` = `widget`.`id`";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testLeftOuterJoin() {
+        ORM::for_table('widget')->left_outer_join('widget_handle', array('widget_handle.widget_id', '=', 'widget.id'))->find_many();
+        $expected = "SELECT * FROM `widget` LEFT OUTER JOIN `widget_handle` ON `widget_handle`.`widget_id` = `widget`.`id`";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testRightOuterJoin() {
+        ORM::for_table('widget')->right_outer_join('widget_handle', array('widget_handle.widget_id', '=', 'widget.id'))->find_many();
+        $expected = "SELECT * FROM `widget` RIGHT OUTER JOIN `widget_handle` ON `widget_handle`.`widget_id` = `widget`.`id`";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testFullOuterJoin() {
+        ORM::for_table('widget')->full_outer_join('widget_handle', array('widget_handle.widget_id', '=', 'widget.id'))->find_many();
+        $expected = "SELECT * FROM `widget` FULL OUTER JOIN `widget_handle` ON `widget_handle`.`widget_id` = `widget`.`id`";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testMultipleJoinSources() {
+        ORM::for_table('widget')
+        ->join('widget_handle', array('widget_handle.widget_id', '=', 'widget.id'))
+        ->join('widget_nozzle', array('widget_nozzle.widget_id', '=', 'widget.id'))
+        ->find_many();
+        $expected = "SELECT * FROM `widget` JOIN `widget_handle` ON `widget_handle`.`widget_id` = `widget`.`id` JOIN `widget_nozzle` ON `widget_nozzle`.`widget_id` = `widget`.`id`";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testJoinWithAliases() {
+        ORM::for_table('widget')->join('widget_handle', array('wh.widget_id', '=', 'widget.id'), 'wh')->find_many();
+        $expected = "SELECT * FROM `widget` JOIN `widget_handle` `wh` ON `wh`.`widget_id` = `widget`.`id`";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testJoinWithStringConstraint() {
+        ORM::for_table('widget')->join('widget_handle', "widget_handle.widget_id = widget.id")->find_many();
+        $expected = "SELECT * FROM `widget` JOIN `widget_handle` ON widget_handle.widget_id = widget.id";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testSelectWithDistinct() {
+        ORM::for_table('widget')->distinct()->select('name')->find_many();
+        $expected = "SELECT DISTINCT `name` FROM `widget`";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testInsertData() {
+        $widget = ORM::for_table('widget')->create();
+        $widget->name = "Fred";
+        $widget->age = 10;
+        $widget->save();
+        $expected = "INSERT INTO `widget` (`name`, `age`) VALUES ('Fred', '10')";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testInsertDataContainingAnExpression() {
+        $widget = ORM::for_table('widget')->create();
+        $widget->name = "Fred";
+        $widget->age = 10;
+        $widget->set_expr('added', 'NOW()');
+        $widget->save();
+        $expected = "INSERT INTO `widget` (`name`, `age`, `added`) VALUES ('Fred', '10', NOW())";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testInsertDataUsingArrayAccess() {
+        $widget = ORM::for_table('widget')->create();
+        $widget['name'] = "Fred";
+        $widget['age'] = 10;
+        $widget->save();
+        $expected = "INSERT INTO `widget` (`name`, `age`) VALUES ('Fred', '10')";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testUpdateData() {
+        $widget = ORM::for_table('widget')->find_one(1);
+        $widget->name = "Fred";
+        $widget->age = 10;
+        $widget->save();
+        $expected = "UPDATE `widget` SET `name` = 'Fred', `age` = '10' WHERE `id` = '1'";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testUpdateDataContainingAnExpression() {
+        $widget = ORM::for_table('widget')->find_one(1);
+        $widget->name = "Fred";
+        $widget->age = 10;
+        $widget->set_expr('added', 'NOW()');
+        $widget->save();
+        $expected = "UPDATE `widget` SET `name` = 'Fred', `age` = '10', `added` = NOW() WHERE `id` = '1'";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testUpdateMultipleFields() {
+        $widget = ORM::for_table('widget')->find_one(1);
+        $widget->set(array("name" => "Fred", "age" => 10));
+        $widget->save();
+        $expected = "UPDATE `widget` SET `name` = 'Fred', `age` = '10' WHERE `id` = '1'";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testUpdateMultipleFieldsContainingAnExpression() {
+        $widget = ORM::for_table('widget')->find_one(1);
+        $widget->set(array("name" => "Fred", "age" => 10));
+        $widget->set_expr(array("added" => "NOW()", "lat_long" => "GeomFromText('POINT(1.2347 2.3436)')"));
+        $widget->save();
+        $expected = "UPDATE `widget` SET `name` = 'Fred', `age` = '10', `added` = NOW(), `lat_long` = GeomFromText('POINT(1.2347 2.3436)') WHERE `id` = '1'";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testUpdateMultipleFieldsContainingAnExpressionAndOverridePreviouslySetExpression() {
+        $widget = ORM::for_table('widget')->find_one(1);
+        $widget->set(array("name" => "Fred", "age" => 10));
+        $widget->set_expr(array("added" => "NOW()", "lat_long" => "GeomFromText('POINT(1.2347 2.3436)')"));
+        $widget->lat_long = 'unknown';
+        $widget->save();
+        $expected = "UPDATE `widget` SET `name` = 'Fred', `age` = '10', `added` = NOW(), `lat_long` = 'unknown' WHERE `id` = '1'";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testDeleteData() {
+        $widget = ORM::for_table('widget')->find_one(1);
+        $widget->delete();
+        $expected = "DELETE FROM `widget` WHERE `id` = '1'";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testDeleteMany() {
+        ORM::for_table('widget')->where_equal('age', 10)->delete_many();
+        $expected = "DELETE FROM `widget` WHERE `age` = '10'";
         $this->assertEquals($expected, ORM::get_last_query());
     }
 
@@ -328,5 +502,41 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals($expected, ORM::get_last_query());
     }
 
+    /**
+     * Regression tests
+     */
+    public function testIssue12IncorrectQuotingOfColumnWildcard() {
+        ORM::for_table('widget')->select('widget.*')->find_one();
+        $expected = "SELECT `widget`.* FROM `widget` LIMIT 1";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testIssue57LogQueryRaisesWarningWhenPercentSymbolSupplied() {
+        ORM::for_table('widget')->where_raw('username LIKE "ben%"')->find_many();
+        $expected = 'SELECT * FROM `widget` WHERE username LIKE "ben%"';
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testIssue57LogQueryRaisesWarningWhenQuestionMarkSupplied() {
+        ORM::for_table('widget')->where_raw('comments LIKE "has been released?%"')->find_many();
+        $expected = 'SELECT * FROM `widget` WHERE comments LIKE "has been released?%"';
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testIssue74EscapingQuoteMarksIn_quote_identifier_part() {
+        $widget = ORM::for_table('widget')->find_one(1);
+        $widget->set('ad`ded', '2013-01-04');
+        $widget->save();
+        $expected = "UPDATE `widget` SET `ad``ded` = '2013-01-04' WHERE `id` = '1'";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testIssue90UsingSetExprAloneDoesTriggerQueryGeneration() {
+        $widget = ORM::for_table('widget')->find_one(1);
+        $widget->set_expr('added', 'NOW()');
+        $widget->save();
+        $expected = "UPDATE `widget` SET `added` = NOW() WHERE `id` = '1'";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
 }
 
