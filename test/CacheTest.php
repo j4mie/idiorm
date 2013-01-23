@@ -32,12 +32,14 @@ class CacheTest extends PHPUnit_Framework_TestCase {
         $expected = ORM::get_last_query();
         ORM::for_table('widget')->where('name', 'Fred')->where('age', 17)->find_one(); // this shouldn't run a query!
         $this->assertEquals($expected, ORM::get_last_query());
+    }
 
+    public function testQueryGenerationOnlyOccursOnceWithMultipleConnections() {
         // Test caching with multiple connections (also a bit of a hack)
         ORM::for_table('widget', self::ALTERNATE)->where('name', 'Steve')->where('age', 80)->find_one();
         ORM::for_table('widget', self::ALTERNATE)->where('name', 'Tom')->where('age', 120)->find_one();
-        $expectedToo = ORM::get_last_query();
+        $expected = ORM::get_last_query();
         ORM::for_table('widget', self::ALTERNATE)->where('name', 'Steve')->where('age', 80)->find_one(); // this shouldn't run a query!
-        $this->assertEquals($expectedToo, ORM::get_last_query(self::ALTERNATE));
+        $this->assertEquals($expected, ORM::get_last_query(self::ALTERNATE));
     }
 }
