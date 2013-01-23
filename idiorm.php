@@ -173,11 +173,7 @@
          * you wish to configure, another shortcut is to pass an array
          * of settings (and omit the second argument).
          */
-        public static function  configure(
-            $key,
-            $value = null,
-            $connection_name = self::DEFAULT_CONNECTION
-        ) {
+        public static function configure($key, $value = null, $connection_name = self::DEFAULT_CONNECTION) {
             self::_setup_db_config($connection_name); //ensures at least default config is set
 
             if (is_array($key)) {
@@ -224,7 +220,8 @@
                     self::$_config[$connection_name]['connection_string'],
                     self::$_config[$connection_name]['username'],
                     self::$_config[$connection_name]['password'],
-                    self::$_config[$connection_name]['driver_options']);
+                    self::$_config[$connection_name]['driver_options']
+                );
 
                 $db->setAttribute(PDO::ATTR_ERRMODE, self::$_config[$connection_name]['error_mode']);
                 self::set_db($db, $connection_name);
@@ -307,11 +304,7 @@
          * @param array
          * @return bool Success
          */
-        public static function raw_execute(
-            $query,
-            $parameters = array(),
-            $connection_name = self::DEFAULT_CONNECTION
-        ) {
+        public static function raw_execute($query, $parameters = array(), $connection_name = self::DEFAULT_CONNECTION) {
             self::_setup_db($connection_name);
 
             self::_log_query($query, $parameters, $connection_name);
@@ -430,11 +423,7 @@
          * "Private" constructor; shouldn't be called directly.
          * Use the ORM::for_table factory method instead.
          */
-        protected function __construct(
-            $table_name,
-            $data = array(),
-            $connection_name = self::DEFAULT_CONNECTION
-        ) {
+        protected function __construct($table_name, $data = array(), $connection_name = self::DEFAULT_CONNECTION) {
             $this->_table_name = $table_name;
             $this->_data = $data;
 
@@ -1437,10 +1426,7 @@
          * Check the query cache for the given cache key. If a value
          * is cached for the key, return the value. Otherwise, return false.
          */
-        protected static function _check_query_cache(
-            $cache_key,
-            $connection_name = self::DEFAULT_CONNECTION
-        ) {
+        protected static function _check_query_cache($cache_key, $connection_name = self::DEFAULT_CONNECTION) {
             if (isset(self::$_query_cache[$connection_name][$cache_key])) {
                 return self::$_query_cache[$cache_key];
             }
@@ -1457,11 +1443,7 @@
         /**
          * Add the given value to the query cache.
          */
-        protected static function _cache_query_result(
-            $cache_key,
-            $value,
-            $connection_name = self::DEFAULT_CONNECTION
-        ) {
+        protected static function _cache_query_result($cache_key, $value, $connection_name = self::DEFAULT_CONNECTION) {
             if (!isset(self::$_query_cache[$connection_name])) {
                 self::$_query_cache[$connection_name] = array();
             }
