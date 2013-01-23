@@ -39,3 +39,37 @@ class MockPDO extends PDO {
        return $this->last_query;
    }
 }
+
+/**
+ * Another mock PDOStatement class, used for testing multiple connections
+ */
+class MockDifferentPDOStatement extends PDOStatement {
+
+    private $current_row = 0;
+    /**
+     * Return some dummy data
+     */
+     public function fetch($fetch_style=PDO::FETCH_BOTH, $cursor_orientation=PDO::FETCH_ORI_NEXT, $cursor_offset=0) {
+        if ($this->current_row == 5) {
+            return false;
+        } else {
+            $this->current_row++;
+            return array('name' => 'Steve', 'age' => 80, 'id' => "{$this->current_row}");
+        }
+    }
+}
+
+/**
+ * A different mock database class, for testing multiple connections
+ * Mock database class implementing a subset of the PDO API.
+ */
+class MockDifferentPDO extends PDO {
+
+    /**
+     * Return a dummy PDO statement
+     */
+    public function prepare($statement, $driver_options = array()) {
+        $this->last_query = new MockDifferentPDOStatement($statement);
+        return $this->last_query;
+    }
+}
