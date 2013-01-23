@@ -1428,7 +1428,7 @@
          */
         protected static function _check_query_cache($cache_key, $connection_name = self::DEFAULT_CONNECTION) {
             if (isset(self::$_query_cache[$connection_name][$cache_key])) {
-                return self::$_query_cache[$cache_key];
+                return self::$_query_cache[$connection_name][$cache_key];
             }
             return false;
         }
