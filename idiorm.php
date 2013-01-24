@@ -172,6 +172,9 @@
          * required to use Idiorm). If you have more than one setting
          * you wish to configure, another shortcut is to pass an array
          * of settings (and omit the second argument).
+         * @param string $key
+         * @param mixed $value
+         * @param string $connection_name Which connection to use
          */
         public static function configure($key, $value = null, $connection_name = self::DEFAULT_CONNECTION) {
             self::_setup_db_config($connection_name); //ensures at least default config is set
@@ -199,6 +202,9 @@
          * this way for the sake of a readable interface, ie
          * ORM::for_table('table_name')->find_one()-> etc. As such,
          * this will normally be the first method called in a chain.
+         * @param string $table_name
+         * @param string $connection_name Which connection to use
+         * @return ORM
          */
         public static function for_table($table_name, $connection_name = self::DEFAULT_CONNECTION)
         {
@@ -207,9 +213,8 @@
         }
 
         /**
-         * Set up the database connection used by the class.
-         * Default value of parameter used for compatibility with Paris, until it can be updated
-         * @todo After paris is updated to support multiple connections, remove default value of parameter
+         * Set up the database connection used by the class
+         * @param string $connection_name Which connection to use
          */
         protected static function _setup_db($connection_name = self::DEFAULT_CONNECTION)
         {
@@ -228,8 +233,9 @@
             }
         }
 
-        /**
+       /**
         * Ensures configuration (mulitple connections) is at least set to default.
+        * @param string $connection_name Which connection to use
         */
         protected static function _setup_db_config($connection_name) {
             if (!array_key_exists($connection_name, self::$_config)) {
@@ -242,6 +248,8 @@
          * This is public in case the ORM should use a ready-instantiated
          * PDO object as its database connection. Accepts an optional string key
          * to identify the connection if multiple connections are used.
+         * @param ORM $db
+         * @param string $connection_name Which connection to use
          */
         public static function set_db($db, $connection_name = self::DEFAULT_CONNECTION) {
             self::_setup_db_config($connection_name);
@@ -254,6 +262,7 @@
          * (table names, column names etc). If this has been specified
          * manually using ORM::configure('identifier_quote_character', 'some-char'),
          * this will do nothing.
+         * @param string $connection_name Which connection to use
          */
         protected static function _setup_identifier_quote_character($connection_name) {
             if (is_null(self::$_config[$connection_name]['identifier_quote_character'])) {
@@ -265,6 +274,8 @@
         /**
          * Return the correct character used to quote identifiers (table
          * names, column names etc) by looking at the driver being used by PDO.
+         * @param string $connection_name Which connection to use
+         * @return string
          */
         protected static function _detect_identifier_quote_character($connection_name) {
             switch(self::$_db[$connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME)) {
@@ -287,6 +298,8 @@
          * the database. This can be called if any low-level DB access is
          * required outside the class. If multiple connections are used,
          * accepts an optional key name for the connection.
+         * @param string $connection_name Which connection to use
+         * @return ORM
          */
         public static function get_db($connection_name = self::DEFAULT_CONNECTION) {
             self::_setup_db($connection_name); // required in case this is called before Idiorm is instantiated
@@ -301,31 +314,32 @@
          * @example raw_execute('INSERT OR REPLACE INTO `widget` (`id`, `name`) SELECT `id`, `name` FROM `other_table`')
          * @param string $query The raw SQL query
          * @param array  $parameters Optional bound parameters
-         * @param array
+         * @param string $connection_name Which connection to use
          * @return bool Success
          */
         public static function raw_execute($query, $parameters = array(), $connection_name = self::DEFAULT_CONNECTION) {
             self::_setup_db($connection_name);
-
-            self::_log_query($query, $parameters, $connection_name);
-            $statement = self::$_db[$connection_name]->prepare($query);
-            return $statement->execute($parameters);
+            return self::_execute($query, $parameters, $connection_name);
         }
 
         /**
          * Returns the PDOStatement instance last used by any connection wrapped by the ORM.
          * Useful for access to PDOStatement::rowCount() or error information
+         * @return PDOStatement
          */
         public static function get_last_statement() {
             return self::$_last_statement;
         }
 
-        /**
+       /**
         * Internal helper method for executing statments. Logs queries, and
         * stores statement object in ::_last_statment, accessible publicly
         * through ::get_last_statement()
+        * @param string $query
+        * @param array $parameters An array of parameters to be bound in to the query
+        * @param string $connection_name Which connection to use
         * @return bool Response of PDOStatement::execute()
-        **/
+        */
         protected static function _execute($query, $parameters = array(), $connection_name = self::DEFAULT_CONNECTION) {
             self::_log_query($query, $parameters, $connection_name);
             $statement = self::$_db[$connection_name]->prepare($query);
@@ -343,6 +357,10 @@
          * query isn't executed like this (PDO normally passes the query and
          * parameters to the database which takes care of the binding) but
          * doing it this way makes the logged queries more readable.
+         * @param string $query
+         * @param array $parameters An array of parameters to be bound in to the query
+         * @param string $connection_name Which connection to use
+         * @return bool
          */
         protected static function _log_query($query, $parameters, $connection_name) {
             // If logging is not enabled, do nothing
@@ -382,7 +400,10 @@
         /**
          * Get the last query executed. Only works if the
          * 'logging' config option is set to true. Otherwise
-         * this will return null. Returns last query from all connections
+         * this will return null. Returns last query from all connections if
+         * no connection_name is specified
+         * @param null|string $connection_name Which connection to use
+         * @return string
          */
         public static function get_last_query($connection_name = null) {
             if ($connection_name === null) {
@@ -401,7 +422,7 @@
          * specified connection up to now.
          * Only works if the 'logging' config option is
          * set to true. Otherwise, returned array will be empty.
-         * @param String $connection_name Key of database connection
+         * @param string $connection_name Which connection to use
          */
         public static function get_query_log($connection_name = self::DEFAULT_CONNECTION) {
             if (isset(self::$_query_log[$connection_name])) {
@@ -410,8 +431,11 @@
             return array();
         }
 
-        public static function get_connection_keys()
-        {
+        /**
+         * Get a list of the available connection names
+         * @return array
+         */
+        public static function get_connection_names() {
             return array_keys(self::$_db);
         }
 
@@ -1613,10 +1637,11 @@
             if ($this->_is_new) {
                 $this->_is_new = false;
                 if (is_null($this->id())) {
-                    $this->_data[$this->_get_id_column_name()] =
-                        self::$_db[$this->_connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql' ?
-                        self::get_last_statement()->fetchColumn() :
-                        self::$_db[$this->_connection_name]->lastInsertId();
+                    if(self::$_db[$this->_connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql') {
+                        $this->_data[$this->_get_id_column_name()] = self::get_last_statement()->fetchColumn();
+                    } else {
+                        $this->_data[$this->_get_id_column_name()] = self::$_db[$this->_connection_name]->lastInsertId();
+                    }
                 }
             }
 

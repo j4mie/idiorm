@@ -51,10 +51,16 @@ query on *any* connection.
 
 ::
 
+    // Using default connection, explicitly
+    $person = ORM::for_table('person')->find_one(5);
+    
+    // Using named connection
+    $person = ORM::for_table('different_person', 'remote')->find_one(5);
+
     // Last query on *any* connection
     ORM::get_last_query(); // returns query on 'different_person' using 'remote'
     
-    // returns query on 'person' using default
+    // returns query on 'person' using default by passing in the connection name
     ORM::get_last_query(ORM::DEFAULT_CONNECTION);
 
 Notes
@@ -64,7 +70,7 @@ Notes
   one connection has logging set to ``true`` and the other does not, only
   queries from the logged connection will be available via
   ``ORM::get_last_query()`` and ``ORM::get_query_log()``.
-* A new method has been added, ``ORM::get_connection_keys()``, which returns
+* A new method has been added, ``ORM::get_connection_names()``, which returns
   an array of connection names.
 * Caching *should* work with multiple connections (remember to turn caching
   on for each connection), but the unit tests are not robust. Please report
