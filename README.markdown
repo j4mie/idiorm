@@ -22,6 +22,7 @@ Features
 * Consists of just one class called `ORM`. Minimal global namespace pollution.
 * Database agnostic. Currently supports SQLite and MySQL. May support others, please give it a try!
 * Supports collections of models with method chaining to filter or apply actions to multiple results at once.
+* Multiple connections supported
 
 Documentation
 -------------
@@ -41,6 +42,7 @@ Changelog
 
 #### 1.3.0 - release XXXX-XX-XX
 
+* Add support for multiple database connections
 * Add in raw_execute - closes issue #40 [[tag](https://github.com/tag)]
 * Add query logging to `delete_many` [[tag](https://github.com/tag)]
 * Add `is_new` method - closes issue #85
