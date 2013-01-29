@@ -1503,6 +1503,11 @@
                 self::_cache_query_result($cache_key, $rows, $this->_connection_name);
             }
 
+            // reset Idiorm after executing the query
+            $this->_values = array();
+            $this->_result_columns = array('*');
+            $this->_using_default_result_columns = true;
+
             return $rows;
         }
 
