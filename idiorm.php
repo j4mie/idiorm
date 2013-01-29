@@ -284,6 +284,7 @@
                 case 'dblib':
                 case 'mssql':
                 case 'sybase':
+                case 'firebird':
                     return '"';
                 case 'mysql':
                 case 'sqlite':
@@ -1375,7 +1376,11 @@
          */
         protected function _build_limit() {
             if (!is_null($this->_limit)) {
-                return "LIMIT " . $this->_limit;
+                $clause = 'LIMIT';
+                if (self::$_db[$this->_connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME) == 'firebird') {
+                    $clause = 'ROWS';
+                }
+                return "$clause " . $this->_limit;
             }
             return '';
         }
@@ -1385,7 +1390,11 @@
          */
         protected function _build_offset() {
             if (!is_null($this->_offset)) {
-                return "OFFSET " . $this->_offset;
+                $clause = 'OFFSET';
+                if (self::$_db[$this->_connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME) == 'firebird') {
+                    $clause = 'TO';
+                }
+                return "$clause " . $this->_offset;
             }
             return '';
         }
