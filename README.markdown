@@ -65,24 +65,26 @@ Changelog
 #### 1.3.0 - release XXXX-XX-XX
 
 * Add support for multiple database connections
-* Add in raw_execute - closes issue #40 [[tag](https://github.com/tag)]
+* Add in raw_execute - closes [issue #40](https://github.com/j4mie/idiorm/issues/40) [[tag](https://github.com/tag)]
 * Add query logging to `delete_many` [[tag](https://github.com/tag)]
-* Add `is_new` method - closes issue #85
-* Fix last insert ID for PostgreSQL using RETURNING - closes issues #62 and #89 [[laacz](https://github.com/laacz)]
-* Add `get_last_statement()` - closes issue #84 [[tag](https://github.com/tag)]
-* Fix when using `set_expr` alone it doesn't trigger query creation - closes issue #90
-* Escape quote symbols in "_quote_identifier_part" - close issue #74
-* Add HAVING clause functionality
-* Fix issue with aggregate functions always returning `int` when is `float` sometimes required - closes issue #92
+* Add `is_new` method - closes [issue #85](https://github.com/j4mie/idiorm/issues/85)
+* Fix last insert ID for PostgreSQL using RETURNING - closes issues [#62](https://github.com/j4mie/idiorm/issues/62) and [#89](https://github.com/j4mie/idiorm/issues/89) [[laacz](https://github.com/laacz)]
+* Add `get_last_statement()` - closes [issue #84](https://github.com/j4mie/idiorm/issues/84) [[tag](https://github.com/tag)]
+* Fix when using `set_expr` alone it doesn't trigger query creation - closes [issue #90](https://github.com/j4mie/idiorm/issues/90)
+* Escape quote symbols in "_quote_identifier_part" - close [issue #74](https://github.com/j4mie/idiorm/issues/74)
+* Add HAVING clause functionality - close [issue #50](https://github.com/j4mie/idiorm/issues/50)
+* Fix issue with aggregate functions always returning `int` when is `float` sometimes required - closes [issue #92](https://github.com/j4mie/idiorm/issues/92)
 * Documentation moved to [idiorm.rtfd.org](http://idiorm.rtfd.org) and built using [Sphinx](http://sphinx-doc.org/)
-* Add `ArrayAccess` support to the model instances allowing property access via `$model['field']` as well as `$model->field` - issue #51
-* Add a result set object for collections of models that can support method chains to filter or apply actions to multiple results at once - issue #51 and #22
+* Add `ArrayAccess` support to the model instances allowing property access via `$model['field']` as well as `$model->field` - [issue #51](https://github.com/j4mie/idiorm/issues/51)
+* Add a result set object for collections of models that can support method chains to filter or apply actions to multiple results at once - issue [#51](https://github.com/j4mie/idiorm/issues/51) and [#22](https://github.com/j4mie/idiorm/issues/22)
 * Move testing into PHPUnit to unify method testing and query generation testing
-* Change Composer to use a classmap so that autoloading is better supported [[javierd](https://github.com/javiervd)] - issue #96
+* Change Composer to use a classmap so that autoloading is better supported [[javierd](https://github.com/javiervd)] - [issue #96](https://github.com/j4mie/idiorm/issues/96)
+* Add support for [Firebird](http://www.firebirdsql.org) with `ROWS` and `TO` result set limiting and identifier quoting [[mapner](https://github.com/mapner)] - [issue #98](https://github.com/j4mie/idiorm/issues/98)
+* Reset Idiorm after performing a query to allow for calling `count()` and then `find_many()` [[fayland](https://github.com/fayland)] - [issue #97](https://github.com/j4mie/idiorm/issues/97)
 
 #### 1.2.3 - release 2012-11-28
 
-* Fix issue #78 - remove use of PHP 5.3 static call
+* Fix [issue #78](https://github.com/j4mie/idiorm/issues/78) - remove use of PHP 5.3 static call
 
 #### 1.2.2 - release 2012-11-15
 
@@ -99,16 +101,16 @@ Changelog
 * Add support for raw queries without parameters argument [[sandermarechal](http://github.com/sandermarechal)]
 * Add support to set multiple properties at once by passing an associative array to `set` method [[sandermarechal](http://github.com/sandermarechal)]
 * Allow an associative array to be passed to `configure` method [[jordanlev](http://github.com/jordanlev)]
-* Patch to allow empty Paris models to be saved ([[j4mie/paris](http://github.com/j4mie/paris)]) issue #58
-* Add `select_many` and `select_many_expr` - closing issues #49 and #69
-* Add support for `MIN`, `AVG`, `MAX` and `SUM` - closes issue #16
-* Add `group_by_expr` - closes issue #24
-* Add `set_expr` to allow database expressions to be set as ORM properties - closes issues #59 and #43 [[brianherbert](https://github.com/brianherbert)]
-* Prevent ambiguous column names when joining tables - issue #66 [[hellogerard](https://github.com/hellogerard)]
+* Patch to allow empty Paris models to be saved ([[j4mie/paris](http://github.com/j4mie/paris)]) - [issue #58](https://github.com/j4mie/idiorm/issues/58)
+* Add `select_many` and `select_many_expr` - closing issues [#49](https://github.com/j4mie/idiorm/issues/49) and [#69](https://github.com/j4mie/idiorm/issues/69)
+* Add support for `MIN`, `AVG`, `MAX` and `SUM` - closes [issue #16](https://github.com/j4mie/idiorm/issues/16)
+* Add `group_by_expr` - closes [issue #24](https://github.com/j4mie/idiorm/issues/24)
+* Add `set_expr` to allow database expressions to be set as ORM properties - closes issues [#59](https://github.com/j4mie/idiorm/issues/59) and [#43](https://github.com/j4mie/idiorm/issues/43) [[brianherbert](https://github.com/brianherbert)]
+* Prevent ambiguous column names when joining tables - [issue #66](https://github.com/j4mie/idiorm/issues/66) [[hellogerard](https://github.com/hellogerard)]
 * Add `delete_many` method [[CBeerta](https://github.com/CBeerta)]
 * Allow unsetting of ORM parameters [[CBeerta](https://github.com/CBeerta)]
-* Add `find_array` to get the records as associative arrays [[Surt](https://github.com/Surt)] - closes issue #17
-* Fix bug in `_log_query` with `?` and `%` supplied in raw where statements etc. - closes issue #57 [[ridgerunner](https://github.com/ridgerunner)]
+* Add `find_array` to get the records as associative arrays [[Surt](https://github.com/Surt)] - closes [issue #17](https://github.com/j4mie/idiorm/issues/17)
+* Fix bug in `_log_query` with `?` and `%` supplied in raw where statements etc. - closes [issue #57](https://github.com/j4mie/idiorm/issues/57) [[ridgerunner](https://github.com/ridgerunner)]
 
 #### 1.1.1 - release 2011-01-30
 
