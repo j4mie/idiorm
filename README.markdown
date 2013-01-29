@@ -64,23 +64,23 @@ Changelog
 
 #### 1.3.0 - release XXXX-XX-XX
 
-* Add support for multiple database connections
+* Documentation moved to [idiorm.rtfd.org](http://idiorm.rtfd.org) and now built using [Sphinx](http://sphinx-doc.org/)
+* Add support for multiple database connections - closes [issue #15](https://github.com/j4mie/idiorm/issues/15) [[tag](https://github.com/tag)]
 * Add in raw_execute - closes [issue #40](https://github.com/j4mie/idiorm/issues/40) [[tag](https://github.com/tag)]
-* Add query logging to `delete_many` [[tag](https://github.com/tag)]
-* Add `is_new` method - closes [issue #85](https://github.com/j4mie/idiorm/issues/85)
-* Fix last insert ID for PostgreSQL using RETURNING - closes issues [#62](https://github.com/j4mie/idiorm/issues/62) and [#89](https://github.com/j4mie/idiorm/issues/89) [[laacz](https://github.com/laacz)]
 * Add `get_last_statement()` - closes [issue #84](https://github.com/j4mie/idiorm/issues/84) [[tag](https://github.com/tag)]
-* Fix when using `set_expr` alone it doesn't trigger query creation - closes [issue #90](https://github.com/j4mie/idiorm/issues/90)
-* Escape quote symbols in "_quote_identifier_part" - close [issue #74](https://github.com/j4mie/idiorm/issues/74)
-* Add HAVING clause functionality - close [issue #50](https://github.com/j4mie/idiorm/issues/50)
-* Fix issue with aggregate functions always returning `int` when is `float` sometimes required - closes [issue #92](https://github.com/j4mie/idiorm/issues/92)
-* Documentation moved to [idiorm.rtfd.org](http://idiorm.rtfd.org) and built using [Sphinx](http://sphinx-doc.org/)
+* Add HAVING clause functionality - closes [issue #50](https://github.com/j4mie/idiorm/issues/50)
+* Add `is_new` method - closes [issue #85](https://github.com/j4mie/idiorm/issues/85)
 * Add `ArrayAccess` support to the model instances allowing property access via `$model['field']` as well as `$model->field` - [issue #51](https://github.com/j4mie/idiorm/issues/51)
 * Add a result set object for collections of models that can support method chains to filter or apply actions to multiple results at once - issue [#51](https://github.com/j4mie/idiorm/issues/51) and [#22](https://github.com/j4mie/idiorm/issues/22)
-* Move testing into PHPUnit to unify method testing and query generation testing
-* Change Composer to use a classmap so that autoloading is better supported [[javierd](https://github.com/javiervd)] - [issue #96](https://github.com/j4mie/idiorm/issues/96)
 * Add support for [Firebird](http://www.firebirdsql.org) with `ROWS` and `TO` result set limiting and identifier quoting [[mapner](https://github.com/mapner)] - [issue #98](https://github.com/j4mie/idiorm/issues/98)
+* Fix last insert ID for PostgreSQL using RETURNING - closes issues [#62](https://github.com/j4mie/idiorm/issues/62) and [#89](https://github.com/j4mie/idiorm/issues/89) [[laacz](https://github.com/laacz)]
 * Reset Idiorm after performing a query to allow for calling `count()` and then `find_many()` [[fayland](https://github.com/fayland)] - [issue #97](https://github.com/j4mie/idiorm/issues/97)
+* Change Composer to use a classmap so that autoloading is better supported [[javierd](https://github.com/javiervd)] - [issue #96](https://github.com/j4mie/idiorm/issues/96)
+* Add query logging to `delete_many` [[tag](https://github.com/tag)]
+* Fix when using `set_expr` alone it doesn't trigger query creation - closes [issue #90](https://github.com/j4mie/idiorm/issues/90)
+* Escape quote symbols in "_quote_identifier_part" - close [issue #74](https://github.com/j4mie/idiorm/issues/74)
+* Fix issue with aggregate functions always returning `int` when is `float` sometimes required - closes [issue #92](https://github.com/j4mie/idiorm/issues/92)
+* Move testing into PHPUnit to unify method testing and query generation testing
 
 #### 1.2.3 - release 2012-11-28
 
