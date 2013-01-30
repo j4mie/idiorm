@@ -413,8 +413,7 @@
                 return '';
             }
 
-            return implode('', array_slice(self::$_query_log[$connection_name], -1));
-            // Used implode(array_slice()) instead of end() to avoid resetting interal array pointer
+            return end(self::$_query_log[$connection_name]);
         }
 
         /**
