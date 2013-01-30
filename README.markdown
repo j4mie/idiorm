@@ -1,6 +1,8 @@
 Idiorm
 ======
 
+[![Build Status](https://travis-ci.org/j4mie/idiorm.png?branch=master)](https://travis-ci.org/j4mie/idiorm)
+
 [http://j4mie.github.com/idiormandparis/](http://j4mie.github.com/idiormandparis/)
 
 A lightweight nearly-zero-configuration object-relational mapper and fluent query builder for PHP5.
