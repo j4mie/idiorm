@@ -218,7 +218,8 @@
          */
         protected static function _setup_db($connection_name = self::DEFAULT_CONNECTION)
         {
-            if (!is_object(self::$_db[$connection_name])) {
+            if (!array_key_exists($connection_name, self::$_db) ||
+                !is_object(self::$_db[$connection_name])) {
                 self::_setup_db_config($connection_name);
 
                 $db = new PDO(
