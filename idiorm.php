@@ -206,8 +206,7 @@
          * @param string $connection_name Which connection to use
          * @return ORM
          */
-        public static function for_table($table_name, $connection_name = self::DEFAULT_CONNECTION)
-        {
+        public static function for_table($table_name, $connection_name = self::DEFAULT_CONNECTION) {
             self::_setup_db($connection_name);
             return new self($table_name, array(), $connection_name);
         }
@@ -216,8 +215,7 @@
          * Set up the database connection used by the class
          * @param string $connection_name Which connection to use
          */
-        protected static function _setup_db($connection_name = self::DEFAULT_CONNECTION)
-        {
+        protected static function _setup_db($connection_name = self::DEFAULT_CONNECTION) {
             if (!array_key_exists($connection_name, self::$_db) ||
                 !is_object(self::$_db[$connection_name])) {
                 self::_setup_db_config($connection_name);
