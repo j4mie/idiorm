@@ -21,7 +21,7 @@ Features
 * Built on top of [PDO](http://php.net/pdo).
 * Uses [prepared statements](http://uk.php.net/manual/en/pdo.prepared-statements.php) throughout to protect against [SQL injection](http://en.wikipedia.org/wiki/SQL_injection) attacks.
 * Requires no model classes, no XML configuration and no code generation: works out of the box, given only a connection string.
-* Consists of just one class called `ORM`. Minimal global namespace pollution.
+* Consists of one main class called `ORM`. Additional classes are prefixed with `Idiorm`. Minimal global namespace pollution.
 * Database agnostic. Currently supports SQLite, MySQL, Firebird and PostgreSQL. May support others, please give it a try!
 * Supports collections of models with method chaining to filter or apply actions to multiple results at once.
 * Multiple connections supported
@@ -64,7 +64,7 @@ Let's See Some Code
 Changelog
 ---------
 
-#### 1.3.0 - release XXXX-XX-XX
+#### 1.3.0 - release 2013-01-31
 
 * Documentation moved to [idiorm.rtfd.org](http://idiorm.rtfd.org) and now built using [Sphinx](http://sphinx-doc.org/)
 * Add support for multiple database connections - closes [issue #15](https://github.com/j4mie/idiorm/issues/15) [[tag](https://github.com/tag)]
