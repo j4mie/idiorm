@@ -4,7 +4,7 @@ Transactions
 Idiorm doesn’t supply any extra methods to deal with transactions, but
 it’s very easy to use PDO’s built-in methods:
 
-::
+.. code-block:: php
 
     // Start a transaction
     ORM::get_db()->beginTransaction();

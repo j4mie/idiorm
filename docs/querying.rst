@@ -37,7 +37,7 @@ requested, or ``false`` if no matching record was found.
 To find a single record where the ``name`` column has the value "Fred
 Bloggs":
 
-::
+.. code-block:: php
 
     $person = ORM::for_table('person')->where('name', 'Fred Bloggs')->find_one();
 
@@ -47,7 +47,7 @@ This roughly translates into the following SQL:
 To find a single record by ID, you can pass the ID directly to the
 ``find_one`` method:
 
-::
+.. code-block:: php
 
     $person = ORM::for_table('person')->find_one(5);
 
@@ -65,13 +65,13 @@ were found, an empty array will be returned.
 
 To find all records in the table:
 
-::
+.. code-block:: php
 
     $people = ORM::for_table('person')->find_many();
 
 To find all records where the ``gender`` is ``female``:
 
-::
+.. code-block:: php
 
     $females = ORM::for_table('person')->where('gender', 'female')->find_many();
 
@@ -94,7 +94,7 @@ set of results.
 
 So for example instead of running this:
 
-::
+.. code-block:: php
 
     $people = ORM::for_table('person')->find_many();
     foreach ($people as $person) {
@@ -104,7 +104,7 @@ So for example instead of running this:
 
 You can simple do this instead:
 
-::
+.. code-block:: php
 
     ORM::for_table('person')->find_result_set()
     ->set('age', 50)
@@ -116,13 +116,13 @@ To do this substitute any call to ``find_many()`` with
 A result set will also behave like an array so you can `count()` it and `foreach`
 over it just like an array.
 
-::
+.. code-block:: php
 
     foreach(ORM::for_table('person')->find_result_set() as $record) {
         echo $person->name;
     }
 
-::
+.. code-block:: php
 
     echo count(ORM::for_table('person')->find_result_set());
 
@@ -138,7 +138,7 @@ You can also find many records as an associative array instead of Idiorm
 instances. To do this substitute any call to ``find_many()`` with
 ``find_array()``.
 
-::
+.. code-block:: php
 
     $females = ORM::for_table('person')->where('gender', 'female')->find_array();
 
@@ -152,7 +152,7 @@ Counting results
 To return a count of the number of rows that would be returned by a
 query, call the ``count()`` method.
 
-::
+.. code-block:: php
 
     $number_of_people = ORM::for_table('person')->count();
 
@@ -221,13 +221,13 @@ String comparision: ``where_like`` and ``where_not_like``
 
 To add a ``WHERE ... LIKE`` clause, use:
 
-::
+.. code-block:: php
 
     $people = ORM::for_table('person')->where_like('name', '%fred%')->find_many();
 
 Similarly, to add a ``WHERE ... NOT LIKE`` clause, use:
 
-::
+.. code-block:: php
 
     $people = ORM::for_table('person')->where_not_like('name', '%bob%')->find_many();
 
@@ -240,7 +240,7 @@ To add a ``WHERE ... IN ()`` or ``WHERE ... NOT IN ()`` clause, use the
 Both methods accept two arguments. The first is the column name to
 compare against. The second is an *array* of possible values.
 
-::
+.. code-block:: php
 
     $people = ORM::for_table('person')->where_in('name', array('Fred', 'Joe', 'John'))->find_many();
 
@@ -269,7 +269,7 @@ methods as well as methods such as ``offset``, ``limit`` and
 ``order_by_*``. The contents of the string you supply will be connected
 with preceding and following WHERE clauses with AND.
 
-::
+.. code-block:: php
 
     $people = ORM::for_table('person')
                 ->where('name', 'Fred')
@@ -298,7 +298,7 @@ these should **not** be passed directly from user input.*
 The ``limit`` and ``offset`` methods map pretty closely to their SQL
 equivalents.
 
-::
+.. code-block:: php
 
     $people = ORM::for_table('person')->where('gender', 'female')->limit(5)->offset(10)->find_many();
 
@@ -312,7 +312,7 @@ Two methods are provided to add ``ORDER BY`` clauses to your query.
 These are ``order_by_desc`` and ``order_by_asc``, each of which takes a
 column name to sort by. The column names will be quoted.
 
-::
+.. code-block:: php
 
     $people = ORM::for_table('person')->order_by_asc('gender')->order_by_desc('name')->find_many();
 
@@ -320,7 +320,7 @@ If you want to order by something other than a column name, then use the
 ``order_by_expr`` method to add an unquoted SQL expression as an
 ``ORDER BY`` clause.
 
-::
+.. code-block:: php
 
     $people = ORM::for_table('person')->order_by_expr('SOUNDEX(`name`)')->find_many();
 
@@ -334,13 +334,13 @@ To add a ``GROUP BY`` clause to your query, call the ``group_by``
 method, passing in the column name. You can call this method multiple
 times to add further columns.
 
-::
+.. code-block:: php
 
     $people = ORM::for_table('person')->where('gender', 'female')->group_by('name')->find_many();
 
 It is also possible to ``GROUP BY`` a database expression:
 
-::
+.. code-block:: php
 
     $people = ORM::for_table('person')->where('gender', 'female')->group_by_expr("FROM_UNIXTIME(`time`, '%Y-%m')")->find_many();
 
@@ -355,7 +355,7 @@ Substitute ``where_`` for ``having_`` to make use of these functions.
 
 For example:
 
-::
+.. code-block:: php
 
     $people = ORM::for_table('person')->group_by('name')->having_not_like('name', '%bob%')->find_many();
 
@@ -365,13 +365,13 @@ Result columns
 By default, all columns in the ``SELECT`` statement are returned from
 your query. That is, calling:
 
-::
+.. code-block:: php
 
     $people = ORM::for_table('person')->find_many();
 
 Will result in the query:
 
-::
+.. code-block:: php
 
     SELECT * FROM `person`;
 
@@ -380,39 +380,39 @@ Call ``select`` multiple times to specify columns to return or use
 ```select_many`` <#shortcuts-for-specifying-many-columns>`_ to specify
 many columns at once.
 
-::
+.. code-block:: php
 
     $people = ORM::for_table('person')->select('name')->select('age')->find_many();
 
 Will result in the query:
 
-::
+.. code-block:: php
 
     SELECT `name`, `age` FROM `person`;
 
 Optionally, you may also supply a second argument to ``select`` to
 specify an alias for the column:
 
-::
+.. code-block:: php
 
     $people = ORM::for_table('person')->select('name', 'person_name')->find_many();
 
 Will result in the query:
 
-::
+.. code-block:: php
 
     SELECT `name` AS `person_name` FROM `person`;
 
 Column names passed to ``select`` are quoted automatically, even if they
 contain ``table.column``-style identifiers:
 
-::
+.. code-block:: php
 
     $people = ORM::for_table('person')->select('person.name', 'person_name')->find_many();
 
 Will result in the query:
 
-::
+.. code-block:: php
 
     SELECT `person`.`name` AS `person_name` FROM `person`;
 
@@ -423,14 +423,14 @@ specify multiple expressions by calling ``select_expr`` multiple times
 or use ```select_many_expr`` <#shortcuts-for-specifying-many-columns>`_
 to specify many expressions at once.
 
-::
+.. code-block:: php
 
     // NOTE: For illustrative purposes only. To perform a count query, use the count() method.
     $people_count = ORM::for_table('person')->select_expr('COUNT(*)', 'count')->find_many();
 
 Will result in the query:
 
-::
+.. code-block:: php
 
     SELECT COUNT(*) AS `count` FROM `person`;
 
@@ -440,33 +440,33 @@ Shortcuts for specifying many columns
 ``select_many`` and ``select_many_expr`` are very similar, but they
 allow you to specify more than one column at once. For example:
 
-::
+.. code-block:: php
 
     $people = ORM::for_table('person')->select_many('name', 'age')->find_many();
 
 Will result in the query:
 
-::
+.. code-block:: php
 
     SELECT `name`, `age` FROM `person`;
 
 To specify aliases you need to pass in an array (aliases are set as the
 key in an associative array):
 
-::
+.. code-block:: php
 
     $people = ORM::for_table('person')->select_many(array('first_name' => 'name', 'age'), 'height')->find_many();
 
 Will result in the query:
 
-::
+.. code-block:: php
 
     SELECT `name` AS `first_name`, `age`, `height` FROM `person`;
 
 You can pass the the following styles into ``select_many`` and
 ``select_many_expr`` by mixing and matching arrays and parameters:
 
-::
+.. code-block:: php
 
     select_many(array('alias' => 'column', 'column2', 'alias2' => 'column3'), 'column4', 'column5')
     select_many('column', 'column2', 'column3')
@@ -475,13 +475,13 @@ You can pass the the following styles into ``select_many`` and
 All the select methods can also be chained with each other so you could
 do the following to get a neat select query including an expression:
 
-::
+.. code-block:: php
 
     $people = ORM::for_table('person')->select_many('name', 'age', 'height')->select_expr('NOW()', 'timestamp')->find_many();
 
 Will result in the query:
 
-::
+.. code-block:: php
 
     SELECT `name`, `age`, `height`, NOW() AS `timestamp` FROM `person`;
 
@@ -491,13 +491,13 @@ DISTINCT
 To add a ``DISTINCT`` keyword before the list of result columns in your
 query, add a call to ``distinct()`` to your query chain.
 
-::
+.. code-block:: php
 
     $distinct_names = ORM::for_table('person')->distinct()->select('name')->find_many();
 
 This will result in the query:
 
-::
+.. code-block:: php
 
     SELECT DISTINCT `name` FROM `person`;
 
@@ -520,7 +520,7 @@ recommended way to specify the conditions is as an *array* containing
 three components: the first column, the operator, and the second column.
 The table and column names will be automatically quoted. For example:
 
-::
+.. code-block:: php
 
     $results = ORM::for_table('person')->join('person_profile', array('person.id', '=', 'person_profile.person_id'))->find_many();
 
@@ -528,7 +528,7 @@ It is also possible to specify the condition as a string, which will be
 inserted as-is into the query. However, in this case the column names
 will **not** be escaped, and so this method should be used with caution.
 
-::
+.. code-block:: php
 
     // Not recommended because the join condition will not be escaped.
     $results = ORM::for_table('person')->join('person_profile', 'person.id = person_profile.person_id')->find_many();
@@ -540,7 +540,7 @@ it is best combined with the ``table_alias`` method, which will add an
 alias to the *main* table associated with the ORM, and the ``select``
 method to control which columns get returned.
 
-::
+.. code-block:: php
 
     $results = ORM::for_table('person')
         ->table_alias('p1')
@@ -557,7 +557,7 @@ to ``COUNT`` (documented earlier).
 
 To return a minimum value of column, call the ``min()`` method.
 
-::
+.. code-block:: php
 
     $min = ORM::for_table('person')->min('height');
 
@@ -574,7 +574,7 @@ takes a string and optionally an array of parameters. The string can
 contain placeholders, either in question mark or named placeholder
 syntax, which will be used to bind the parameters to the query.
 
-::
+.. code-block:: php
 
     $people = ORM::for_table('person')->raw_query('SELECT p.* FROM person p JOIN role r ON p.role_id = r.id WHERE r.name = :role', array('role' => 'janitor'))->find_many();
 

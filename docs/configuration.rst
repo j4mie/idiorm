@@ -12,7 +12,7 @@ Setup
 
 First, ``require`` the Idiorm source file:
 
-::
+.. code-block:: php
 
     require_once 'idiorm.php';
 
@@ -20,7 +20,7 @@ Then, pass a *Data Source Name* connection string to the ``configure``
 method of the ORM class. This is used by PDO to connect to your
 database. For more information, see the `PDO documentation`_.
 
-::
+.. code-block:: php
 
     ORM::configure('sqlite:./example.db');
 
@@ -28,7 +28,7 @@ You may also need to pass a username and password to your database
 driver, using the ``username`` and ``password`` configuration options.
 For example, if you are using MySQL:
 
-::
+.. code-block:: php
 
     ORM::configure('mysql:host=localhost;dbname=my_database');
     ORM::configure('username', 'database_user');
@@ -45,14 +45,14 @@ options on the ORM class. Modifying settings involves passing a
 key/value pair to the ``configure`` method, representing the setting you
 wish to modify and the value you wish to set it to.
 
-::
+.. code-block:: php
 
     ORM::configure('setting_name', 'value_for_setting');
 
 A shortcut is provided to allow passing multiple key/value pairs at
 once.
 
-::
+.. code-block:: php
 
     ORM::configure(array(
         'setting_name_1' => 'value_for_setting_1', 
@@ -70,7 +70,7 @@ to be supplied separately to the DSN string. These settings allow you to
 provide these values. A typical MySQL connection setup might look like
 this:
 
-::
+.. code-block:: php
 
     ORM::configure('mysql:host=localhost;dbname=my_database');
     ORM::configure('username', 'database_user');
@@ -79,7 +79,7 @@ this:
 Or you can combine the connection setup into a single line using the
 configuration array shortcut:
 
-::
+.. code-block:: php
 
     ORM::configure(array(
         'mysql:host=localhost;dbname=my_database', 
@@ -95,7 +95,7 @@ Setting: ``return_result_sets``
 Collections of results can be returned as an array (default) or as a result set.
 See the `find_result_set()` documentation for more information.
 
-::
+.. code-block:: php
 
     ORM::configure('return_result_sets', true); // returns result sets
 
@@ -116,7 +116,7 @@ through to the PDO constructor. For more information, see `the PDO
 documentation`_. For example, to force the MySQL driver to use UTF-8 for
 the connection:
 
-::
+.. code-block:: php
 
     ORM::configure('driver_options', array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'));
 
@@ -129,7 +129,7 @@ This can be used to set the ``PDO::ATTR_ERRMODE`` setting on the
 database connection class used by Idiorm. It should be passed one of the
 class constants defined by PDO. For example:
 
-::
+.. code-block:: php
 
     ORM::configure('error_mode', PDO::ERRMODE_WARNING);
 
@@ -172,7 +172,7 @@ Setting: ``id_column``
 This setting is used to configure the name of the primary key column for
 all tables. If your ID column is called ``primary_key``, use:
 
-::
+.. code-block:: php
 
     ORM::configure('id_column', 'primary_key');
 
@@ -183,7 +183,7 @@ table separately. It takes an associative array mapping table names to
 column names. If, for example, your ID column names include the name of
 the table, you can use the following configuration:
 
-::
+.. code-block:: php
 
     ORM::configure('id_column_overrides', array(
         'person' => 'person_id',

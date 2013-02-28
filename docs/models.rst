@@ -9,7 +9,7 @@ access properties on those objects (the values stored in the columns in
 its corresponding table) in two ways: by using the ``get`` method, or
 simply by accessing the property on the object directly:
 
-::
+.. code-block:: php
 
     $person = ORM::for_table('person')->find_one(5);
 
@@ -25,7 +25,7 @@ The ``as_array`` method takes column names as optional arguments. If one
 or more of these arguments is supplied, only matching column names will
 be returned.
 
-::
+.. code-block:: php
 
     $person = ORM::for_table('person')->create();
 
@@ -49,7 +49,7 @@ either by using the ``set`` method or by setting the value of the
 property directly. By using the ``set`` method it is also possible to
 update multiple properties at once, by passing in an associative array:
 
-::
+.. code-block:: php
 
     $person = ORM::for_table('person')->find_one(5);
 
@@ -72,7 +72,7 @@ Properties containing expressions
 It is possible to set properties on the model that contain database
 expressions using the ``set_expr`` method.
 
-::
+.. code-block:: php
 
     $person = ORM::for_table('person')->find_one(5);
     $person->set('name', 'Bob Smith');
@@ -90,7 +90,7 @@ Creating new records
 To add a new record, you need to first create an "empty" object
 instance. You then set values on the object as normal, and save it.
 
-::
+.. code-block:: php
 
     $person = ORM::for_table('person')->create();
 
@@ -109,7 +109,7 @@ Properties containing expressions
 It is possible to set properties on the model that contain database
 expressions using the ``set_expr`` method.
 
-::
+.. code-block:: php
 
     $person = ORM::for_table('person')->create();
     $person->set('name', 'Bob Smith');
@@ -127,7 +127,7 @@ Checking whether a property has been modified
 To check whether a property has been changed since the object was
 created (or last saved), call the ``is_dirty`` method:
 
-::
+.. code-block:: php
 
     $name_has_changed = $person->is_dirty('name'); // Returns true or false
 
@@ -137,14 +137,14 @@ Deleting records
 To delete an object from the database, simply call its ``delete``
 method.
 
-::
+.. code-block:: php
 
     $person = ORM::for_table('person')->find_one(5);
     $person->delete();
 
 To delete more than one object from the database, build a query:
 
-::
+.. code-block:: php
 
     $person = ORM::for_table('person')
         ->where_equal('zipcode', 55555)
