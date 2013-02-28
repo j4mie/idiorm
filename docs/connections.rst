@@ -12,6 +12,7 @@ calls in the chain use the correct connection.
 
 .. code-block:: php
 
+    <?php
     // Default connection
     ORM::configure('sqlite:./example.db');
 
@@ -51,6 +52,7 @@ query on *any* connection.
 
 .. code-block:: php
 
+    <?php
     // Using default connection, explicitly
     $person = ORM::for_table('person')->find_one(5);
     

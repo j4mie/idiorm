@@ -14,6 +14,7 @@ First, ``require`` the Idiorm source file:
 
 .. code-block:: php
 
+    <?php
     require_once 'idiorm.php';
 
 Then, pass a *Data Source Name* connection string to the ``configure``
@@ -22,6 +23,7 @@ database. For more information, see the `PDO documentation`_.
 
 .. code-block:: php
 
+    <?php
     ORM::configure('sqlite:./example.db');
 
 You may also need to pass a username and password to your database
@@ -30,6 +32,7 @@ For example, if you are using MySQL:
 
 .. code-block:: php
 
+    <?php
     ORM::configure('mysql:host=localhost;dbname=my_database');
     ORM::configure('username', 'database_user');
     ORM::configure('password', 'top_secret');
@@ -47,6 +50,7 @@ wish to modify and the value you wish to set it to.
 
 .. code-block:: php
 
+    <?php
     ORM::configure('setting_name', 'value_for_setting');
 
 A shortcut is provided to allow passing multiple key/value pairs at
@@ -54,6 +58,7 @@ once.
 
 .. code-block:: php
 
+    <?php
     ORM::configure(array(
         'setting_name_1' => 'value_for_setting_1', 
         'setting_name_2' => 'value_for_setting_2', 
@@ -72,6 +77,7 @@ this:
 
 .. code-block:: php
 
+    <?php
     ORM::configure('mysql:host=localhost;dbname=my_database');
     ORM::configure('username', 'database_user');
     ORM::configure('password', 'top_secret');
@@ -81,6 +87,7 @@ configuration array shortcut:
 
 .. code-block:: php
 
+    <?php
     ORM::configure(array(
         'connection_string' => 'mysql:host=localhost;dbname=my_database', 
         'username' => 'database_user', 
@@ -97,6 +104,7 @@ See the `find_result_set()` documentation for more information.
 
 .. code-block:: php
 
+    <?php
     ORM::configure('return_result_sets', true); // returns result sets
 
 
@@ -118,6 +126,7 @@ the connection:
 
 .. code-block:: php
 
+    <?php
     ORM::configure('driver_options', array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'));
 
 PDO Error Mode
@@ -131,6 +140,7 @@ class constants defined by PDO. For example:
 
 .. code-block:: php
 
+    <?php
     ORM::configure('error_mode', PDO::ERRMODE_WARNING);
 
 The default setting is ``PDO::ERRMODE_EXCEPTION``. For full details of
@@ -174,6 +184,7 @@ all tables. If your ID column is called ``primary_key``, use:
 
 .. code-block:: php
 
+    <?php
     ORM::configure('id_column', 'primary_key');
 
 Setting: ``id_column_overrides``
@@ -185,6 +196,7 @@ the table, you can use the following configuration:
 
 .. code-block:: php
 
+    <?php
     ORM::configure('id_column_overrides', array(
         'person' => 'person_id',
         'role' => 'role_id',

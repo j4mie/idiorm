@@ -39,6 +39,7 @@ Bloggs":
 
 .. code-block:: php
 
+    <?php
     $person = ORM::for_table('person')->where('name', 'Fred Bloggs')->find_one();
 
 This roughly translates into the following SQL:
@@ -49,6 +50,7 @@ To find a single record by ID, you can pass the ID directly to the
 
 .. code-block:: php
 
+    <?php
     $person = ORM::for_table('person')->find_one(5);
 
 Multiple records
@@ -67,12 +69,14 @@ To find all records in the table:
 
 .. code-block:: php
 
+    <?php
     $people = ORM::for_table('person')->find_many();
 
 To find all records where the ``gender`` is ``female``:
 
 .. code-block:: php
 
+    <?php
     $females = ORM::for_table('person')->where('gender', 'female')->find_many();
 
 As a result set
@@ -96,6 +100,7 @@ So for example instead of running this:
 
 .. code-block:: php
 
+    <?php
     $people = ORM::for_table('person')->find_many();
     foreach ($people as $person) {
         $person->age = 50;
@@ -106,6 +111,7 @@ You can simple do this instead:
 
 .. code-block:: php
 
+    <?php
     ORM::for_table('person')->find_result_set()
     ->set('age', 50)
     ->save();
@@ -118,12 +124,14 @@ over it just like an array.
 
 .. code-block:: php
 
+    <?php
     foreach(ORM::for_table('person')->find_result_set() as $record) {
         echo $person->name;
     }
 
 .. code-block:: php
 
+    <?php
     echo count(ORM::for_table('person')->find_result_set());
 
 .. note::
@@ -140,6 +148,7 @@ instances. To do this substitute any call to ``find_many()`` with
 
 .. code-block:: php
 
+    <?php
     $females = ORM::for_table('person')->where('gender', 'female')->find_array();
 
 This is useful if you need to serialise the the query output into a
@@ -154,6 +163,7 @@ query, call the ``count()`` method.
 
 .. code-block:: php
 
+    <?php
     $number_of_people = ORM::for_table('person')->count();
 
 Filtering results
@@ -223,12 +233,14 @@ To add a ``WHERE ... LIKE`` clause, use:
 
 .. code-block:: php
 
+    <?php
     $people = ORM::for_table('person')->where_like('name', '%fred%')->find_many();
 
 Similarly, to add a ``WHERE ... NOT LIKE`` clause, use:
 
 .. code-block:: php
 
+    <?php
     $people = ORM::for_table('person')->where_not_like('name', '%bob%')->find_many();
 
 Set membership: ``where_in`` and ``where_not_in``
@@ -242,6 +254,7 @@ compare against. The second is an *array* of possible values.
 
 .. code-block:: php
 
+    <?php
     $people = ORM::for_table('person')->where_in('name', array('Fred', 'Joe', 'John'))->find_many();
 
 Working with ``NULL`` values: ``where_null`` and ``where_not_null``
@@ -271,6 +284,7 @@ with preceding and following WHERE clauses with AND.
 
 .. code-block:: php
 
+    <?php
     $people = ORM::for_table('person')
                 ->where('name', 'Fred')
                 ->where_raw('(`age` = ? OR `age` = ?)', array(20, 25))
@@ -300,6 +314,7 @@ equivalents.
 
 .. code-block:: php
 
+    <?php
     $people = ORM::for_table('person')->where('gender', 'female')->limit(5)->offset(10)->find_many();
 
 Ordering
@@ -314,6 +329,7 @@ column name to sort by. The column names will be quoted.
 
 .. code-block:: php
 
+    <?php
     $people = ORM::for_table('person')->order_by_asc('gender')->order_by_desc('name')->find_many();
 
 If you want to order by something other than a column name, then use the
@@ -322,6 +338,7 @@ If you want to order by something other than a column name, then use the
 
 .. code-block:: php
 
+    <?php
     $people = ORM::for_table('person')->order_by_expr('SOUNDEX(`name`)')->find_many();
 
 Grouping
@@ -336,12 +353,14 @@ times to add further columns.
 
 .. code-block:: php
 
+    <?php
     $people = ORM::for_table('person')->where('gender', 'female')->group_by('name')->find_many();
 
 It is also possible to ``GROUP BY`` a database expression:
 
 .. code-block:: php
 
+    <?php
     $people = ORM::for_table('person')->where('gender', 'female')->group_by_expr("FROM_UNIXTIME(`time`, '%Y-%m')")->find_many();
 
 Having
@@ -357,6 +376,7 @@ For example:
 
 .. code-block:: php
 
+    <?php
     $people = ORM::for_table('person')->group_by('name')->having_not_like('name', '%bob%')->find_many();
 
 Result columns
@@ -367,12 +387,14 @@ your query. That is, calling:
 
 .. code-block:: php
 
+    <?php
     $people = ORM::for_table('person')->find_many();
 
 Will result in the query:
 
 .. code-block:: php
 
+    <?php
     SELECT * FROM `person`;
 
 The ``select`` method gives you control over which columns are returned.
@@ -382,12 +404,14 @@ many columns at once.
 
 .. code-block:: php
 
+    <?php
     $people = ORM::for_table('person')->select('name')->select('age')->find_many();
 
 Will result in the query:
 
 .. code-block:: php
 
+    <?php
     SELECT `name`, `age` FROM `person`;
 
 Optionally, you may also supply a second argument to ``select`` to
@@ -395,12 +419,14 @@ specify an alias for the column:
 
 .. code-block:: php
 
+    <?php
     $people = ORM::for_table('person')->select('name', 'person_name')->find_many();
 
 Will result in the query:
 
 .. code-block:: php
 
+    <?php
     SELECT `name` AS `person_name` FROM `person`;
 
 Column names passed to ``select`` are quoted automatically, even if they
@@ -408,12 +434,14 @@ contain ``table.column``-style identifiers:
 
 .. code-block:: php
 
+    <?php
     $people = ORM::for_table('person')->select('person.name', 'person_name')->find_many();
 
 Will result in the query:
 
 .. code-block:: php
 
+    <?php
     SELECT `person`.`name` AS `person_name` FROM `person`;
 
 If you wish to override this behaviour (for example, to supply a
@@ -425,6 +453,7 @@ to specify many expressions at once.
 
 .. code-block:: php
 
+    <?php
     // NOTE: For illustrative purposes only. To perform a count query, use the count() method.
     $people_count = ORM::for_table('person')->select_expr('COUNT(*)', 'count')->find_many();
 
@@ -432,6 +461,7 @@ Will result in the query:
 
 .. code-block:: php
 
+    <?php
     SELECT COUNT(*) AS `count` FROM `person`;
 
 Shortcuts for specifying many columns
@@ -442,12 +472,14 @@ allow you to specify more than one column at once. For example:
 
 .. code-block:: php
 
+    <?php
     $people = ORM::for_table('person')->select_many('name', 'age')->find_many();
 
 Will result in the query:
 
 .. code-block:: php
 
+    <?php
     SELECT `name`, `age` FROM `person`;
 
 To specify aliases you need to pass in an array (aliases are set as the
@@ -455,12 +487,14 @@ key in an associative array):
 
 .. code-block:: php
 
+    <?php
     $people = ORM::for_table('person')->select_many(array('first_name' => 'name'), 'age', 'height')->find_many();
 
 Will result in the query:
 
 .. code-block:: php
 
+    <?php
     SELECT `name` AS `first_name`, `age`, `height` FROM `person`;
 
 You can pass the the following styles into ``select_many`` and
@@ -468,6 +502,7 @@ You can pass the the following styles into ``select_many`` and
 
 .. code-block:: php
 
+    <?php
     select_many(array('alias' => 'column', 'column2', 'alias2' => 'column3'), 'column4', 'column5')
     select_many('column', 'column2', 'column3')
     select_many(array('column', 'column2', 'column3'), 'column4', 'column5')
@@ -477,12 +512,14 @@ do the following to get a neat select query including an expression:
 
 .. code-block:: php
 
+    <?php
     $people = ORM::for_table('person')->select_many('name', 'age', 'height')->select_expr('NOW()', 'timestamp')->find_many();
 
 Will result in the query:
 
 .. code-block:: php
 
+    <?php
     SELECT `name`, `age`, `height`, NOW() AS `timestamp` FROM `person`;
 
 DISTINCT
@@ -493,12 +530,14 @@ query, add a call to ``distinct()`` to your query chain.
 
 .. code-block:: php
 
+    <?php
     $distinct_names = ORM::for_table('person')->distinct()->select('name')->find_many();
 
 This will result in the query:
 
 .. code-block:: php
 
+    <?php
     SELECT DISTINCT `name` FROM `person`;
 
 Joins
@@ -522,6 +561,7 @@ The table and column names will be automatically quoted. For example:
 
 .. code-block:: php
 
+    <?php
     $results = ORM::for_table('person')->join('person_profile', array('person.id', '=', 'person_profile.person_id'))->find_many();
 
 It is also possible to specify the condition as a string, which will be
@@ -530,6 +570,7 @@ will **not** be escaped, and so this method should be used with caution.
 
 .. code-block:: php
 
+    <?php
     // Not recommended because the join condition will not be escaped.
     $results = ORM::for_table('person')->join('person_profile', 'person.id = person_profile.person_id')->find_many();
 
@@ -542,6 +583,7 @@ method to control which columns get returned.
 
 .. code-block:: php
 
+    <?php
     $results = ORM::for_table('person')
         ->table_alias('p1')
         ->select('p1.*')
@@ -559,6 +601,7 @@ To return a minimum value of column, call the ``min()`` method.
 
 .. code-block:: php
 
+    <?php
     $min = ORM::for_table('person')->min('height');
 
 The other functions (``AVG``, ``MAX`` and ``SUM``) work in exactly the
@@ -576,6 +619,7 @@ syntax, which will be used to bind the parameters to the query.
 
 .. code-block:: php
 
+    <?php
     $people = ORM::for_table('person')->raw_query('SELECT p.* FROM person p JOIN role r ON p.role_id = r.id WHERE r.name = :role', array('role' => 'janitor'))->find_many();
 
 The ORM class instance(s) returned will contain data for all the columns

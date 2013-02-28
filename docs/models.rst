@@ -11,6 +11,7 @@ simply by accessing the property on the object directly:
 
 .. code-block:: php
 
+    <?php
     $person = ORM::for_table('person')->find_one(5);
 
     // The following two forms are equivalent
@@ -27,6 +28,7 @@ be returned.
 
 .. code-block:: php
 
+    <?php
     $person = ORM::for_table('person')->create();
 
     $person->first_name = 'Fred';
@@ -51,6 +53,7 @@ update multiple properties at once, by passing in an associative array:
 
 .. code-block:: php
 
+    <?php
     $person = ORM::for_table('person')->find_one(5);
 
     // The following two forms are equivalent
@@ -74,6 +77,7 @@ expressions using the ``set_expr`` method.
 
 .. code-block:: php
 
+    <?php
     $person = ORM::for_table('person')->find_one(5);
     $person->set('name', 'Bob Smith');
     $person->age = 20;
@@ -92,6 +96,7 @@ instance. You then set values on the object as normal, and save it.
 
 .. code-block:: php
 
+    <?php
     $person = ORM::for_table('person')->create();
 
     $person->name = 'Joe Bloggs';
@@ -111,6 +116,7 @@ expressions using the ``set_expr`` method.
 
 .. code-block:: php
 
+    <?php
     $person = ORM::for_table('person')->create();
     $person->set('name', 'Bob Smith');
     $person->age = 20;
@@ -129,6 +135,7 @@ created (or last saved), call the ``is_dirty`` method:
 
 .. code-block:: php
 
+    <?php
     $name_has_changed = $person->is_dirty('name'); // Returns true or false
 
 Deleting records
@@ -139,6 +146,7 @@ method.
 
 .. code-block:: php
 
+    <?php
     $person = ORM::for_table('person')->find_one(5);
     $person->delete();
 
@@ -146,6 +154,7 @@ To delete more than one object from the database, build a query:
 
 .. code-block:: php
 
+    <?php
     $person = ORM::for_table('person')
         ->where_equal('zipcode', 55555)
         ->delete_many();
