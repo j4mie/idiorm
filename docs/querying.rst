@@ -455,7 +455,7 @@ key in an associative array):
 
 .. code-block:: php
 
-    $people = ORM::for_table('person')->select_many(array('first_name' => 'name', 'age'), 'height')->find_many();
+    $people = ORM::for_table('person')->select_many(array('first_name' => 'name'), 'age', 'height')->find_many();
 
 Will result in the query:
 

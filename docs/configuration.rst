@@ -82,7 +82,7 @@ configuration array shortcut:
 .. code-block:: php
 
     ORM::configure(array(
-        'mysql:host=localhost;dbname=my_database', 
+        'connection_string' => 'mysql:host=localhost;dbname=my_database', 
         'username' => 'database_user', 
         'password' => 'top_secret'
     ));

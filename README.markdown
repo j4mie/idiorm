@@ -42,24 +42,26 @@ The documentation will now be in docs/_build/html/index.html
 Let's See Some Code
 -------------------
 
-    $user = ORM::for_table('user')
-        ->where_equal('username', 'j4mie')
-        ->find_one();
+```php
+$user = ORM::for_table('user')
+    ->where_equal('username', 'j4mie')
+    ->find_one();
 
-    $user->first_name = 'Jamie';
-    $user->save();
+$user->first_name = 'Jamie';
+$user->save();
 
-    $tweets = ORM::for_table('tweet')
-        ->select('tweet.*')
-        ->join('user', array(
-            'user.id', '=', 'tweet.user_id'
-        ))
-        ->where_equal('user.username', 'j4mie')
-        ->find_many();
+$tweets = ORM::for_table('tweet')
+    ->select('tweet.*')
+    ->join('user', array(
+        'user.id', '=', 'tweet.user_id'
+    ))
+    ->where_equal('user.username', 'j4mie')
+    ->find_many();
 
-    foreach ($tweets as $tweet) {
-        echo $tweet->text;
-    }
+foreach ($tweets as $tweet) {
+    echo $tweet->text;
+}
+```
 
 Changelog
 ---------
