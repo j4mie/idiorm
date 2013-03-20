@@ -299,7 +299,7 @@
          * required outside the class. If multiple connections are used,
          * accepts an optional key name for the connection.
          * @param string $connection_name Which connection to use
-         * @return ORM
+         * @return PDO
          */
         public static function get_db($connection_name = self::DEFAULT_CONNECTION) {
             self::_setup_db($connection_name); // required in case this is called before Idiorm is instantiated
