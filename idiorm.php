@@ -1796,6 +1796,44 @@
         public function __isset($key) {
             return $this->offsetExists($key);
         }
+
+        /**
+         * Magic method to capture calls to undefined class methods.
+         * In this case we are attempting to convert camel case formatted 
+         * methods into underscore formatted methods.
+         *
+         * This allows us to call ORM methods using camel case and remain 
+         * backwards compatible.
+         * 
+         * @param  string   $name
+         * @param  array    $arguments
+         * @return ORM
+         */
+        public function __call($name, $arguments)
+        {
+            $method = strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $name));
+
+            return call_user_func_array(array($this, $method), $arguments);
+        }
+
+        /**
+         * Magic method to capture calls to undefined static class methods. 
+         * In this case we are attempting to convert camel case formatted 
+         * methods into underscore formatted methods.
+         *
+         * This allows us to call ORM methods using camel case and remain 
+         * backwards compatible.
+         * 
+         * @param  string   $name
+         * @param  array    $arguments
+         * @return ORM
+         */
+        public static function __callStatic($name, $arguments)
+        {
+            $method = strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $name));
+
+            return call_user_func_array(array('ORM', $method), $arguments);
+        }
     }
 
     /**
