@@ -1,6 +1,6 @@
 <?php
 
-namespace Idiorm\ORM;
+namespace Idiorm;
 
 use \PDO;
 
