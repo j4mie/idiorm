@@ -107,7 +107,7 @@ So for example instead of running this:
         $person->save();
     }
 
-You can simple do this instead:
+You can simply do this instead:
 
 .. code-block:: php
 
