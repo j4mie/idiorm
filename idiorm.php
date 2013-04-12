@@ -263,7 +263,7 @@
             self::_setup_db_config($connection_name);
             self::$_db[$connection_name] = $db;
             self::_setup_identifier_quote_character($connection_name);
-            self::_setup_limit_clause_style();
+            self::_setup_limit_clause_style($connection_name);
         }
 
         /**
@@ -285,9 +285,9 @@
          * "... LIMIT 5"). If this has been specified manually using 
          * ORM::configure('limit_clause_style', 'top'), this will do nothing.
          */
-        public static function _setup_limit_clause_style() {
+        public static function _setup_limit_clause_style($connection_name) {
             if (is_null(self::$_config['limit_clause_style'])) {
-                self::$_config['limit_clause_style'] = self::_detect_limit_clause_style();
+                self::$_config['limit_clause_style'] = self::_detect_limit_clause_style($connection_name);
             }
         }
 
@@ -318,11 +318,11 @@
          * Returns a constant for the "limit clause style" for MS Sql Server 
          * versus grown up databases.
          */
-        protected static function _detect_limit_clause_style() {
-            switch(self::$_db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
+        protected static function _detect_limit_clause_style($connection_name) {
+            switch(self::$_db[$connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME)) {
                 case 'sqlsrv':
                 case 'dblib':
-		    return ORM::LIMIT_STYLE_TOP_N;
+					return ORM::LIMIT_STYLE_TOP_N;
                 case 'mssql':
                     return ORM::LIMIT_STYLE_TOP_N;
                 default:
