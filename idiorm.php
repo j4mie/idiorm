@@ -507,12 +507,7 @@
             if (!is_null($id)) {
                 $this->where_id_is($id);
             }
-
-			// Use of 'LIMIT 1' in SQL querries with find_one()
-			if (array_key_exists('find_one_limit', $this->_config[$this->_connection_name])) {
-				$this->limit(1);
-			}
-
+            $this->limit(1);
             $rows = $this->_run();
 
             if (empty($rows)) {
