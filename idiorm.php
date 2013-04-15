@@ -202,6 +202,13 @@
         }
 
         /**
+         * 
+         */
+        public static function reset_config() {
+            self::$_config = array();
+        }
+        
+        /**
          * Despite its slightly odd name, this is actually the factory
          * method used to acquire instances of the class. It is named
          * this way for the sake of a readable interface, ie
@@ -473,6 +480,13 @@
          */
         public static function get_connection_names() {
             return array_keys(self::$_db);
+        }
+
+        /**
+         * Delete all registered PDO objects in _db array.
+         */
+        public static function reset_db() {
+            self::$_db = array();
         }
 
         // ------------------------ //
@@ -1417,11 +1431,11 @@
         protected function _build_limit() {
             if (!is_null($this->_limit)) {
                 if (self::$_config[$this->_connection_name]['limit_clause_style'] == ORM::LIMIT_STYLE_LIMIT) {
-                    return 'LIMIT' . $this->_limit;
+                    return 'LIMIT ' . $this->_limit;
                 }
 
                 if (self::$_db[$this->_connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME) == 'firebird') {
-                    return 'ROWS' . $this->_limit;
+                    return 'ROWS ' . $this->_limit;
                 }
             }
             return '';

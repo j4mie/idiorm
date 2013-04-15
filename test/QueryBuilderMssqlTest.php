@@ -13,8 +13,8 @@ class QueryBuilderMssqlTest extends PHPUnit_Framework_TestCase {
     }
 
     public function tearDown() {
-        ORM::configure('logging', false);
-        ORM::set_db(null);
+        ORM::reset_config();
+        ORM::reset_db();
     }
 
     public function testFindMany() {
