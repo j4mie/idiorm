@@ -50,10 +50,6 @@
 
         const DEFAULT_CONNECTION = 'default';
 
-        // Where condition array keys
-        const WHERE_FRAGMENT = 0;
-        const WHERE_VALUES = 1;
-        
         // Limit clause style
         const LIMIT_STYLE_TOP_N = "top";
         const LIMIT_STYLE_LIMIT = "limit";
@@ -276,7 +272,7 @@
         protected static function _setup_identifier_quote_character($connection_name) {
             if (is_null(self::$_config[$connection_name]['identifier_quote_character'])) {
                 self::$_config[$connection_name]['identifier_quote_character'] =
-                     self::_detect_identifier_quote_character($connection_name);
+                    self::_detect_identifier_quote_character($connection_name);
             }
         }
 
@@ -287,8 +283,8 @@
          */
         public static function _setup_limit_clause_style($connection_name) {
             if (is_null(self::$_config[$connection_name]['limit_clause_style'])) {
-                self::$_config[$connection_name]['limit_clause_style'] = 
-					self::_detect_limit_clause_style($connection_name);
+                self::$_config[$connection_name]['limit_clause_style'] =
+                    self::_detect_limit_clause_style($connection_name);
             }
         }
 
@@ -303,8 +299,11 @@
                 case 'pgsql':
                 case 'sqlsrv':
                 case 'dblib':
+                    return '';
                 case 'mssql':
+                    return '';
                 case 'sybase':
+                    return '';
                 case 'firebird':
                     return '"';
                 case 'mysql':
@@ -323,7 +322,7 @@
             switch(self::$_db[$connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME)) {
                 case 'sqlsrv':
                 case 'dblib':
-					return ORM::LIMIT_STYLE_TOP_N;
+                    return ORM::LIMIT_STYLE_TOP_N;
                 case 'mssql':
                     return ORM::LIMIT_STYLE_TOP_N;
                 default:
@@ -1331,7 +1330,7 @@
             $result_columns = join(', ', $this->_result_columns);
 
             if (self::$_config[$this->_connection_name]['limit_clause_style'] == ORM::LIMIT_STYLE_TOP_N && !is_null($this->_limit)) {
-              $top = "TOP {$this->_limit} ";
+                $top = "TOP {$this->_limit} ";
             }
 
             if ($this->_distinct) {
@@ -1416,8 +1415,14 @@
          * Build LIMIT
          */
         protected function _build_limit() {
-            if (self::$_config[$this->_connection_name]['limit_clause_style'] == ORM::LIMIT_STYLE_LIMIT && !is_null($this->_limit)) {
-                return "LIMIT " . $this->_limit;
+            if (!is_null($this->_limit)) {
+                if (self::$_config[$this->_connection_name]['limit_clause_style'] == ORM::LIMIT_STYLE_LIMIT) {
+                    return 'LIMIT' . $this->_limit;
+                }
+
+                if (self::$_db[$this->_connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME) == 'firebird') {
+                    return 'ROWS' . $this->_limit;
+                }
             }
             return '';
         }
