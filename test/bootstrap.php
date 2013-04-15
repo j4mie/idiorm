@@ -53,10 +53,10 @@ class MockPDO extends PDO {
         if ($attribute == self::ATTR_DRIVER_NAME) {
             if (!is_null($this->fake_driver)) {
                 return $this->fake_driver;
-            } else {
-                parent::getAttribute($attribute);
             }
         }
+        
+        return parent::getAttribute($attribute);
     }
 }
 
