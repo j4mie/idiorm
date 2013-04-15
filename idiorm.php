@@ -202,7 +202,7 @@
         }
 
         /**
-         * 
+         * Delete all configs in _config array.
          */
         public static function reset_config() {
             self::$_config = array();
