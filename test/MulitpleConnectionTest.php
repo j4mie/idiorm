@@ -15,10 +15,8 @@ class MultipleConnectionTest extends PHPUnit_Framework_TestCase {
     }
 
     public function tearDown() {
-        ORM::configure('logging', false);
-        ORM::configure('logging', false, self::ALTERNATE);
-        ORM::set_db(null);
-        ORM::set_db(null, self::ALTERNATE);
+        ORM::reset_config();
+        ORM::reset_db();
     }
 
     public function testMultiplePdoConnections() {
