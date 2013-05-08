@@ -616,8 +616,11 @@
             if('*' != $column) {
                 $column = $this->_quote_identifier($column);
             }
+            $result_columns = $this->_result_columns;
+            $this->_result_columns = array();
             $this->select_expr("$sql_function($column)", $alias);
             $result = $this->find_one();
+            $this->_result_columns = $result_columns;
 
             $return_value = 0;
             if($result !== false && isset($result->$alias)) {
