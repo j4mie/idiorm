@@ -38,7 +38,7 @@
      *
      */
 
-    class ORM implements ArrayAccess {
+    class ORM implements \ArrayAccess {
 
         // ----------------------- //
         // --- CLASS CONSTANTS --- //
@@ -59,7 +59,7 @@
             'connection_string' => 'sqlite::memory:',
             'id_column' => 'id',
             'id_column_overrides' => array(),
-            'error_mode' => PDO::ERRMODE_EXCEPTION,
+            'error_mode' => \PDO::ERRMODE_EXCEPTION,
             'username' => null,
             'password' => null,
             'driver_options' => null,
@@ -220,14 +220,14 @@
                 !is_object(self::$_db[$connection_name])) {
                 self::_setup_db_config($connection_name);
 
-                $db = new PDO(
+                $db = new \PDO(
                     self::$_config[$connection_name]['connection_string'],
                     self::$_config[$connection_name]['username'],
                     self::$_config[$connection_name]['password'],
                     self::$_config[$connection_name]['driver_options']
                 );
 
-                $db->setAttribute(PDO::ATTR_ERRMODE, self::$_config[$connection_name]['error_mode']);
+                $db->setAttribute(\PDO::ATTR_ERRMODE, self::$_config[$connection_name]['error_mode']);
                 self::set_db($db, $connection_name);
             }
         }
@@ -277,7 +277,7 @@
          * @return string
          */
         protected static function _detect_identifier_quote_character($connection_name) {
-            switch(self::$_db[$connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME)) {
+            switch(self::$_db[$connection_name]->getAttribute(\PDO::ATTR_DRIVER_NAME)) {
                 case 'pgsql':
                 case 'sqlsrv':
                 case 'dblib':
@@ -1375,7 +1375,7 @@
         protected function _build_limit() {
             if (!is_null($this->_limit)) {
                 $clause = 'LIMIT';
-                if (self::$_db[$this->_connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME) == 'firebird') {
+                if (self::$_db[$this->_connection_name]->getAttribute(\PDO::ATTR_DRIVER_NAME) == 'firebird') {
                     $clause = 'ROWS';
                 }
                 return "$clause " . $this->_limit;
@@ -1389,7 +1389,7 @@
         protected function _build_offset() {
             if (!is_null($this->_offset)) {
                 $clause = 'OFFSET';
-                if (self::$_db[$this->_connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME) == 'firebird') {
+                if (self::$_db[$this->_connection_name]->getAttribute(\PDO::ATTR_DRIVER_NAME) == 'firebird') {
                     $clause = 'TO';
                 }
                 return "$clause " . $this->_offset;
@@ -1502,7 +1502,7 @@
             $statement = self::get_last_statement();
 
             $rows = array();
-            while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
+            while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
                 $rows[] = $row;
             }
 
@@ -1649,7 +1649,7 @@
             if ($this->_is_new) {
                 $this->_is_new = false;
                 if (is_null($this->id())) {
-                    if(self::$_db[$this->_connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql') {
+                    if(self::$_db[$this->_connection_name]->getAttribute(\PDO::ATTR_DRIVER_NAME) == 'pgsql') {
                         $this->_data[$this->_get_id_column_name()] = self::get_last_statement()->fetchColumn();
                     } else {
                         $this->_data[$this->_get_id_column_name()] = self::$_db[$this->_connection_name]->lastInsertId();
@@ -1695,7 +1695,7 @@
             $placeholders = $this->_create_placeholders($this->_dirty_fields);
             $query[] = "({$placeholders})";
 
-            if (self::$_db[$this->_connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql') {
+            if (self::$_db[$this->_connection_name]->getAttribute(\PDO::ATTR_DRIVER_NAME) == 'pgsql') {
                 $query[] = 'RETURNING ' . $this->_quote_identifier($this->_get_id_column_name());
             }
 
@@ -1885,7 +1885,7 @@
      * A result set class for working with collections of model instances
      * @author Simon Holywell <treffynnon@php.net>
      */
-    class IdiormResultSet implements Countable, IteratorAggregate, ArrayAccess, Serializable {
+    class IdiormResultSet implements \Countable, \IteratorAggregate, \ArrayAccess, \Serializable {
         /**
          * The current result set as an array
          * @var array
@@ -2013,4 +2013,4 @@
     /**
      * A placeholder for exceptions eminating from the IdiormString class
      */
-    class IdiormStringException extends Exception {}
+    class IdiormStringException extends \Exception {}
