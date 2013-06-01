@@ -973,7 +973,7 @@
             if(is_array($column_name) && null === $value){
                 $query_builder = $this;
                 foreach ($column_name as $column_name => $value) {
-                    if(!is_array($value)){
+                    if(is_string($column_name)){
                         $value = array($column_name,$value);
                     }
                     if(2 === count($value)) {

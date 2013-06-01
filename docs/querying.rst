@@ -319,6 +319,7 @@ an array as column_name and null as value :
         array('name', 'NOT LIKE', '%Fred%'),            // ->where_not_like('name','%Fred%')
         array('name', 'in', array('Fred', 'Joe')),      // ->where_in('name', array('Fred', 'Joe'))
         array('name', array('Fred', 'Joe')),            // ->where_in('name', array('Fred', 'Joe'))
+        'name' => array('Fred', 'Joe'),                 // ->where_in('name', array('Fred', 'Joe'))
         array('name', 'not in', array('Joe', 'Fred')),  // ->where_not_in('name', array('Joe', 'Fred')
         array('age', '<', 9),                           // ->where_lt('age', 9)
         array('age', '>', 5),                           // ->where_gt('age', 5)

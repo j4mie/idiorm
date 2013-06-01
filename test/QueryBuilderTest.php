@@ -548,6 +548,7 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
             ->where_not_like('name', '%Fred%')
             ->where_in('name', array('Fred', 'Joe'))
             ->where_in('name', array('Joel'))
+            ->where_in('age', array(10,12))
             ->where_not_in('name', array('Joe', 'Fred'))
             ->where_lt('age', 9)
             ->where_gt('age', 5)
@@ -566,6 +567,7 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
             array('name', 'NOT LIKE', '%Fred%'),
             array('name', 'in', array('Fred', 'Joe')),
             array('name', array('Joel')),
+            'age' => array(10,12),
             array('name', 'not in', array('Joe', 'Fred')),
             array('age', '<', 9),
             array('age', '>', 5),
