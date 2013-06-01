@@ -538,5 +538,44 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
         $expected = "UPDATE `widget` SET `added` = NOW() WHERE `id` = '1'";
         $this->assertEquals($expected, ORM::get_last_query());
     }
+    
+    public function testPassArrayConditionsToWhereIsTheSameThanChainWhere(){
+        ORM::for_table('widget')
+            ->where('name', 'Fred')
+            ->where_equal('age', 10)
+            ->where_not_equal('name', 'Fred')
+            ->where_like('name', '%Fred%')
+            ->where_not_like('name', '%Fred%')
+            ->where_in('name', array('Fred', 'Joe'))
+            ->where_in('name', array('Joel'))
+            ->where_not_in('name', array('Joe', 'Fred'))
+            ->where_lt('age', 9)
+            ->where_gt('age', 5)
+            ->where_lte('age', 8)
+            ->where_gte('age', 6)
+            ->where_null('name')
+            ->where_null('age')
+            ->where_not_null('name')
+            ->find_many();
+        $inline_mode = ORM::get_last_query();    
+        ORM::for_table('widget')->where(array(
+            'name' => 'Fred',
+            array('age', 10),
+            array('name', '!=', 'Fred'),
+            array('name', 'LIKE', '%Fred%'),
+            array('name', 'NOT LIKE', '%Fred%'),
+            array('name', 'in', array('Fred', 'Joe')),
+            array('name', array('Joel')),
+            array('name', 'not in', array('Joe', 'Fred')),
+            array('age', '<', 9),
+            array('age', '>', 5),
+            array('age', '<=', 8),
+            array('age', '>=', 6),
+            array('name', null),
+            array('age', '=', null),
+            array('name', '!=', null)
+        ))->find_many();
+        $this->assertEquals($inline_mode, ORM::get_last_query());
+    }
 }
 

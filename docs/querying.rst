@@ -303,6 +303,34 @@ exactly matches the number of elements in the array.
 If you require yet more flexibility, you can manually specify the entire
 query. See *Raw queries* below.
 
+Multiple WHERE clases
+'''''''''''''''''''''
+
+Most of this conditions can be done by one call to the where method passing 
+an array as column_name and null as value :
+
+.. code-block:: php
+
+    ORM::for_table('person')->where(array(
+        'name' => 'Fred',                               // ->where('name', 'Fred') or ->where_equal('name', 'Fred')
+        array('age', 10),                               // ->where('age', 10) or ->where_equal('age', 10)
+        array('name', '!=', 'Fred'),                    // ->where_not_equal('name', 'Fred')
+        array('name', 'LIKE', '%Fred%'),                // ->where_like('name','%Fred%')
+        array('name', 'NOT LIKE', '%Fred%'),            // ->where_not_like('name','%Fred%')
+        array('name', 'in', array('Fred', 'Joe')),      // ->where_in('name', array('Fred', 'Joe'))
+        array('name', array('Fred', 'Joe')),            // ->where_in('name', array('Fred', 'Joe'))
+        array('name', 'not in', array('Joe', 'Fred')),  // ->where_not_in('name', array('Joe', 'Fred')
+        array('age', '<', 9),                           // ->where_lt('age', 9)
+        array('age', '>', 5),                           // ->where_gt('age', 5)
+        array('age', '<=', 8),                          // ->where_lte('age', 8)
+        array('age', '>=', 6),                          // ->where_gte('age', 6)
+        array('name', null),                            // ->where_null('name')
+        array('name' => null),                          // ->where_null('name')
+        array('age', '=', null),                        // ->where_null('name')
+        array('name', '!=', null)                       // ->where_not_null('name')
+    ))->find_many();
+
+
 Limits and offsets
 ''''''''''''''''''
 
