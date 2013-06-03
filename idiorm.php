@@ -973,24 +973,7 @@
             if(is_array($column_name) && null === $value){
                 $query_builder = $this;
                 foreach ($column_name as $column_name => $value) {
-                    if(is_string($column_name)){
-                        $value = array($column_name,$value);
-                    }
-                    if(2 === count($value)) {
-                        $operator = '=';
-                        if(is_array($value[1])) $operator = 'in';
-                        $value = array($value[0], $operator, $value[1]);
-                    }
-                    if( 'in' === strtolower($value[1]) ) {
-                        $query_builder->where_in($value[0], $value[2]);
-                    } elseif( 'not in' === strtolower($value[1]) ) {
-                        $query_builder->where_not_in($value[0], $value[2]);
-                    } elseif ( null === $value[2] ) {
-                        if( '=' === $value[1] ) $this->where_null($value[0]);
-                        if( '!=' === $value[1] ) $this->where_not_null($value[0]);
-                    }else {
-                        $query_builder->_add_simple_where($value[0], $value[1], $value[2]);
-                    }
+                    $query_builder->where_equal($column_name, $value);
                 }
                 return $query_builder;
             }else{
