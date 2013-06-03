@@ -538,5 +538,18 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
         $expected = "UPDATE `widget` SET `added` = NOW() WHERE `id` = '1'";
         $this->assertEquals($expected, ORM::get_last_query());
     }
+    
+    public function testPassArrayConditionsToWhereIsTheSameThanChainWhere(){
+        ORM::for_table('widget')
+            ->where('name', 'Fred')
+            ->where_equal('age', 10)
+            ->find_many();
+        $inline_mode = ORM::get_last_query();    
+        ORM::for_table('widget')->where(array(
+            'name' => 'Fred',
+            'age' => 10
+        ))->find_many();
+        $this->assertEquals($inline_mode, ORM::get_last_query());
+    }
 }
 

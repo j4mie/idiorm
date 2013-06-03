@@ -966,9 +966,19 @@
          * this is called in the chain, an additional WHERE will be
          * added, and these will be ANDed together when the final query
          * is built.
+         * To add multiple conditions at once, pass an array as the first
+         * parameter and leave out the second parameter
          */
-        public function where($column_name, $value) {
-            return $this->where_equal($column_name, $value);
+        public function where($column_name, $value = null) {
+            if(is_array($column_name) && null === $value){
+                $query_builder = $this;
+                foreach ($column_name as $column_name => $value) {
+                    $query_builder->where_equal($column_name, $value);
+                }
+                return $query_builder;
+            }else{
+                return $this->where_equal($column_name, $value);
+            }
         }
 
         /**
