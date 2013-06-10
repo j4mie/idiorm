@@ -65,6 +65,7 @@
             'driver_options' => null,
             'identifier_quote_character' => null, // if this is null, will be autodetected
             'logging' => false,
+            'logger' => null,
             'caching' => false,
             'return_result_sets' => false,
         );
@@ -394,6 +395,13 @@
 
             self::$_last_query = $bound_query;
             self::$_query_log[$connection_name][] = $bound_query;
+            
+            
+            if(is_callable(self::$_config[$connection_name]['logger'])){
+                $logger = $self::$_config[$connection_name]['logger'];
+                $logger($bound_query);
+            }
+            
             return true;
         }
 
