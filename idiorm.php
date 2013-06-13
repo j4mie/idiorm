@@ -398,7 +398,7 @@
             
             
             if(is_callable(self::$_config[$connection_name]['logger'])){
-                $logger = $self::$_config[$connection_name]['logger'];
+                $logger = self::$_config[$connection_name]['logger'];
                 $logger($bound_query);
             }
             
