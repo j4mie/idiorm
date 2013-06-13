@@ -540,8 +540,26 @@
          */
         protected function _find_many() {
             $rows = $this->_run();
-            return array_map(array($this, '_create_instance_from_row'), $rows);
+            return $this->_instances_with_key($rows);
         }
+
+        /**
+         * Create instances and assigns it to an associative array
+         * @return array
+         */
+
+        protected function _instances_with_key($rows){
+            $size = count($rows);
+            $instances = array();
+            for ($i = 0; $i < $size; $i++) {
+                $row = $this->_create_instance_from_row($rows[$i]);
+                $key = (isset($row->{$this->_instance_id_column})) ? $row->{$this->_instance_id_column} : $i;
+                $instances[$key] = $row;
+            }
+
+            return $instances;
+        }
+
 
         /**
          * Tell the ORM that you are expecting multiple results
@@ -1570,6 +1588,7 @@
          */
         public function set($key, $value = null) {
             $this->_set_orm_property($key, $value);
+            return $this;
         }
 
         /**
@@ -1583,6 +1602,7 @@
          */
         public function set_expr($key, $value = null) {
             $this->_set_orm_property($key, $value, true);
+            return $this;
         }
 
         /**
@@ -1930,6 +1950,22 @@
          */
         public function count() {
             return count($this->_results);
+        }
+        
+        /**
+         * Get the first element of the result set
+         * @return Model
+         */
+        public function first(){
+            return reset($this->get_results());
+        }
+
+        /**
+         * Get the last element of the result set
+         * @return Model
+         */
+        public function last(){
+            return end($this->get_results());
         }
 
         /**
