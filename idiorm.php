@@ -718,8 +718,8 @@
          */
         public function select($column, $alias=null) {
             $columns = array_map('trim',explode(',',$column));
-            foreach($columns as $key=>$column){
-                $columns[$key] = $this->_quote_identifier($column);
+            foreach($columns as $column){
+                $column = $this->_quote_identifier($column);
                 $this->_add_result_column($column, $alias);
             }
             return $this;
