@@ -711,13 +711,20 @@
 
         /**
          * Add a column to the list of columns returned by the SELECT
-         * query. This defaults to '*'. The second optional argument is
+         * query. This defaults to '*'. 
+         * $column can be a string of columns to select separated by comma
+         * The second optional argument is
          * the alias to return the column as.
          */
         public function select($column, $alias=null) {
-            $column = $this->_quote_identifier($column);
-            return $this->_add_result_column($column, $alias);
+            $columns = array_map('trim',explode(',',$column));
+            foreach($columns as $key=>$column){
+                $columns[$key] = $this->_quote_identifier($column);
+                $this->_add_result_column($column, $alias);
+            }
+            return $this;
         }
+
 
         /**
          * Add an unquoted expression to the list of columns returned
