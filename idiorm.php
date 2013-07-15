@@ -1643,6 +1643,7 @@
                 $query = $this->_build_insert();
             }
 
+            self::_setup_db($this->_connection_name);
             $success = self::_execute($query, $values, $this->_connection_name);
 
             // If we've just inserted a new record, set the ID of this object
