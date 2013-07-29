@@ -1657,7 +1657,7 @@
                 }
             }
 
-            $this->_dirty_fields = array();
+            $this->_dirty_fields = $this->_expr_fields = array();
             return $success;
         }
 
