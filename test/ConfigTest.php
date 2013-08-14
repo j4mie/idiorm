@@ -14,10 +14,8 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
     }
 
     public function tearDown() {
-        ORM::configure('logging', false);
-        ORM::set_db(null);
-
-        ORM::configure('id_column', 'id');
+        ORM::reset_config();
+        ORM::reset_db();
     }
 
     protected function setUpIdColumnOverrides() {

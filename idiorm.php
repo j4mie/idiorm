@@ -50,6 +50,10 @@
 
         const DEFAULT_CONNECTION = 'default';
 
+        // Limit clause style
+        const LIMIT_STYLE_TOP_N = "top";
+        const LIMIT_STYLE_LIMIT = "limit";
+
         // ------------------------ //
         // --- CLASS PROPERTIES --- //
         // ------------------------ //
@@ -64,6 +68,7 @@
             'password' => null,
             'driver_options' => null,
             'identifier_quote_character' => null, // if this is null, will be autodetected
+            'limit_clause_style' => null, // if this is null, will be autodetected
             'logging' => false,
             'caching' => false,
             'return_result_sets' => false,
@@ -197,6 +202,13 @@
         }
 
         /**
+         * Delete all configs in _config array.
+         */
+        public static function reset_config() {
+            self::$_config = array();
+        }
+        
+        /**
          * Despite its slightly odd name, this is actually the factory
          * method used to acquire instances of the class. It is named
          * this way for the sake of a readable interface, ie
@@ -254,6 +266,7 @@
             self::_setup_db_config($connection_name);
             self::$_db[$connection_name] = $db;
             self::_setup_identifier_quote_character($connection_name);
+            self::_setup_limit_clause_style($connection_name);
         }
 
         /**
@@ -266,7 +279,19 @@
         protected static function _setup_identifier_quote_character($connection_name) {
             if (is_null(self::$_config[$connection_name]['identifier_quote_character'])) {
                 self::$_config[$connection_name]['identifier_quote_character'] =
-                     self::_detect_identifier_quote_character($connection_name);
+                    self::_detect_identifier_quote_character($connection_name);
+            }
+        }
+
+        /**
+         * Detect and initialise the limit clause style ("SELECT TOP 5" /
+         * "... LIMIT 5"). If this has been specified manually using 
+         * ORM::configure('limit_clause_style', 'top'), this will do nothing.
+         */
+        public static function _setup_limit_clause_style($connection_name) {
+            if (is_null(self::$_config[$connection_name]['limit_clause_style'])) {
+                self::$_config[$connection_name]['limit_clause_style'] =
+                    self::_detect_limit_clause_style($connection_name);
             }
         }
 
@@ -281,8 +306,11 @@
                 case 'pgsql':
                 case 'sqlsrv':
                 case 'dblib':
+                    return '';
                 case 'mssql':
+                    return '';
                 case 'sybase':
+                    return '';
                 case 'firebird':
                     return '"';
                 case 'mysql':
@@ -290,6 +318,22 @@
                 case 'sqlite2':
                 default:
                     return '`';
+            }
+        }
+
+        /**
+         * Returns a constant for the "limit clause style" for MS Sql Server 
+         * versus grown up databases.
+         */
+        protected static function _detect_limit_clause_style($connection_name) {
+            switch(self::$_db[$connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME)) {
+                case 'sqlsrv':
+                case 'dblib':
+                    return ORM::LIMIT_STYLE_TOP_N;
+                case 'mssql':
+                    return ORM::LIMIT_STYLE_TOP_N;
+                default:
+                    return ORM::LIMIT_STYLE_LIMIT;
             }
         }
 
@@ -436,6 +480,13 @@
          */
         public static function get_connection_names() {
             return array_keys(self::$_db);
+        }
+
+        /**
+         * Delete all registered PDO objects in _db array.
+         */
+        public static function reset_db() {
+            self::$_db = array();
         }
 
         // ------------------------ //
@@ -1289,13 +1340,18 @@
          * Build the start of the SELECT statement
          */
         protected function _build_select_start() {
+            $top = "";
             $result_columns = join(', ', $this->_result_columns);
+
+            if (self::$_config[$this->_connection_name]['limit_clause_style'] == ORM::LIMIT_STYLE_TOP_N && !is_null($this->_limit)) {
+                $top = "TOP {$this->_limit} ";
+            }
 
             if ($this->_distinct) {
                 $result_columns = 'DISTINCT ' . $result_columns;
             }
 
-            $fragment = "SELECT {$result_columns} FROM " . $this->_quote_identifier($this->_table_name);
+            $fragment = "SELECT {$top}{$result_columns} FROM " . $this->_quote_identifier($this->_table_name);
 
             if (!is_null($this->_table_alias)) {
                 $fragment .= " " . $this->_quote_identifier($this->_table_alias);
@@ -1374,11 +1430,13 @@
          */
         protected function _build_limit() {
             if (!is_null($this->_limit)) {
-                $clause = 'LIMIT';
-                if (self::$_db[$this->_connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME) == 'firebird') {
-                    $clause = 'ROWS';
+                if (self::$_config[$this->_connection_name]['limit_clause_style'] == ORM::LIMIT_STYLE_LIMIT) {
+                    return 'LIMIT ' . $this->_limit;
                 }
-                return "$clause " . $this->_limit;
+
+                if (self::$_db[$this->_connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME) == 'firebird') {
+                    return 'ROWS ' . $this->_limit;
+                }
             }
             return '';
         }

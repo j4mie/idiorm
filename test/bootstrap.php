@@ -35,7 +35,8 @@ class MockDifferentPDOStatement extends MockPDOStatement { }
  *
  */
 class MockPDO extends PDO {
-
+   public $fake_driver = null;
+   
    /**
     * Return a dummy PDO statement
     */
@@ -43,6 +44,20 @@ class MockPDO extends PDO {
        $this->last_query = new MockPDOStatement($statement);
        return $this->last_query;
    }
+   
+   /**
+    * If we are asking for the name of the driver, check if a fake one
+    * has been set.
+    */
+    public function getAttribute($attribute) {
+        if ($attribute == self::ATTR_DRIVER_NAME) {
+            if (!is_null($this->fake_driver)) {
+                return $this->fake_driver;
+            }
+        }
+        
+        return parent::getAttribute($attribute);
+    }
 }
 
 /**
@@ -50,6 +65,7 @@ class MockPDO extends PDO {
  * Mock database class implementing a subset of the PDO API.
  */
 class MockDifferentPDO extends MockPDO {
+    public $fake_driver = null;
 
     /**
      * Return a dummy PDO statement
@@ -57,5 +73,19 @@ class MockDifferentPDO extends MockPDO {
     public function prepare($statement, $driver_options = array()) {
         $this->last_query = new MockDifferentPDOStatement($statement);
         return $this->last_query;
+    }
+    
+    /**
+    * If we are asking for the name of the driver, check if a fake one
+    * has been set.
+    */
+    public function getAttribute($attribute) {
+        if ($attribute == self::ATTR_DRIVER_NAME) {
+            if (!is_null($this->fake_driver)) {
+                return $this->fake_driver;
+            }
+        }
+        
+        return parent::getAttribute($attribute);
     }
 }
