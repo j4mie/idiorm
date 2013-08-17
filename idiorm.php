@@ -197,6 +197,19 @@
         }
 
         /**
+         * Retrieve configuration options by key, or as whole array.
+         * @param string $key
+         * @param string $connection_name Which connection to use
+         */
+        public static function get_config($key = null, $connection_name = self::DEFAULT_CONNECTION) {
+            if ($key) {
+                return self::$_config[$connection_name][$key];
+            } else {
+                return self::$_config[$connection_name];
+            }
+        }
+
+        /**
          * Despite its slightly odd name, this is actually the factory
          * method used to acquire instances of the class. It is named
          * this way for the sake of a readable interface, ie
