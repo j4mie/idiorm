@@ -373,7 +373,7 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals($expected, ORM::get_last_query());
     }
 
-    public function testJonWithAliasesAndWhere() {
+    public function testJoinWithAliasesAndWhere() {
         ORM::for_table('widget')->table_alias('w')->join('widget_handle', array('wh.widget_id', '=', 'w.id'), 'wh')->where_equal('id', 1)->find_many();
         $expected = "SELECT * FROM `widget` `w` JOIN `widget_handle` `wh` ON `wh`.`widget_id` = `w`.`id` WHERE `w`.`id` = '1'";
         $this->assertEquals($expected, ORM::get_last_query());
