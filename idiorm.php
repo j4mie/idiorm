@@ -952,7 +952,12 @@
         protected function _add_simple_condition($type, $column_name, $separator, $value) {
             // Add the table name in case of ambiguous columns
             if (count($this->_join_sources) > 0 && strpos($column_name, '.') === false) {
-                $column_name = "{$this->_table_name}.{$column_name}";
+                $table = $this->_table_name;
+                if (!is_null($this->_table_alias)) {
+                    $table = $this->_table_alias;
+                }
+
+                $column_name = "{$table}.{$column_name}";
             }
             $column_name = $this->_quote_identifier($column_name);
             return $this->_add_condition($type, "{$column_name} {$separator} ?", $value);
