@@ -8,8 +8,11 @@ require_once dirname(__FILE__) . '/../idiorm.php';
  *
  */
 class MockPDOStatement extends PDOStatement {
-
    private $current_row = 0;
+   
+   public function __construct() {}
+   public function execute($params) {}
+   
    /**
     * Return some dummy data
     */
