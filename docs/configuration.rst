@@ -65,6 +65,16 @@ once.
         'etc' => 'etc'
     ));
 
+Use the ``get_config`` method to read current settings.
+
+.. code-block:: php
+
+    <?php
+    $isLoggingEnabled = ORM::get_config('logging');
+    ORM::configure('logging', false);
+    // some crazy loop we don't want to log
+    ORM::configure('logging', $isLoggingEnabled);
+
 Database authentication details
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
