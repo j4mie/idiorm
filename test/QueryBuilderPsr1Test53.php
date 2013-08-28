@@ -1,6 +1,6 @@
 <?php
 
-class QueryBuilderPsr1Test extends PHPUnit_Framework_TestCase {
+class QueryBuilderPsr1Test53 extends PHPUnit_Framework_TestCase {
 
     public function setUp() {
         // Enable logging
