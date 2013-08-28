@@ -13,6 +13,14 @@ class MockPDOStatement extends PDOStatement {
    /**
     * Return some dummy data
     */
+   
+   /**
+    * These are necessary to run the tests on hhvm. In fact, newing up a PDOStatement (or derivative) should not be
+    * technically used since there is no direct constructor for PDOStatement, even though it does work with Zend
+    */
+   public function __construct() {}
+   public function execute($params) {}
+   
    public function fetch($fetch_style=PDO::FETCH_BOTH, $cursor_orientation=PDO::FETCH_ORI_NEXT, $cursor_offset=0) {
        if ($this->current_row == 5) {
            return false;
