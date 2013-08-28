@@ -71,6 +71,7 @@ Changelog
 
 * Add PSR-1 compliant camelCase method calls to Idiorm (PHP 5.3+ required) [[crhayes](https://github.com/crhayes)] - [issue #108](https://github.com/j4mie/idiorm/issues/108)
 * Add static method `get_config()` to access current configuration [[javierd](https://github.com/mikejestes)] - [issue #141](https://github.com/j4mie/idiorm/issues/141)
+* Add logging callback functionality [[lalop](https://github.com/lalop)] - [issue #130](https://github.com/j4mie/idiorm/issues/130)
 * Uses table aliases in `WHERE` clauses [[vicvicvic](https://github.com/vicvicvic)] - [issue #140](https://github.com/j4mie/idiorm/issues/140)
 * Ignore result columns when calling an aggregate function [[tassoevan](https://github.com/tassoevan)] - [issue #120](https://github.com/j4mie/idiorm/issues/120)
 * Improve documentation [[bruston](https://github.com/bruston)] - [issue #111](https://github.com/j4mie/idiorm/issues/111)

@@ -225,6 +225,30 @@ the log. ``ORM::get_last_query()`` returns the most recent query
 executed. ``ORM::get_query_log()`` returns an array of all queries
 executed.
 
+Query logger
+^^^^^^^^^^^^
+
+Setting: ``logger``
+
+.. note::
+
+    You must enable ``logging`` for this setting to have any effect.
+
+It is possible to supply a ``callable`` to this configuration setting, which will
+be executed for every query that idiorm executes. In PHP a ``callable`` is anything
+that can be executed as if it were a function. Most commonly this will take the
+form of a anonymous function.
+
+This setting is useful if you wish to log queries with an external library as it
+allows you too whatever you would like from inside the callback function.
+
+.. code-block:: php
+
+    <?php
+    ORM::configure('logger', function($log_string) {
+        echo $log_string;
+    });
+
 Query caching
 ^^^^^^^^^^^^^
 
