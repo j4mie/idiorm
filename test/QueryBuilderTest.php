@@ -477,6 +477,12 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
         $expected = "SELECT COUNT(*) AS `count` FROM `widget` LIMIT 1";
         $this->assertEquals($expected, ORM::get_last_query());
     }
+    
+    public function testIgnoreSelectAndCount() {
+    	ORM::for_table('widget')->select('test')->count();
+    	$expected = "SELECT COUNT(*) AS `count` FROM `widget` LIMIT 1";
+    	$this->assertEquals($expected, ORM::get_last_query());
+    }
 
     public function testMax() {
         ORM::for_table('person')->max('height');
