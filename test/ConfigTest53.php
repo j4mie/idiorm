@@ -101,7 +101,6 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
         $this->assertTrue(ORM::get_config('logging'));
         ORM::configure('logging', false);
         $this->assertFalse(ORM::get_config('logging'));
-        ORM::configure('logging', true);
     }
 
     public function testGetConfigArray() {
@@ -115,7 +114,6 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
             'driver_options' => null,
             'identifier_quote_character' => '`',
             'logging' => true,
-            'logger' => null,
             'caching' => false,
             'return_result_sets' => false,
         );
