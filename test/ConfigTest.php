@@ -14,10 +14,8 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
     }
 
     public function tearDown() {
-        ORM::configure('logging', false);
-        ORM::set_db(null);
-
-        ORM::configure('id_column', 'id');
+        ORM::reset_config();
+        ORM::reset_db();
     }
 
     protected function setUpIdColumnOverrides() {
@@ -118,6 +116,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
             'logger' => null,
             'caching' => false,
             'return_result_sets' => false,
+            'limit_clause_style' => 'limit',
         );
         $this->assertEquals($expected, ORM::get_config());
     }

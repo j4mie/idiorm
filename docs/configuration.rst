@@ -212,6 +212,22 @@ the table, you can use the following configuration:
         'role' => 'role_id',
     ));
 
+Limit clause style
+^^^^^^^^^^^^^^^^^^
+
+Setting: ``limit_clause_style``
+
+You can specify the limit clause style in the configuration. This is to facilitate
+a MS SQL style limit clause that uses the ``TOP`` syntax.
+
+Acceptable values are ``ORM::LIMIT_STYLE_TOP_N`` and ``ORM::LIMIT_STYLE_LIMIT``.
+
+.. note::
+
+    If the PDO driver you are using is one of sqlsrv, dblib or mssql then Idiorm
+    will automatically select the ``ORM::LIMIT_STYLE_TOP_N`` for you unless you
+    override the setting.
+
 Query logging
 ^^^^^^^^^^^^^
 
