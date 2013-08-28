@@ -6,6 +6,7 @@
     <testsuites>
         <testsuite name="Idiorm Test Suite">
             <directory suffix="Test.php">test</directory>
+            <directory suffix="Test53.php" phpVersion="5.3.0" phpVersionOperator=">=">test</directory>
         </testsuite>
     </testsuites>
 </phpunit>
