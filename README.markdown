@@ -66,6 +66,15 @@ foreach ($tweets as $tweet) {
 Changelog
 ---------
 
+#### 1.4.0 - release 2013-XX-XX
+
+* Add static method `get_config()` to access current configuration [[javierd](https://github.com/mikejestes)] - [issue #141](https://github.com/j4mie/idiorm/issues/141)
+* Uses table aliases in `WHERE` clauses [[vicvicvic](https://github.com/vicvicvic)] - [issue #140](https://github.com/j4mie/idiorm/issues/140)
+* Ignore result columns when calling an aggregate function [[tassoevan](https://github.com/tassoevan)] - [issue #120](https://github.com/j4mie/idiorm/issues/120)
+* Improve documentation [[bruston](https://github.com/bruston)] - [issue #111](https://github.com/j4mie/idiorm/issues/111)
+* Improve PHPDoc on `get_db()` [[mailopl](https://github.com/mailopl)] - [issue #106](https://github.com/j4mie/idiorm/issues/106)
+* Improve documentation [[sjparsons](https://github.com/sjparsons)] - [issue #103](https://github.com/j4mie/idiorm/issues/103)
+
 #### 1.3.0 - release 2013-01-31
 
 * Documentation moved to [idiorm.rtfd.org](http://idiorm.rtfd.org) and now built using [Sphinx](http://sphinx-doc.org/)
