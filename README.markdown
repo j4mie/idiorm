@@ -5,6 +5,13 @@ Idiorm
 
 [http://j4mie.github.com/idiormandparis/](http://j4mie.github.com/idiormandparis/)
 
+---
+### Feature complete
+
+Idiorm is now considered to be feature complete as of version 1.4.0. Whilst it will continue to be maintained with bug fixes there will be no further new features added.
+
+---
+
 A lightweight nearly-zero-configuration object-relational mapper and fluent query builder for PHP5.
 
 Tested on PHP 5.2.0+ - may work on earlier versions with PDO and the correct database drivers.
@@ -78,7 +85,7 @@ Changelog
 * Improve documentation [[bruston](https://github.com/bruston)] - [issue #111](https://github.com/j4mie/idiorm/issues/111)
 * Improve PHPDoc on `get_db()` [[mailopl](https://github.com/mailopl)] - [issue #106](https://github.com/j4mie/idiorm/issues/106)
 * Improve documentation [[sjparsons](https://github.com/sjparsons)] - [issue #103](https://github.com/j4mie/idiorm/issues/103)
-* Make tests/bootstrap.php [[JoelMarcey](https://github.com/JoelMarcey)] - [issue #143](https://github.com/j4mie/idiorm/issues/143)
+* Make tests/bootstrap.php HHVM compatible [[JoelMarcey](https://github.com/JoelMarcey)] - [issue #143](https://github.com/j4mie/idiorm/issues/143)
 
 #### 1.3.0 - release 2013-01-31
 
