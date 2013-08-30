@@ -21,7 +21,7 @@ class MockPDOStatement extends PDOStatement {
            return false;
        } else {
            $this->current_row++;
-           return array('name' => 'Fred', 'age' => 10, 'id' => '1');
+           return array('name' => 'Fred', 'age' => 10, 'id' => $this->current_row);
        }
    }
 }
