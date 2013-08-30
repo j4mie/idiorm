@@ -621,7 +621,7 @@
          * @param array $rows
          * @return array
          */
-        protected _instances_with_id_as_key($rows) {
+        protected function _instances_with_id_as_key($rows) {
             $instances = array();
             foreach($rows as $row) {
                 $row = $this->_create_instance_from_row($row);
