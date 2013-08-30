@@ -1673,7 +1673,7 @@
          * database when save() is called.
          */
         public function set($key, $value = null) {
-            $this->_set_orm_property($key, $value);
+            return $this->_set_orm_property($key, $value);
         }
 
         /**
@@ -1686,7 +1686,7 @@
          * @param string|null $value
          */
         public function set_expr($key, $value = null) {
-            $this->_set_orm_property($key, $value, true);
+            return $this->_set_orm_property($key, $value, true);
         }
 
         /**
@@ -1708,6 +1708,7 @@
                     $this->_expr_fields[$field] = true;
                 }
             }
+            return $this;
         }
 
         /**
