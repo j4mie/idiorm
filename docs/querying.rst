@@ -158,7 +158,7 @@ over it just like an array.
 
     <?php
     foreach(ORM::for_table('person')->find_result_set() as $record) {
-        echo $person->name;
+        echo $record->name;
     }
 
 .. code-block:: php
