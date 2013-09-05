@@ -74,7 +74,7 @@ foreach ($tweets as $tweet) {
 Changelog
 ---------
 
-#### 1.4.0 - release 2013-XX-XX
+#### 1.4.0 - release 2013-09-05
 
 * `find_many()` now returns an associative array with the databases primary ID as the array keys [[Surt](https://github.com/Surt)] - [issue #133](https://github.com/j4mie/idiorm/issues/133)
 * Calls to `set()` and `set_expr()` return `$this` allowing them to be chained [[Surt](https://github.com/Surt)]
