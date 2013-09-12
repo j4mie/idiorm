@@ -1793,13 +1793,8 @@
     
                 $queryFinal = join(' ', $query);
     
-                self::_log_query($queryFinal, $parameters, $this->_connection_name);
-    
-                $statement = self::$_db[$this->_connection_name]->prepare($queryFinal);
-    
-                self::$_last_statement = $statement;
-    
-                return $statement->execute($parameters);
+                return self::_execute($queryFinal, $parameters, $this->_connection_name);
+                
             } else {
                 return null;
             }
