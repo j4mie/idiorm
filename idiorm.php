@@ -711,7 +711,10 @@
 
             $return_value = 0;
             if($result !== false && isset($result->$alias)) {
-                if((int) $result->$alias == (float) $result->$alias) {
+                if (!is_numeric($result->$alias)) {
+                    $return_value = $result->$alias;
+                }
+                elseif((int) $result->$alias == (float) $result->$alias) {
                     $return_value = (int) $result->$alias;
                 } else {
                     $return_value = (float) $result->$alias;
