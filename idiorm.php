@@ -1755,6 +1755,7 @@
                 $this->_is_new = false;
                 if (is_null($this->id())) {
                     if(self::$_db[$this->_connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql') {
+                        $this->_returning();
                         $this->_data[$this->_get_id_column_name()] = self::get_last_statement()->fetchColumn();
                     } else {
                         $this->_data[$this->_get_id_column_name()] = self::$_db[$this->_connection_name]->lastInsertId();
@@ -1764,6 +1765,39 @@
 
             $this->_dirty_fields = $this->_expr_fields = array();
             return $success;
+        }
+    
+
+        /*
+         * Set last statement as a select of the id from last inserted data. PGSQL 8 compat.
+         */
+        protected function _returning()
+        {
+            if (substr(self::$_db[$this->_connection_name]->getAttribute(PDO::ATTR_SERVER_VERSION), 0, 1) == 8) {
+                $query[] = "SELECT";
+                $query[] = $this->_get_id_column_name();
+                $query[] = "FROM";
+                $query[] = $this->_quote_identifier($this->_table_name);
+                $query[] = "WHERE";
+    
+                $fieldsValues = array_diff_key($this->_dirty_fields, $this->_expr_fields);
+    
+                foreach ($fieldsValues as $field => $value) {
+                    if ($value != '' OR $value != NULL) {
+                        $fields[]     = $field . ' = ?';
+                        $parameters[] = $value;
+                    }
+                }
+    
+                $query[] = implode(' AND ', $fields);
+    
+                $queryFinal = join(' ', $query);
+    
+                return self::_execute($queryFinal, $parameters, $this->_connection_name);
+                
+            } else {
+                return null;
+            }
         }
 
         /**
@@ -1800,7 +1834,8 @@
             $placeholders = $this->_create_placeholders($this->_dirty_fields);
             $query[] = "({$placeholders})";
 
-            if (self::$_db[$this->_connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql') {
+            if (self::$_db[$this->_connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql' AND
+            substr(self::$_db[$this->_connection_name]->getAttribute(PDO::ATTR_SERVER_VERSION), 0, 1) != 8) {
                 $query[] = 'RETURNING ' . $this->_quote_identifier($this->_get_id_column_name());
             }
 
