@@ -1886,7 +1886,11 @@
         {
             $method = strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $name));
 
-            return call_user_func_array(array($this, $method), $arguments);
+            if (method_exists($this, $method)) {
+                return call_user_func_array(array($this, $method), $arguments);
+            } else {
+                throw new IdiormMethodMissingException("Method $name() does not exist in class " . get_class($this));
+            }
         }
 
         /**
@@ -2136,7 +2140,11 @@
          */
         public function __call($method, $params = array()) {
             foreach($this->_results as $model) {
-                call_user_func_array(array($model, $method), $params);
+                if (method_exists($model, $method)) {
+                    call_user_func_array(array($model, $method), $params);
+                } else {
+                    throw new IdiormMethodMissingException("Method $method() does not exist in class " . get_class($this));
+                }
             }
             return $this;
         }
@@ -2146,3 +2154,5 @@
      * A placeholder for exceptions eminating from the IdiormString class
      */
     class IdiormStringException extends Exception {}
+
+    class IdiormMethodMissingException extends Exception {}
