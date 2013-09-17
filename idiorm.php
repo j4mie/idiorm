@@ -165,6 +165,12 @@
         // this instance only. Overrides the config settings.
         protected $_instance_id_column = null;
 
+        // Set a field as instance key
+        protected $_key_by = null;
+
+        // Put rows into a set with specified instance key?
+        protected $_row_set = false;
+
         // ---------------------- //
         // --- STATIC METHODS --- //
         // ---------------------- //
@@ -616,17 +622,38 @@
 
         /**
          * Create instances of each row in the result and map
-         * them to an associative array with the primary IDs as
+         * them to an associative array with the specified row field as
          * the array keys.
          * @param array $rows
          * @return array
          */
         protected function _instances_with_id_as_key($rows) {
             $instances = array();
-            foreach($rows as $row) {
-                $row = $this->_create_instance_from_row($row);
-                $instances[$row->id()] = $row;
+            if (is_null($this->_key_by) {
+                foreach($rows as $row) {
+                    $row = $this->_create_instance_from_row($row);
+                    $instances[] = $row;
+                }
+            } else if (!$this->_row_set) {
+                foreach($rows as $row) {
+                    $row = $this->_create_instance_from_row($row);
+                    $instances[$row->get($this->_key_by)] = $row;
+                }
+            } else {
+                foreach($rows as $row) {
+                    $row = $this->_create_instance_from_row($row);
+                    $instances[$row->get($this->_key_by)][] = $row;
+                }
             }
+            return $instances;
+        }
+
+        /**
+         * Specify array key
+         */
+        public function key_by ($key, $set = false) {
+            $this->_key_by = $key;
+            $this->_row_set = $set;
             return $instances;
         }
 
