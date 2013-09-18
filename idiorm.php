@@ -589,6 +589,42 @@
         }
 
         /**
+         * Tell the ORM that you are expecting a single result
+         * back from your query, and execute it. If it doesn't
+         * exist, create a new one. Will return
+         * a single instance of the ORM class, or a new one if
+         * no rows were returned.
+         * As a shortcut, you may supply an ID as a parameter
+         * to this method. This will perform a primary key
+         * lookup on the table.
+         */
+        public function find_or_create($id = null)
+        {
+            if (!is_null($id)) {
+                $this->where_id_is($id);
+            }
+            $this->limit(1);
+            $rows = $this->_run();
+    
+    
+            if (empty($rows)) {
+                $this->_is_new = true;
+                if (!empty($this->_where_conditions)) {
+                    foreach ($this->_where_conditions as $where) {
+                        $field = reset(array_slice(explode('"', reset($where)), 1, 1));
+                        $value = reset(end($where));
+                        if ($field != $this->_get_id_column_name()) {
+                            $this->$field = $value;
+                        }
+                    }
+                }
+                return $this;
+            }
+    
+            return $this->_create_instance_from_row($rows[0]);
+        }
+
+        /**
          * Tell the ORM that you are expecting multiple results
          * from your query, and execute it. Will return an array
          * of instances of the ORM class, or an empty array if
