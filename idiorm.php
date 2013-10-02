@@ -189,7 +189,7 @@
                 // Shortcut: If only one array argument is passed,
                 // assume it's an array of configuration settings
                 foreach ($key as $conf_key => $conf_value) {
-                    self::configure($conf_key, $conf_value, $connection_name);
+                    self::$_config[$connection_name][$conf_key] = $conf_value;
                 }
             } else {
                 if (is_null($value)) {
@@ -233,7 +233,6 @@
          * @return ORM
          */
         public static function for_table($table_name, $connection_name = self::DEFAULT_CONNECTION) {
-            self::_setup_db($connection_name);
             return new self($table_name, array(), $connection_name);
         }
 
@@ -259,7 +258,7 @@
         }
 
        /**
-        * Ensures configuration (mulitple connections) is at least set to default.
+        * Ensures configuration (multiple connections) is at least set to default.
         * @param string $connection_name Which connection to use
         */
         protected static function _setup_db_config($connection_name) {
@@ -324,7 +323,7 @@
          * @return string
          */
         protected static function _detect_identifier_quote_character($connection_name) {
-            switch(self::$_db[$connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME)) {
+            switch(self::get_db($connection_name)->getAttribute(PDO::ATTR_DRIVER_NAME)) {
                 case 'pgsql':
                 case 'sqlsrv':
                 case 'dblib':
@@ -347,7 +346,7 @@
          * @return string Limit clause style keyword/constant
          */
         protected static function _detect_limit_clause_style($connection_name) {
-            switch(self::$_db[$connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME)) {
+            switch(self::get_db($connection_name)->getAttribute(PDO::ATTR_DRIVER_NAME)) {
                 case 'sqlsrv':
                 case 'dblib':
                 case 'mssql':
@@ -406,7 +405,7 @@
         */
         protected static function _execute($query, $parameters = array(), $connection_name = self::DEFAULT_CONNECTION) {
             self::_log_query($query, $parameters, $connection_name);
-            $statement = self::$_db[$connection_name]->prepare($query);
+            $statement = self::get_db($connection_name)->prepare($query);
 
             self::$_last_statement = $statement;
 
@@ -438,7 +437,7 @@
 
             if (count($parameters) > 0) {
                 // Escape the parameters
-                $parameters = array_map(array(self::$_db[$connection_name], 'quote'), $parameters);
+                $parameters = array_map(array(self::get_db($connection_name), 'quote'), $parameters);
 
                 // Avoid %format collision for vsprintf
                 $query = str_replace("%", "%%", $query);
@@ -1477,7 +1476,7 @@
             $fragment = '';
             if (!is_null($this->_limit) &&
                 self::$_config[$this->_connection_name]['limit_clause_style'] == ORM::LIMIT_STYLE_LIMIT) {
-                if (self::$_db[$this->_connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME) == 'firebird') {
+                if (self::get_db($this->_connection_name)->getAttribute(PDO::ATTR_DRIVER_NAME) == 'firebird') {
                     $fragment = 'ROWS';
                 } else {
                     $fragment = 'LIMIT';
@@ -1493,7 +1492,7 @@
         protected function _build_offset() {
             if (!is_null($this->_offset)) {
                 $clause = 'OFFSET';
-                if (self::$_db[$this->_connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME) == 'firebird') {
+                if (self::get_db($this->_connection_name)->getAttribute(PDO::ATTR_DRIVER_NAME) == 'firebird') {
                     $clause = 'TO';
                 }
                 return "$clause " . $this->_offset;
@@ -1754,10 +1753,11 @@
             if ($this->_is_new) {
                 $this->_is_new = false;
                 if (is_null($this->id())) {
-                    if(self::$_db[$this->_connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql') {
+                    $db = self::get_db($this->_connection_name);
+                    if($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql') {
                         $this->_data[$this->_get_id_column_name()] = self::get_last_statement()->fetchColumn();
                     } else {
-                        $this->_data[$this->_get_id_column_name()] = self::$_db[$this->_connection_name]->lastInsertId();
+                        $this->_data[$this->_get_id_column_name()] = $db->lastInsertId();
                     }
                 }
             }
@@ -1800,7 +1800,7 @@
             $placeholders = $this->_create_placeholders($this->_dirty_fields);
             $query[] = "({$placeholders})";
 
-            if (self::$_db[$this->_connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql') {
+            if (self::get_db($this->_connection_name)->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql') {
                 $query[] = 'RETURNING ' . $this->_quote_identifier($this->_get_id_column_name());
             }
 
