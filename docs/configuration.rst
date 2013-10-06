@@ -197,6 +197,13 @@ all tables. If your ID column is called ``primary_key``, use:
     <?php
     ORM::configure('id_column', 'primary_key');
 
+You can specify a compound primary key using an array:
+
+.. code-block:: php
+
+    <?php
+    ORM::configure('id_column', array('pk_1', 'pk_2'));
+
 Setting: ``id_column_overrides``
 
 This setting is used to specify the primary key column name for each
@@ -211,6 +218,9 @@ the table, you can use the following configuration:
         'person' => 'person_id',
         'role' => 'role_id',
     ));
+
+As with ``id_column`` setting, you can specify a compound primary key
+using an array.
 
 Limit clause style
 ^^^^^^^^^^^^^^^^^^

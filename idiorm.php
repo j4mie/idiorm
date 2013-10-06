@@ -617,7 +617,7 @@
         /**
          * Create instances of each row in the result and map
          * them to an associative array with the primary IDs as
-         * the array keys.
+         * the array keys if the primary key is not compound.
          * @param array $rows
          * @return array
          */
@@ -625,7 +625,12 @@
             $instances = array();
             foreach($rows as $row) {
                 $row = $this->_create_instance_from_row($row);
-                $instances[$row->id()] = $row;
+                if (is_array($row->id())) {
+                    $instances[] = $row;
+                }
+                else {
+                    $instances[$row->id()] = $row;
+                }
             }
             return $instances;
         }
@@ -1082,7 +1087,8 @@
         }
 
         /**
-         * Special method to query the table by its primary key
+         * Special method to query the table by its primary key.
+         * Does not work with compounf primary keys.
          */
         public function where_id_is($id) {
             return $this->where($this->_get_id_column_name(), $id);
@@ -1263,7 +1269,8 @@
         }
 
         /**
-         * Special method to query the table by its primary key
+         * Special method to query the table by its primary key.
+         * Does not work with compound primary keys.
          */
         public function having_id_is($id) {
             return $this->having($this->_get_id_column_name(), $id);
@@ -1523,10 +1530,22 @@
          * (table names, column names etc). This method can
          * also deal with dot-separated identifiers eg table.column
          */
-        protected function _quote_identifier($identifier) {
+        protected function _quote_one_identifier($identifier) {
             $parts = explode('.', $identifier);
             $parts = array_map(array($this, '_quote_identifier_part'), $parts);
             return join('.', $parts);
+        }
+
+        /**
+         * Quote a string that is used as an identifier
+         * (table names, column names etc) or an array containing
+         * multiple identifiers. This method can also deal with
+         * dot-separated identifiers eg table.column
+         */
+        protected function _quote_identifier($identifier) {
+            return is_array($identifier) ?
+                    array_map(array($this, '_quote_one_identifier'), $identifier) :
+                    $this->_quote_one_identifier($identifier);
         }
 
         /**
@@ -1646,7 +1665,8 @@
 
         /**
          * Return the name of the column in the database table which contains
-         * the primary key ID of the row.
+         * the primary key ID of the row. It will return an array if a compound
+         * primary key is used.
          */
         protected function _get_id_column_name() {
             if (!is_null($this->_instance_id_column)) {
@@ -1659,10 +1679,20 @@
         }
 
         /**
-         * Get the primary key ID of this object.
+         * Get the primary key ID of this object. It will return an associative
+         * array if a compound primary key is used.
          */
         public function id() {
-            return $this->get($this->_get_id_column_name());
+            if (is_array($this->_get_id_column_name())) {
+                $return = array();
+                foreach($this->_get_id_column_name() as $key) {
+                    $return[$key] = $this->get($key);
+                }
+                return $return;
+            }
+            else {
+                return $this->get($this->_get_id_column_name());
+            }
         }
 
         /**
@@ -1743,17 +1773,23 @@
                     return true;
                 }
                 $query = $this->_build_update();
-                $values[] = $this->id();
+                if (is_array($this->_get_id_column_name())) {
+                    $values = array_merge($values, $this->id());
+                }
+                else {
+                    $values[] = $this->id();
+                }
             } else { // INSERT
                 $query = $this->_build_insert();
             }
 
             $success = self::_execute($query, $values, $this->_connection_name);
 
-            // If we've just inserted a new record, set the ID of this object
+            // If we've just inserted a new record and the primary key is not compound,
+            // set the ID of this object
             if ($this->_is_new) {
                 $this->_is_new = false;
-                if (is_null($this->id())) {
+                if (is_null($this->id()) && (!is_array($this->_get_id_column_name()))) {
                     if(self::$_db[$this->_connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql') {
                         $this->_data[$this->_get_id_column_name()] = self::get_last_statement()->fetchColumn();
                     } else {
@@ -1764,6 +1800,25 @@
 
             $this->_dirty_fields = $this->_expr_fields = array();
             return $success;
+        }
+
+        /**
+         * Add a WHERE clause for every column that composes the primary key
+         */
+        public function _add_id_column_conditions(&$query) {
+            $query[] = "WHERE";
+            $keys = is_array($this->_get_id_column_name()) ? $this->_get_id_column_name() : array( $this->_get_id_column_name() );
+            $first = true;
+            foreach($keys as $key) {
+                if ($first) {
+                    $first = false;
+                }
+                else {
+                    $query[] = "AND";
+                }
+                $query[] = $this->_quote_identifier($key);
+                $query[] = "= ?";
+            }
         }
 
         /**
@@ -1781,9 +1836,7 @@
                 $field_list[] = "{$this->_quote_identifier($key)} = $value";
             }
             $query[] = join(", ", $field_list);
-            $query[] = "WHERE";
-            $query[] = $this->_quote_identifier($this->_get_id_column_name());
-            $query[] = "= ?";
+            $this->_add_id_column_conditions($query);
             return join(" ", $query);
         }
 
@@ -1800,7 +1853,9 @@
             $placeholders = $this->_create_placeholders($this->_dirty_fields);
             $query[] = "({$placeholders})";
 
-            if (self::$_db[$this->_connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql') {
+            // Only enable returning last insert ID on PostgreSQL when not using compound primary keys
+            if ((self::$_db[$this->_connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql') &&
+                (!is_array($this->_get_id_column_name()))) {
                 $query[] = 'RETURNING ' . $this->_quote_identifier($this->_get_id_column_name());
             }
 
@@ -1811,15 +1866,12 @@
          * Delete this record from the database
          */
         public function delete() {
-            $query = join(" ", array(
+            $query = array(
                 "DELETE FROM",
-                $this->_quote_identifier($this->_table_name),
-                "WHERE",
-                $this->_quote_identifier($this->_get_id_column_name()),
-                "= ?",
-            ));
-
-            return self::_execute($query, array($this->id()), $this->_connection_name);
+                $this->_quote_identifier($this->_table_name)
+            );
+            $this->_add_id_column_conditions($query);
+            return self::_execute(join(" ", $query), is_array($this->id()) ? $this->id() :array($this->id()), $this->_connection_name);
         }
 
         /**
