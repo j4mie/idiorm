@@ -58,6 +58,21 @@ class ORMTest extends PHPUnit_Framework_TestCase {
         $this->assertFalse(isset($model['test']));
     }
 
+    public function testGetId() {
+        $value = 'test';
+        $record = ORM::for_table('test')->create();
+        $record->set('id', 10);
+        $this->assertEquals($record->id(), 10);
+    }
+
+    public function testGetIdWithCompoundPrimaryKeys() {
+        $value = 'test';
+        $record = ORM::for_table('test')->use_id_column(array('id1', 'id2'))->create();
+        $record->set('id1', 10);
+        $record->set('id2', 20);
+        $this->assertEquals($record->id(), array('id1' => 10, 'id2' => 20));
+    }
+
     public function testFindResultSet() {
         $result_set = ORM::for_table('test')->find_result_set();
         $this->assertInstanceOf('IdiormResultSet', $result_set);

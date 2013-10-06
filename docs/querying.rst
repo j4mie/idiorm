@@ -85,6 +85,8 @@ To find a single record by ID, you can pass the ID directly to the
     <?php
     $person = ORM::for_table('person')->find_one(5);
 
+This feature works only when compound primary keys are not used.
+
 Multiple records
 ^^^^^^^^^^^^^^^^
 
@@ -110,6 +112,10 @@ To find all records where the ``gender`` is ``female``:
 
     <?php
     $females = ORM::for_table('person')->where('gender', 'female')->find_many();
+
+Notice that it will return an associative array with the primary IDs as the keys,
+but only if the primary key is not compund (in this case, a regular array will be
+returned).
 
 As a result set
 '''''''''''''''
@@ -242,7 +248,8 @@ Shortcut: ``where_id_is``
 '''''''''''''''''''''''''
 
 This is a simple helper method to query the table by primary key.
-Respects the ID column specified in the config.
+Respects the ID column specified in the config. It won't work when using
+compound primary keys.
 
 Less than / greater than: ``where_lt``, ``where_gt``, ``where_lte``, ``where_gte``
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -667,3 +674,14 @@ using this method. If you find yourself calling ``raw_query`` often, you
 may have misunderstood the purpose of using an ORM, or your application
 may be too complex for Idiorm. Consider using a more full-featured
 database abstraction system.
+
+Specifying a non-default ID column in a query
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Should you need to override the table default primary key column in
+the current query, you can use the ``use_id_column`` method. It takes
+the column name as the only parameter, but you can use an array of
+column names if the primary key is compound.
+
+Take note, though, that you can specify the default primary key for
+a table for every query using the ``id_column_overrides`` setting.
