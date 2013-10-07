@@ -647,10 +647,7 @@
          */
         protected function _find_many() {
             $rows = $this->_run();
-            if(self::$_config[$this->_connection_name]['find_many_primary_id_as_key']) {
-                return $this->_instances_with_id_as_key($rows);
-            }
-            return array_map(array($this, '_create_instance_from_row'), $rows);
+            return $this->_instances_with_id_as_key($rows);
         }
 
         /**
@@ -661,10 +658,12 @@
          * @return array
          */
         protected function _instances_with_id_as_key($rows) {
+            $size = count($rows);
             $instances = array();
-            foreach($rows as $row) {
-                $row = $this->_create_instance_from_row($row);
-                $instances[$row->id()] = $row;
+            for ($i = 0; $i < $size; $i++) {
+                $row = $this->_create_instance_from_row($rows[$i]);
+                $key = (isset($row->{$this->_instance_id_column}) && $this->_associative_results) ? $row->{$this->_instance_id_column} : $i;
+                $instances[$key] = $row;
             }
             return $instances;
         }
