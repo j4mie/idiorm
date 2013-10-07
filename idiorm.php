@@ -593,13 +593,14 @@
          * from your query, and execute it. Will return an array
          * of instances of the ORM class, or an empty array if
          * no rows were returned.
+         * @param bool $ids_as_keys
          * @return array|\IdiormResultSet
          */
-        public function find_many() {
+        public function find_many($ids_as_keys = true) {
             if(self::$_config[$this->_connection_name]['return_result_sets']) {
                 return $this->find_result_set();
             }
-            return $this->_find_many();
+            return $this->_find_many($ids_as_keys);
         }
 
         /**
@@ -607,11 +608,15 @@
          * from your query, and execute it. Will return an array
          * of instances of the ORM class, or an empty array if
          * no rows were returned.
+         * @param bool $ids_as_keys
          * @return array
          */
-        protected function _find_many() {
+        protected function _find_many($ids_as_keys) {
             $rows = $this->_run();
-            return $this->_instances_with_id_as_key($rows);
+            if(true === $ids_as_keys) {
+                return $this->_instances_with_id_as_key($rows);
+            }
+            return array_map(array($this, '_create_instance_from_row'), $rows);
         }
 
         /**
