@@ -123,6 +123,25 @@ See the `find_result_set()` documentation for more information.
    It is recommended that you setup your projects to use result sets as they
    are more flexible.
 
+``find_many()`` to index records by primary key
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Setting: ``find_many_primary_id_as_key``
+Default: true
+
+This setting causes Idiorm to use the primary key of a record as it's index in
+the returned array.
+
+.. warning::
+
+    If you are not using Idiorm with a proper unique primary key then you can set
+    this to false so that you do not get duplicate records overwriting each other.
+
+.. code-block:: php
+
+    <?php
+    ORM::configure('find_many_primary_id_as_key', true); // returns records indexed by primary key
+
 PDO Driver Options
 ^^^^^^^^^^^^^^^^^^
 
