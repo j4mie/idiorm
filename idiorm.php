@@ -189,7 +189,7 @@
                 // Shortcut: If only one array argument is passed,
                 // assume it's an array of configuration settings
                 foreach ($key as $conf_key => $conf_value) {
-                    self::$_config[$connection_name][$conf_key] = $conf_value;
+                    self::configure($conf_key, $conf_value, $connection_name);
                 }
             } else {
                 if (is_null($value)) {
