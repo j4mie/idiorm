@@ -942,12 +942,14 @@
         /**
          * Add a RAW JOIN source to the query
          */
-        public function raw_join($table, $constraint, $table_alias=null) {
+        public function raw_join($table, $constraint, $table_alias, $parameters = array()) {
             // Add table alias if present
             if (!is_null($table_alias)) {
                 $table_alias = $this->_quote_identifier($table_alias);
                 $table .= " {$table_alias}";
             }
+
+            $this->_values = $parameters;
 
             // Build the constraint
             if (is_array($constraint)) {
