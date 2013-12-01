@@ -623,6 +623,49 @@ method to control which columns get returned.
         ->join('person', array('p1.parent', '=', 'p2.id'), 'p2')
         ->find_many();
 
+Raw JOIN clauses
+'''''''''''''''''
+
+If you need to construct a more complex query, you can use the ``raw_join``
+method to specify the SQL fragment for the JOIN clause exactly. This
+method takes four required arguments: the string to add to the query,
+the conditions is as an *array* containing three components: 
+the first column, the operator, and the second column, the table alias and
+(optional) the parameters array. If parameters are supplied, 
+the string should contain question mark characters (``?``) to represent 
+the values to be bound, and the parameter array should contain the values 
+to be substituted into the string in the correct order.
+
+This method may be used in a method chain alongside other ``*_join``
+methods as well as methods such as ``offset``, ``limit`` and
+``order_by_*``. The contents of the string you supply will be connected
+with preceding and following JOIN clauses.
+
+.. code-block:: php
+
+    <?php
+    $people = ORM::for_table('person')
+                ->raw_join(
+                    'JOIN (SELECT * FROM role WHERE role.name = ?)', 
+                    array('person.role_id', '=', 'role.id'), 
+                    'role', 
+                    array('role' => 'janitor'))    
+                ->order_by_asc('person.name')
+                ->find_many();
+
+    // Creates SQL:
+    SELECT * FROM `person` JOIN (SELECT * FROM role WHERE role.name = 'janitor') `role` ON `person`.`role_id` = `role`.`id` ORDER BY `person`.`name` ASC
+
+Note that this method only supports "question mark placeholder" syntax,
+and NOT "named placeholder" syntax. This is because PDO does not allow
+queries that contain a mixture of placeholder types. Also, you should
+ensure that the number of question mark placeholders in the string
+exactly matches the number of elements in the array.
+
+If you require yet more flexibility, you can manually specify the entire
+query. See *Raw queries* below.
+
+
 Aggregate functions
 ^^^^^^^^^^^^^^^^^^^
 
