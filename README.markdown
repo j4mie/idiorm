@@ -74,6 +74,12 @@ foreach ($tweets as $tweet) {
 Changelog
 ---------
 
+#### 1.4.1 - release 2013-12-12
+
+**Patch update to remove a broken pull request** - may have consequences for users of 1.4.0 that exploited the "`find_many()` now returns an associative array with the databases primary ID as the array keys" change that was merged in 1.4.0.
+
+* Back out pull request/issue [#133](https://github.com/j4mie/idiorm/pull/133) as it breaks backwards compatibility in previously unexpected ways (see [#162](https://github.com/j4mie/idiorm/pull/162), [#156](https://github.com/j4mie/idiorm/issues/156) and [#133](https://github.com/j4mie/idiorm/pull/133#issuecomment-29063108) - sorry for merging this change into Idiorm as causing issues. - closes [issue 156](https://github.com/j4mie/idiorm/issues/156)
+
 #### 1.4.0 - release 2013-09-05
 
 * `find_many()` now returns an associative array with the databases primary ID as the array keys [[Surt](https://github.com/Surt)] - [issue #133](https://github.com/j4mie/idiorm/issues/133)
