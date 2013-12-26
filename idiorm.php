@@ -279,8 +279,10 @@
         public static function set_db($db, $connection_name = self::DEFAULT_CONNECTION) {
             self::_setup_db_config($connection_name);
             self::$_db[$connection_name] = $db;
-            self::_setup_identifier_quote_character($connection_name);
-            self::_setup_limit_clause_style($connection_name);
+            if(!is_null(self::$_db[$connection_name])) {
+                self::_setup_identifier_quote_character($connection_name);
+                self::_setup_limit_clause_style($connection_name);
+            }
         }
 
         /**
