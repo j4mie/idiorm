@@ -1650,9 +1650,20 @@
         /**
          * Return the value of a property of this object (database row)
          * or null if not present.
+         *
+         * If a column-names array is passed, it will return a associative array
+         * with the value of each column or null if it is not present.
          */
         public function get($key) {
-            return isset($this->_data[$key]) ? $this->_data[$key] : null;
+            if (is_array($key)) {
+                $result = array();
+                foreach($key as $column) {
+                    $result[$column] = isset($this->_data[$column]) ? $this->_data[$column] : null;
+                }
+                return $result;
+            } else {
+                return isset($this->_data[$key]) ? $this->_data[$key] : null;
+            }
         }
 
         /**
