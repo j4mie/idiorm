@@ -1051,6 +1051,21 @@
                 return implode(', ', $db_fields);
             }
         }
+        
+        /**
+         * Helper method that filters a column/value array returning only those
+         * columns that belong to a compound primary key.
+         *
+         * If the key contains a column that does not exist in the given array,
+         * a null value will be returned for it.
+         */
+        protected function _get_compound_id_column_values($value) {
+            $filtered = array();
+            foreach($this->_get_id_column_name() as $key) {
+                $filtered[$key] = isset($value[$key]) ? $value[$key] : null;
+            }
+            return $filtered;
+        }
 
         /**
          * Add a WHERE column = value clause to your query. Each time
