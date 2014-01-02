@@ -1831,7 +1831,12 @@
                     return true;
                 }
                 $query = $this->_build_update();
-                $values[] = $this->id();
+                $id = $this->id();
+                if (is_array($id)) {
+                    $values = array_merge($values, array_values($id));
+                } else {
+                    $values[] = $id;
+                }
             } else { // INSERT
                 $query = $this->_build_insert();
             }
@@ -1856,6 +1861,25 @@
         }
 
         /**
+         * Add a WHERE clause for every column that belongs to the primary key
+         */
+        public function _add_id_column_conditions(&$query) {
+            $query[] = "WHERE";
+            $keys = is_array($this->_get_id_column_name()) ? $this->_get_id_column_name() : array( $this->_get_id_column_name() );
+            $first = true;
+            foreach($keys as $key) {
+                if ($first) {
+                    $first = false;
+                }
+                else {
+                    $query[] = "AND";
+                }
+                $query[] = $this->_quote_identifier($key);
+                $query[] = "= ?";
+            }
+        }
+
+        /**
          * Build an UPDATE query
          */
         protected function _build_update() {
@@ -1870,9 +1894,7 @@
                 $field_list[] = "{$this->_quote_identifier($key)} = $value";
             }
             $query[] = join(", ", $field_list);
-            $query[] = "WHERE";
-            $query[] = $this->_quote_identifier($this->_get_id_column_name());
-            $query[] = "= ?";
+            $this->_add_id_column_conditions($query);
             return join(" ", $query);
         }
 
