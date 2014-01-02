@@ -777,6 +777,18 @@
         }
 
         /**
+         * Counts the number of columns that belong to the primary
+         * key and their value is null.
+         */
+        public function count_null_id_columns() {
+            if (is_array($this->_get_id_column_name())) {
+                return count(array_filter($this->id(), 'is_null'));
+            } else {
+                return is_null($this->id()) ? 1 : 0;
+            }
+        }
+
+        /**
          * Add a column to the list of columns returned by the SELECT
          * query. This defaults to '*'. The second optional argument is
          * the alias to return the column as.
@@ -1607,10 +1619,25 @@
          * (table names, column names etc). This method can
          * also deal with dot-separated identifiers eg table.column
          */
-        protected function _quote_identifier($identifier) {
+        protected function _quote_one_identifier($identifier) {
             $parts = explode('.', $identifier);
             $parts = array_map(array($this, '_quote_identifier_part'), $parts);
             return join('.', $parts);
+        }
+
+        /**
+         * Quote a string that is used as an identifier
+         * (table names, column names etc) or an array containing
+         * multiple identifiers. This method can also deal with
+         * dot-separated identifiers eg table.column
+         */
+        protected function _quote_identifier($identifier) {
+            if (is_array($identifier)) {
+                $result = array_map(array($this, '_quote_one_identifier'), $identifier);
+                return join(', ', $result);
+            } else {
+                return $this->_quote_one_identifier($identifier);
+            }
         }
 
         /**
@@ -1853,12 +1880,23 @@
             // If we've just inserted a new record, set the ID of this object
             if ($this->_is_new) {
                 $this->_is_new = false;
-                if (is_null($this->id())) {
+                if ($this->count_null_id_columns() != 0) {
                     $db = self::get_db($this->_connection_name);
                     if($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql') {
-                        $this->_data[$this->_get_id_column_name()] = self::get_last_statement()->fetchColumn();
+                        // it may return several columns if a compound primary
+                        // key is used
+                        $row = self::get_last_statement()->fetch(PDO::FETCH_ASSOC);
+                        foreach($row as $key => $value) {
+                            $this->_data[$key] = $value;
+                        }
                     } else {
-                        $this->_data[$this->_get_id_column_name()] = $db->lastInsertId();
+                        $column = $this->_get_id_column_name();
+                        // if the primary key is compound, assign the last inserted id
+                        // to the first column
+                        if (is_array($column)) {
+                            $column = array_slice($column, 0, 1);
+                        }
+                        $this->_data[$column] = $db->lastInsertId();
                     }
                 }
             }
