@@ -1922,15 +1922,12 @@
          * Delete this record from the database
          */
         public function delete() {
-            $query = join(" ", array(
+            $query = array(
                 "DELETE FROM",
-                $this->_quote_identifier($this->_table_name),
-                "WHERE",
-                $this->_quote_identifier($this->_get_id_column_name()),
-                "= ?",
-            ));
-
-            return self::_execute($query, array($this->id()), $this->_connection_name);
+                $this->_quote_identifier($this->_table_name)
+            );
+            $this->_add_id_column_conditions($query);
+            return self::_execute(join(" ", $query), is_array($this->id()) ? array_values($this->id()) : array($this->id()), $this->_connection_name);
         }
 
         /**
