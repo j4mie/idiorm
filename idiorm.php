@@ -998,6 +998,37 @@
         }
 
         /**
+         * Add a WHERE clause with multiple values (like IN and NOT IN)
+         */
+        public function _add_where_placeholder($column_name, $separator, $values) {
+            if (!is_array($column_name)) {
+                $data = array($column_name => $values);
+            } else {
+                $data = $column_name;
+            }
+            $result = $this;
+            foreach ($data as $key => $val) {
+                $column = $result->_quote_identifier($key);
+                $placeholders = $result->_create_placeholders($val);
+                $result = $result->_add_where("{$column} {$separator} ({$placeholders})", $val);    
+            }
+            return $result;
+        }
+
+        /**
+         * Add a WHERE clause with no parameters(like IS NULL and IS NOT NULL)
+         */
+        public function _add_where_no_value($column_name, $operator) {
+            $conditions = (is_array($column_name)) ? $column_name : array($column_name);
+            $result = $this;
+            foreach($conditions as $column) {
+                $column = $this->_quote_identifier($column);
+                $result = $result->_add_where("{$column} {$operator}");
+            }
+            return $result;
+        }
+
+        /**
          * Internal method to add a HAVING or WHERE condition to the query
          */
         protected function _add_condition($type, $fragment, $values=array()) {
@@ -1079,8 +1110,11 @@
          * this is called in the chain, an additional WHERE will be
          * added, and these will be ANDed together when the final query
          * is built.
+         *
+         * If you use an array in $column_name, a new clause will be
+         * added for each element. In this case, $value is ignored.
          */
-        public function where($column_name, $value) {
+        public function where($column_name, $value=null) {
             return $this->where_equal($column_name, $value);
         }
 
@@ -1088,63 +1122,68 @@
          * More explicitly named version of for the where() method.
          * Can be used if preferred.
          */
-        public function where_equal($column_name, $value) {
+        public function where_equal($column_name, $value=null) {
             return $this->_add_simple_where($column_name, '=', $value);
         }
 
         /**
          * Add a WHERE column != value clause to your query.
          */
-        public function where_not_equal($column_name, $value) {
+        public function where_not_equal($column_name, $value=null) {
             return $this->_add_simple_where($column_name, '!=', $value);
         }
 
         /**
          * Special method to query the table by its primary key
+         *
+         * If primary key is compound, only the columns that
+         * belong to they key will be used for the query
          */
         public function where_id_is($id) {
-            return $this->where($this->_get_id_column_name(), $id);
+            return (is_array($this->_get_id_column_name())) ?
+                $this->where($this->_get_compound_id_column_values($id), null) :
+                $this->where($this->_get_id_column_name(), $id);
         }
 
         /**
          * Add a WHERE ... LIKE clause to your query.
          */
-        public function where_like($column_name, $value) {
+        public function where_like($column_name, $value=null) {
             return $this->_add_simple_where($column_name, 'LIKE', $value);
         }
 
         /**
          * Add where WHERE ... NOT LIKE clause to your query.
          */
-        public function where_not_like($column_name, $value) {
+        public function where_not_like($column_name, $value=null) {
             return $this->_add_simple_where($column_name, 'NOT LIKE', $value);
         }
 
         /**
          * Add a WHERE ... > clause to your query
          */
-        public function where_gt($column_name, $value) {
+        public function where_gt($column_name, $value=null) {
             return $this->_add_simple_where($column_name, '>', $value);
         }
 
         /**
          * Add a WHERE ... < clause to your query
          */
-        public function where_lt($column_name, $value) {
+        public function where_lt($column_name, $value=null) {
             return $this->_add_simple_where($column_name, '<', $value);
         }
 
         /**
          * Add a WHERE ... >= clause to your query
          */
-        public function where_gte($column_name, $value) {
+        public function where_gte($column_name, $value=null) {
             return $this->_add_simple_where($column_name, '>=', $value);
         }
 
         /**
          * Add a WHERE ... <= clause to your query
          */
-        public function where_lte($column_name, $value) {
+        public function where_lte($column_name, $value=null) {
             return $this->_add_simple_where($column_name, '<=', $value);
         }
 
@@ -1152,34 +1191,28 @@
          * Add a WHERE ... IN clause to your query
          */
         public function where_in($column_name, $values) {
-            $column_name = $this->_quote_identifier($column_name);
-            $placeholders = $this->_create_placeholders($values);
-            return $this->_add_where("{$column_name} IN ({$placeholders})", $values);
+            return $this->_add_where_placeholder($column_name, 'IN', $values);
         }
 
         /**
          * Add a WHERE ... NOT IN clause to your query
          */
         public function where_not_in($column_name, $values) {
-            $column_name = $this->_quote_identifier($column_name);
-            $placeholders = $this->_create_placeholders($values);
-            return $this->_add_where("{$column_name} NOT IN ({$placeholders})", $values);
+            return $this->_add_where_placeholder($column_name, 'NOT IN', $values);
         }
 
         /**
          * Add a WHERE column IS NULL clause to your query
          */
         public function where_null($column_name) {
-            $column_name = $this->_quote_identifier($column_name);
-            return $this->_add_where("{$column_name} IS NULL");
+            return $this->_add_where_no_value($column_name, "IS NULL");
         }
 
         /**
          * Add a WHERE column IS NOT NULL clause to your query
          */
         public function where_not_null($column_name) {
-            $column_name = $this->_quote_identifier($column_name);
-            return $this->_add_where("{$column_name} IS NOT NULL");
+            return $this->_add_where_no_value($column_name, "IS NOT NULL");
         }
 
         /**
