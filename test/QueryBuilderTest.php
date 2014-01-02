@@ -514,6 +514,20 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals($expected, ORM::get_last_query());
     }
 
+    public function test_quote_identifier_part() {
+        $widget = ORM::for_table('widget')->find_one(1);
+        $widget->set('added', '2013-01-04');
+        $widget->save();
+        $expected = "UPDATE `widget` SET `added` = '2013-01-04' WHERE `id` = '1'";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+    
+    public function test_quote_multiple_identifiers_part() {
+        $record = ORM::for_table('widget')->use_id_column(array('id1', 'id2'))->create();
+        $expected = "`id1`, `id2`";
+        $this->assertEquals($expected, $record->_quote_identifier($record->_get_id_column_name()));
+    }
+
     /**
      * Regression tests
      */
