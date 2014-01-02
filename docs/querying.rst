@@ -85,6 +85,18 @@ To find a single record by ID, you can pass the ID directly to the
     <?php
     $person = ORM::for_table('person')->find_one(5);
 
+If you are using a compound primary key, you can find the records
+using an array as the parameter:
+
+.. code-block:: php
+
+    <?php
+    $person = ORM::for_table('user_role')->find_one(array(
+        'user_id' => 34,
+        'role_id' => 10
+    ));
+
+
 Multiple records
 ^^^^^^^^^^^^^^^^
 
@@ -238,11 +250,30 @@ the ``where_equal`` method: this is identical to ``where``.
 The ``where_not_equal`` method adds a ``WHERE column != "value"`` clause
 to your query.
 
+You can specify multiple columns and their values in the same call. In this
+case you should pass an associative array as the first parameter. The array
+notation uses keys as column names.
+
+.. code-block:: php
+
+    <?php
+    $people = ORM::for_table('person')
+                ->where(array(
+                    'name' => 'Fred',
+                    'age' => 20
+                ))
+                ->find_many();
+
+    // Creates SQL:
+    SELECT * FROM `person` WHERE `name` = "Fred" AND `age` = "20";
+
 Shortcut: ``where_id_is``
 '''''''''''''''''''''''''
 
 This is a simple helper method to query the table by primary key.
-Respects the ID column specified in the config.
+Respects the ID column specified in the config. If you are using a compound
+primary key, you must pass an array where the key is the column name. Columns
+that don't belong to the key will be ignored.
 
 Less than / greater than: ``where_lt``, ``where_gt``, ``where_lte``, ``where_gte``
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -282,7 +313,9 @@ To add a ``WHERE ... IN ()`` or ``WHERE ... NOT IN ()`` clause, use the
 ``where_in`` and ``where_not_in`` methods respectively.
 
 Both methods accept two arguments. The first is the column name to
-compare against. The second is an *array* of possible values.
+compare against. The second is an *array* of possible values. As all the
+``where_`` methods, you can specify multiple columns using an associative
+*array* as the only parameter.
 
 .. code-block:: php
 
