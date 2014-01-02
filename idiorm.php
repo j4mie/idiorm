@@ -1017,19 +1017,27 @@
          * style HAVING or WHERE condition into a string and value ready to
          * be passed to the _add_condition method. Avoids duplication
          * of the call to _quote_identifier
+         *
+         * If column_name is an associative array, it will add a condition for each column
          */
         protected function _add_simple_condition($type, $column_name, $separator, $value) {
-            // Add the table name in case of ambiguous columns
-            if (count($this->_join_sources) > 0 && strpos($column_name, '.') === false) {
-                $table = $this->_table_name;
-                if (!is_null($this->_table_alias)) {
-                    $table = $this->_table_alias;
-                }
+            $multiple = is_array($column_name) ? $column_name : array($column_name => $value);
+            $result = $this;
 
-                $column_name = "{$table}.{$column_name}";
+            foreach($multiple as $key => $val) {
+                // Add the table name in case of ambiguous columns
+                if (count($result->_join_sources) > 0 && strpos($key, '.') === false) {
+                    $table = $result->_table_name;
+                    if (!is_null($result->_table_alias)) {
+                        $table = $result->_table_alias;
+                    }
+
+                    $key = "{$table}.{$key}";
+                }
+                $key = $result->_quote_identifier($key);
+                $result = $result->_add_condition($type, "{$key} {$separator} ?", $val);
             }
-            $column_name = $this->_quote_identifier($column_name);
-            return $this->_add_condition($type, "{$column_name} {$separator} ?", $value);
+            return $result;
         } 
 
         /**
