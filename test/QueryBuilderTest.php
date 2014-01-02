@@ -527,6 +527,49 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
         $expected = "`id1`, `id2`";
         $this->assertEquals($expected, $record->_quote_identifier($record->_get_id_column_name()));
     }
+    
+    /**
+     * Compound primary key tests
+     */
+    public function testFindOneWithCompoundPrimaryKey() {
+        $record = ORM::for_table('widget')->use_id_column(array('id1', 'id2'));
+        $record->findOne(array('id1' => 10, 'name' => 'Joe', 'id2' => 20));
+        $expected = "SELECT * FROM `widget` WHERE `id1` = '10' AND `id2` = '20' LIMIT 1";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testInsertWithCompoundPrimaryKey() {
+        $record = ORM::for_table('widget')->use_id_column(array('id1', 'id2'))->create();
+        $record->set('id1', 10);
+        $record->set('id2', 20);
+        $record->set('name', 'Joe');
+        $record->save();
+        $expected = "INSERT INTO `widget` (`id1`, `id2`, `name`) VALUES ('10', '20', 'Joe')";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testUpdateWithCompoundPrimaryKey() {
+        $record = ORM::for_table('widget')->use_id_column(array('id1', 'id2'))->create();
+        $record->set('id1', 10);
+        $record->set('id2', 20);
+        $record->set('name', 'Joe');
+        $record->save();
+        $record->set('name', 'John');
+        $record->save();
+        $expected = "UPDATE `widget` SET `name` = 'John' WHERE `id1` = '10' AND `id2` = '20'";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testDeleteWithCompoundPrimaryKey() {
+        $record = ORM::for_table('widget')->use_id_column(array('id1', 'id2'))->create();
+        $record->set('id1', 10);
+        $record->set('id2', 20);
+        $record->set('name', 'Joe');
+        $record->save();
+        $record->delete();
+        $expected = "DELETE FROM `widget` WHERE `id1` = '10' AND `id2` = '20'";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
 
     /**
      * Regression tests
