@@ -977,6 +977,37 @@
         }
 
         /**
+         * Internal method to add a HAVING clause with multiple values (like IN and NOT IN)
+         */
+        public function _add_having_placeholder($column_name, $separator, $values) {
+            if (!is_array($column_name)) {
+                $data = array($column_name => $values);
+            } else {
+                $data = $column_name;
+            }
+            $result = $this;
+            foreach ($data as $key => $val) {
+                $column = $result->_quote_identifier($key);
+                $placeholders = $result->_create_placeholders($val);
+                $result = $result->_add_having("{$column} {$separator} ({$placeholders})", $val);    
+            }
+            return $result;
+        }
+
+        /**
+         * Internal method to add a HAVING clause with no parameters(like IS NULL and IS NOT NULL)
+         */
+        public function _add_having_no_value($column_name, $operator) {
+            $conditions = (is_array($column_name)) ? $column_name : array($column_name);
+            $result = $this;
+            foreach($conditions as $column) {
+                $column = $this->_quote_identifier($column);
+                $result = $result->_add_having("{$column} {$operator}");
+            }
+            return $result;
+        }
+
+        /**
          * Internal method to add a WHERE condition to the query
          */
         protected function _add_where($fragment, $values=array()) {
@@ -1286,8 +1317,11 @@
          * this is called in the chain, an additional HAVING will be
          * added, and these will be ANDed together when the final query
          * is built.
+         *
+         * If you use an array in $column_name, a new clause will be
+         * added for each element. In this case, $value is ignored.
          */
-        public function having($column_name, $value) {
+        public function having($column_name, $value=null) {
             return $this->having_equal($column_name, $value);
         }
 
@@ -1295,98 +1329,97 @@
          * More explicitly named version of for the having() method.
          * Can be used if preferred.
          */
-        public function having_equal($column_name, $value) {
+        public function having_equal($column_name, $value=null) {
             return $this->_add_simple_having($column_name, '=', $value);
         }
 
         /**
          * Add a HAVING column != value clause to your query.
          */
-        public function having_not_equal($column_name, $value) {
+        public function having_not_equal($column_name, $value=null) {
             return $this->_add_simple_having($column_name, '!=', $value);
         }
 
         /**
-         * Special method to query the table by its primary key
+         * Special method to query the table by its primary key.
+         *
+         * If primary key is compound, only the columns that
+         * belong to they key will be used for the query
          */
         public function having_id_is($id) {
-            return $this->having($this->_get_id_column_name(), $id);
+            return (is_array($this->_get_id_column_name())) ?
+                $this->having($this->_get_compound_id_column_values($value)) :
+                $this->having($this->_get_id_column_name(), $id);
         }
 
         /**
          * Add a HAVING ... LIKE clause to your query.
          */
-        public function having_like($column_name, $value) {
+        public function having_like($column_name, $value=null) {
             return $this->_add_simple_having($column_name, 'LIKE', $value);
         }
 
         /**
          * Add where HAVING ... NOT LIKE clause to your query.
          */
-        public function having_not_like($column_name, $value) {
+        public function having_not_like($column_name, $value=null) {
             return $this->_add_simple_having($column_name, 'NOT LIKE', $value);
         }
 
         /**
          * Add a HAVING ... > clause to your query
          */
-        public function having_gt($column_name, $value) {
+        public function having_gt($column_name, $value=null) {
             return $this->_add_simple_having($column_name, '>', $value);
         }
 
         /**
          * Add a HAVING ... < clause to your query
          */
-        public function having_lt($column_name, $value) {
+        public function having_lt($column_name, $value=null) {
             return $this->_add_simple_having($column_name, '<', $value);
         }
 
         /**
          * Add a HAVING ... >= clause to your query
          */
-        public function having_gte($column_name, $value) {
+        public function having_gte($column_name, $value=null) {
             return $this->_add_simple_having($column_name, '>=', $value);
         }
 
         /**
          * Add a HAVING ... <= clause to your query
          */
-        public function having_lte($column_name, $value) {
+        public function having_lte($column_name, $value=null) {
             return $this->_add_simple_having($column_name, '<=', $value);
         }
 
         /**
          * Add a HAVING ... IN clause to your query
          */
-        public function having_in($column_name, $values) {
-            $column_name = $this->_quote_identifier($column_name);
-            $placeholders = $this->_create_placeholders($values);
-            return $this->_add_having("{$column_name} IN ({$placeholders})", $values);
+        public function having_in($column_name, $values=null) {
+            return $this->_add_having_placeholder($column_name, 'IN', $values);
         }
 
         /**
          * Add a HAVING ... NOT IN clause to your query
          */
-        public function having_not_in($column_name, $values) {
-            $column_name = $this->_quote_identifier($column_name);
-            $placeholders = $this->_create_placeholders($values);
-            return $this->_add_having("{$column_name} NOT IN ({$placeholders})", $values);
+        public function having_not_in($column_name, $values=null) {
+            return $this->_add_having_placeholder($column_name, 'NOT IN', $values);
         }
 
         /**
          * Add a HAVING column IS NULL clause to your query
          */
         public function having_null($column_name) {
-            $column_name = $this->_quote_identifier($column_name);
-            return $this->_add_having("{$column_name} IS NULL");
+            return $this->_add_having_no_value($column_name, 'IS NULL');
         }
 
         /**
          * Add a HAVING column IS NOT NULL clause to your query
          */
         public function having_not_null($column_name) {
-            $column_name = $this->_quote_identifier($column_name);
-            return $this->_add_having("{$column_name} IS NOT NULL");
+            return $this->_add_having_no_value($column_name, 'IS NOT NULL');
         }
 
         /**
