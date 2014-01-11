@@ -437,6 +437,11 @@
                 self::$_query_log[$connection_name] = array();
             }
 
+            // Strip out any non-integer indexes from the parameters
+            foreach($parameters as $key => $value) {
+	            if (!is_int($key)) unset($parameters[$key]);
+            }
+
             if (count($parameters) > 0) {
                 // Escape the parameters
                 $parameters = array_map(array(self::get_db($connection_name), 'quote'), $parameters);
