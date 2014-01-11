@@ -9,9 +9,28 @@ require_once dirname(__FILE__) . '/../idiorm.php';
  */
 class MockPDOStatement extends PDOStatement {
    private $current_row = 0;
+   private $statement = NULL;
    
-   public function __construct() {}
-   public function execute($params) {}
+   /**
+    * Store the statement that gets passed to the constructor
+    */
+   public function __construct($statement) {
+       $this->statement = $statement;
+   }
+
+   /**
+    * Check that the array
+    */
+   public function execute($params) {
+       $count = 0;
+       $m = array();
+       if (preg_match_all('\\?', $this->statement, $m)) {
+           $count = count($m);
+           for ($i = 0; $i < $count; $i++) {
+               if ($params[$i] == NULL) throw new Exception('Incorrect parameter count.');
+           }
+       }
+   }
    
    /**
     * Return some dummy data
