@@ -27,7 +27,12 @@ class MockPDOStatement extends PDOStatement {
        if (preg_match_all('/"[^"\\\\]*(?:\\?)[^"\\\\]*"|\'[^\'\\\\]*(?:\\?)[^\'\\\\]*\'|(\\?)/', $this->statement, $m)) {
            $count = count($m);
            for ($i = 0; $i < $count; $i++) {
-               if ($params[$i] == NULL) throw new Exception('Incorrect parameter count.');
+               if ($params[$i] == NULL) {
+                   ob_start();
+                   var_dump($m, $params);
+                   $output = ob_get_clean();
+                   throw new Exception('Incorrect parameter count. Expected ' . $count . ' got ' . count($params) . '.\n' . $output);
+               }
            }
        }
    }
