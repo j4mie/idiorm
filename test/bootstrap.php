@@ -31,7 +31,7 @@ class MockPDOStatement extends PDOStatement {
                    ob_start();
                    var_dump($m, $params);
                    $output = ob_get_clean();
-                   throw new Exception('Incorrect parameter count. Expected ' . $count . ' got ' . count($params) . '.\n' . $output);
+                   throw new Exception('Incorrect parameter count. Expected ' . $count . ' got ' . count($params) . ".\n" . $this->statement . "\n" . $output);
                }
            }
        }
