@@ -27,7 +27,7 @@ class MockPDOStatement extends PDOStatement {
        if (preg_match_all('/"[^"\\\\]*(?:\\?)[^"\\\\]*"|\'[^\'\\\\]*(?:\\?)[^\'\\\\]*\'|(\\?)/', $this->statement, $m)) {
            $count = count($m);
            for ($i = 0; $i < $count; $i++) {
-               if ($params[$i] == NULL) {
+               if (!isset($params[$i])) {
                    ob_start();
                    var_dump($m, $params);
                    $output = ob_get_clean();
