@@ -956,7 +956,7 @@
                 $table .= " {$table_alias}";
             }
 
-            $this->_values = $parameters;
+            $this->_values = array_merge($this->_values, $parameters);
 
             // Build the constraint
             if (is_array($constraint)) {

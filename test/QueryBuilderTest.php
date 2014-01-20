@@ -397,6 +397,16 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals($expected, ORM::get_last_query());
     }
 
+    public function testRawJoinAndRawWhereWithParameters() {
+        ORM::for_table('widget')
+            ->raw_join('INNER JOIN ( SELECT * FROM `widget_handle` WHERE `widget_handle`.name LIKE ? AND `widget_handle`.category = ?)', array('widget_handle.widget_id', '=', 'widget.id'), 'widget_handle', array('%button%', 2))
+            ->raw_join('INNER JOIN ( SELECT * FROM `person` WHERE `person`.name LIKE ?)', array('person.id', '=', 'widget.person_id'), 'person', array('%Fred%'))
+            ->where_raw('`id` > ? AND `id` < ?', array(5, 10))
+            ->find_many();
+        $expected = "SELECT * FROM `widget` INNER JOIN ( SELECT * FROM `widget_handle` WHERE `widget_handle`.name LIKE '%button%' AND `widget_handle`.category = '2') `widget_handle` ON `widget_handle`.`widget_id` = `widget`.`id` INNER JOIN ( SELECT * FROM `person` WHERE `person`.name LIKE '%Fred%') `person` ON `person`.`id` = `widget`.`person_id` WHERE `id` > '5' AND `id` < '10'";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
     public function testSelectWithDistinct() {
         ORM::for_table('widget')->distinct()->select('name')->find_many();
         $expected = "SELECT DISTINCT `name` FROM `widget`";
