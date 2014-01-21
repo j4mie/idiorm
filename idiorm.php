@@ -1001,6 +1001,41 @@
             return $this;
         }
 
+        /**
+         * Delete all clauses and conditions like WHERE, HAVING, LIMIT, ORDER, etc.
+         * Usage:
+         *
+         * $brick = ORM::for_table('brick')->where('color', 'brown')->find_one();
+         *
+         * // ..use brick accordingly..
+         * // ..and then you can reset it and reuse without need to refactor:
+         *
+         * $brick->reset_conditions()->where('color', 'grey')->find_one();
+         *
+         */
+        public function reset_conditions() {
+
+          // WHERE clauses
+          $this->_where_conditions = array();
+
+          // LIMIT
+          $this->_limit = null;
+
+          // OFFSET
+          $this->_offset = null;
+
+          // ORDER BY
+          $this->_order_by = array();
+
+          // GROUP BY
+          $this->_group_by = array();
+
+          // HAVING
+          $this->_having_conditions = array();
+
+          return $this;
+        }
+
        /**
          * Helper method to compile a simple COLUMN SEPARATOR VALUE
          * style HAVING or WHERE condition into a string and value ready to
