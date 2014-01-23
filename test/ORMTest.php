@@ -84,4 +84,19 @@ class ORMTest extends PHPUnit_Framework_TestCase {
         $this->assertInstanceOf('MockPDOStatement', $statement);
     }
 
+    /**
+     * @expectedException IdiormMethodMissingException
+     */
+    public function testInvalidORMFunctionCallShouldCreateException() {
+        $orm = ORM::for_table('test');
+        $orm->invalidFunctionCall();
+    }
+
+    /**
+     * @expectedException IdiormMethodMissingException
+     */
+    public function testInvalidResultsSetFunctionCallShouldCreateException() {
+        $resultSet = ORM::for_table('test')->find_result_set();
+        $resultSet->invalidFunctionCall();
+    }
 }
