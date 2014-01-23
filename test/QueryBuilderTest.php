@@ -550,5 +550,11 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
         $expected = "UPDATE `widget` SET `added` = NOW() WHERE `id` = '1'";
         $this->assertEquals($expected, ORM::get_last_query());
     }
+
+    public function testIssue176LimitDoesntWorkFirstTime() {
+        $rs = ORM::for_table('position')->limit(1)->find_array();
+        $expected = "SELECT * FROM `position` LIMIT 1";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
 }
 
