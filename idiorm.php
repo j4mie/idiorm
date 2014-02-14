@@ -405,12 +405,15 @@
         * @return bool Response of PDOStatement::execute()
         */
         protected static function _execute($query, $parameters = array(), $connection_name = self::DEFAULT_CONNECTION) {
-            self::_log_query($query, $parameters, $connection_name);
             $statement = self::$_db[$connection_name]->prepare($query);
 
             self::$_last_statement = $statement;
-
-            return $statement->execute($parameters);
+			
+			$time = microtime(true);
+			$q = $statement->execute($parameters);
+			self::_log_query($query, $parameters, $connection_name, (microtime(true)-$time));
+            
+			return $q;
         }
 
         /**
@@ -424,9 +427,10 @@
          * @param string $query
          * @param array $parameters An array of parameters to be bound in to the query
          * @param string $connection_name Which connection to use
+		 * @param float $query_time Query time
          * @return bool
          */
-        protected static function _log_query($query, $parameters, $connection_name) {
+        protected static function _log_query($query, $parameters, $connection_name, $query_time) {
             // If logging is not enabled, do nothing
             if (!self::$_config[$connection_name]['logging']) {
                 return false;
@@ -462,7 +466,7 @@
             
             if(is_callable(self::$_config[$connection_name]['logger'])){
                 $logger = self::$_config[$connection_name]['logger'];
-                $logger($bound_query);
+                $logger($bound_query, $query_time);
             }
             
             return true;
