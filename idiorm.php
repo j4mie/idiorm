@@ -1652,7 +1652,7 @@
         /**
          * Set a property to a particular value on this object.
          * To set multiple properties at once, pass an associative array
-         * as the first parameter and leave out the second parameter.
+         * as the first parameter and optionally pass an array of the expected field names as the second parameter.
          * Flags the properties as 'dirty' so they will be saved to the
          * database when save() is called.
          */
@@ -1676,14 +1676,18 @@
         /**
          * Set a property on the ORM object.
          * @param string|array $key
-         * @param string|null $value
+         * @param string|array|null $value
          * @param bool $raw Whether this value should be treated as raw or not
          */
         protected function _set_orm_property($key, $value = null, $expr = false) {
             if (!is_array($key)) {
                 $key = array($key => $value);
             }
+
+            $expected = $value;
+
             foreach ($key as $field => $value) {
+                if(is_array($expected) && !in_array($field, $expected)) continue;
                 $this->_data[$field] = $value;
                 $this->_dirty_fields[$field] = $value;
                 if (false === $expr and isset($this->_expr_fields[$field])) {
