@@ -326,6 +326,13 @@ with preceding and following WHERE clauses with AND.
     // Creates SQL:
     SELECT * FROM `person` WHERE `name` = "Fred" AND (`age` = 20 OR `age` = 25) ORDER BY `name` ASC;
 
+.. note::
+
+    You must wrap your expression in parentheses when using any of ``ALL``,
+    ``ANY``, ``BETWEEN``, ``IN``, ``LIKE``, ``OR`` and ``SOME``. Otherwise
+    the precedence of ``AND`` will bind stronger and in the above example
+    you would effectively get ``WHERE (`name` = "Fred" AND `age` = 20) OR `age` = 25``
+
 Note that this method only supports "question mark placeholder" syntax,
 and NOT "named placeholder" syntax. This is because PDO does not allow
 queries that contain a mixture of placeholder types. Also, you should
