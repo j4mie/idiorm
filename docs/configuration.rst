@@ -261,8 +261,8 @@ allows you too whatever you would like from inside the callback function.
 .. code-block:: php
 
     <?php
-    ORM::configure('logger', function($log_string) {
-        echo $log_string;
+    ORM::configure('logger', function($log_string, $query_time) {
+        echo $log_string . ' in ' . $query_time;
     });
 
 Query caching
