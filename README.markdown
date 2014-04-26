@@ -76,6 +76,8 @@ Changelog
 
 #### 1.5.0 - release 2014-01-XX
 
+* Add compound primary key support [[lrlopez](https://github.com/lrlopez)] - [issue #171](https://github.com/j4mie/idiorm/issues/171)
+* Add a RAW JOIN source to the query [[moiseevigor](https://github.com/moiseevigor)] - [issue #163](https://github.com/j4mie/idiorm/issues/163)
 * Reduce the type casting on aggregate functions to allow characters [[herroffizier](https://github.com/herroffizier)] - [issue #150](https://github.com/j4mie/idiorm/issues/150)
 * Prevent invalid method calls from triggering infinite recursion [[michaelward82](https://github.com/michaelward82)] - [issue #152](https://github.com/j4mie/idiorm/issues/152)
 * Add time to query logging - adds query time parameter to external logger callback function [[AgelxNash](https://github.com/AgelxNash)] - [issue #180](https://github.com/j4mie/idiorm/issues/180)
