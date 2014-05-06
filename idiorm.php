@@ -233,6 +233,7 @@
          * @return ORM
          */
         public static function for_table($table_name, $connection_name = self::DEFAULT_CONNECTION) {
+            self::_setup_db($connection_name);
             return new self($table_name, array(), $connection_name);
         }
 
