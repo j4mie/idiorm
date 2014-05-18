@@ -1172,6 +1172,18 @@
             return $filtered;
         }
 
+       /**
+         * Helper method that filters an array containing compound column/value
+         * arrays.
+         */
+        protected function _get_compound_id_column_values_array($values) {
+            $filtered = array();
+            foreach($values as $value) {
+                $filtered[] = $this->_get_compound_id_column_values($value);
+            }
+            return $filtered;
+        }
+
         /**
          * Add a WHERE column = value clause to your query. Each time
          * this is called in the chain, an additional WHERE will be
@@ -1210,6 +1222,43 @@
             return (is_array($this->_get_id_column_name())) ?
                 $this->where($this->_get_compound_id_column_values($id), null) :
                 $this->where($this->_get_id_column_name(), $id);
+        }
+
+        /**
+         * Allows adding a WHERE clause that matches any of the conditions
+         * specified in the array. Each element in the associative array will
+         * be a different condition, where the key will be the column name.
+         *
+         * By default, an equal operator will be used against all columns, but
+         * it can be overriden for any or every column using the second parameter.
+         *
+         * Each condition will be ORed together when added to the final query.
+         */        
+        public function where_any_is($values, $operator='=') {
+            $data = array();
+            $query = array("((");
+            $first = true;
+            foreach ($values as $item) {
+                if ($first) {
+                    $first = false;
+                } else {
+                    $query[] = ") OR (";
+                }
+                $firstsub = true;
+                foreach($item as $key => $item) {
+                    $op = is_string($operator) ? $operator : (isset($operator[$key]) ? $operator[$key] : '=');
+                    if ($firstsub) {
+                        $firstsub = false;
+                    } else {
+                        $query[] = "AND";
+                    }
+                    $query[] = $this->_quote_identifier($key);
+                    $data[] = $item;
+                    $query[] = $op . " ?";
+                }
+            }
+            $query[] = "))";
+            return $this->where_raw(join($query, ' '), $data);
         }
 
         /**

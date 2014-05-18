@@ -267,13 +267,11 @@ notation uses keys as column names.
     // Creates SQL:
     SELECT * FROM `person` WHERE `name` = "Fred" AND `age` = "20";
 
-Shortcut: ``where_id_is``
+Shortcut: ``where_id_in``
 '''''''''''''''''''''''''
 
-This is a simple helper method to query the table by primary key.
-Respects the ID column specified in the config. If you are using a compound
-primary key, you must pass an array where the key is the column name. Columns
-that don't belong to the key will be ignored.
+This helper method is similar to ``where_id_is`, but it expects an array of
+primary keys to be selected. It is compound primary keys aware.
 
 Less than / greater than: ``where_lt``, ``where_gt``, ``where_lte``, ``where_gte``
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -305,6 +303,54 @@ Similarly, to add a ``WHERE ... NOT LIKE`` clause, use:
 
     <?php
     $people = ORM::for_table('person')->where_not_like('name', '%bob%')->find_many();
+
+Multiple OR'ed conditions
+'''''''''''''''''''''''''
+
+You can add simple OR'ed conditions to the same WHERE clause using ``where_any_is``. You
+should specify multiple conditions using an array of items. Each item will be an
+associative array that contains a multiple conditions. 
+
+.. code-block:: php
+
+    <?php
+    $people = ORM::for_table('person')
+                ->where_any_is(array(
+                    array('name' => 'Joe', 'age' => 10),
+                    array('name' => 'Fred', 'age' => 20)))
+                ->find_many();
+
+    // Creates SQL:
+    SELECT * FROM `widget` WHERE (( `name` = 'Joe' AND `age` = '10' ) OR ( `name` = 'Fred' AND `age` = '20' ));
+
+By default, it uses the equal operator for every column, but it can be overriden for any
+column using a second parameter:
+
+.. code-block:: php
+
+    <?php
+    $people = ORM::for_table('person')
+                ->where_any_is(array(
+                    array('name' => 'Joe', 'age' => 10),
+                    array('name' => 'Fred', 'age' => 20)), array('age' => '>'))
+                ->find_many();
+
+    // Creates SQL:
+    SELECT * FROM `widget` WHERE (( `name` = 'Joe' AND `age` > '10' ) OR ( `name` = 'Fred' AND `age` > '20' ));
+
+If you want to set the default operator for all the columns, just pass it as the second parameter:
+
+.. code-block:: php
+
+    <?php
+    $people = ORM::for_table('person')
+                ->where_any_is(array(
+                    array('score' => '5', 'age' => 10),
+                    array('score' => '15', 'age' => 20)), '>')
+                ->find_many();
+
+    // Creates SQL:
+    SELECT * FROM `widget` WHERE (( `score` > '5' AND `age` > '10' ) OR ( `score` > '15' AND `age` > '20' ));
 
 Set membership: ``where_in`` and ``where_not_in``
 '''''''''''''''''''''''''''''''''''''''''''''''''
