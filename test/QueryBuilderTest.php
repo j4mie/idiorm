@@ -82,6 +82,30 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals($expected, ORM::get_last_query());
     }
 
+    public function testWhereAnyIs() {
+        ORM::for_table('widget')->where_any_is(array(
+            array('name' => 'Joe', 'age' => 10),
+            array('name' => 'Fred', 'age' => 20)))->find_many();
+        $expected = "SELECT * FROM `widget` WHERE (( `name` = 'Joe' AND `age` = '10' ) OR ( `name` = 'Fred' AND `age` = '20' ))";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testWhereAnyIsOverrideOneColumn() {
+        ORM::for_table('widget')->where_any_is(array(
+            array('name' => 'Joe', 'age' => 10),
+            array('name' => 'Fred', 'age' => 20)), array('age' => '>'))->find_many();
+        $expected = "SELECT * FROM `widget` WHERE (( `name` = 'Joe' AND `age` > '10' ) OR ( `name` = 'Fred' AND `age` > '20' ))";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testWhereAnyIsOverrideAllOperators() {
+        ORM::for_table('widget')->where_any_is(array(
+            array('score' => '5', 'age' => 10),
+            array('score' => '15', 'age' => 20)), '>')->find_many();
+        $expected = "SELECT * FROM `widget` WHERE (( `score` > '5' AND `age` > '10' ) OR ( `score` > '15' AND `age` > '20' ))";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
     public function testLimit() {
         ORM::for_table('widget')->limit(5)->find_many();
         $expected = "SELECT * FROM `widget` LIMIT 5";
