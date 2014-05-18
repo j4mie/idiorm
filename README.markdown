@@ -1,7 +1,7 @@
 Idiorm
 ======
 
-[![Build Status](https://travis-ci.org/j4mie/idiorm.png?branch=master)](https://travis-ci.org/j4mie/idiorm)
+[![Build Status](https://travis-ci.org/j4mie/idiorm.png?branch=master)](https://travis-ci.org/j4mie/idiorm) [![Latest Stable Version](https://poser.pugx.org/j4mie/idiorm/v/stable.png)](https://packagist.org/packages/j4mie/idiorm) [![Total Downloads](https://poser.pugx.org/j4mie/idiorm/downloads.png)](https://packagist.org/packages/j4mie/idiorm)
 
 [http://j4mie.github.com/idiormandparis/](http://j4mie.github.com/idiormandparis/)
 
@@ -73,6 +73,19 @@ foreach ($tweets as $tweet) {
 
 Changelog
 ---------
+
+#### 1.5.0 - release 2014-01-XX
+
+* Add compound primary key support [[lrlopez](https://github.com/lrlopez)] - [issue #171](https://github.com/j4mie/idiorm/issues/171)
+* Add a RAW JOIN source to the query [[moiseevigor](https://github.com/moiseevigor)] - [issue #163](https://github.com/j4mie/idiorm/issues/163)
+* Reduce the type casting on aggregate functions to allow characters [[herroffizier](https://github.com/herroffizier)] - [issue #150](https://github.com/j4mie/idiorm/issues/150)
+* Prevent invalid method calls from triggering infinite recursion [[michaelward82](https://github.com/michaelward82)] - [issue #152](https://github.com/j4mie/idiorm/issues/152)
+* Add time to query logging - adds query time parameter to external logger callback function [[AgelxNash](https://github.com/AgelxNash)] - [issue #180](https://github.com/j4mie/idiorm/issues/180)
+* Changed database array access to ensure it's always properly setup [[falmp](https://github.com/falmp)] - [issue #159](https://github.com/j4mie/idiorm/issues/159)
+* Allow unsetting the db (ORM::set_db(null)) to make the test work again [[borrel](https://github.com/borrel)] - [issue #160](https://github.com/j4mie/idiorm/issues/160)
+* Add HHVM to travis-ci build matrix [[ptarjan](https://github.com/ptarjan)] - [issue #168](https://github.com/j4mie/idiorm/issues/168)
+* Improve where statement precendence documentation [[thomasahle](https://github.com/thomasahle)] - [issue #190](https://github.com/j4mie/idiorm/issues/190)
+* Improve testing checks [[charsleysa](https://github.com/charsleysa)] - [issue #173](https://github.com/j4mie/idiorm/issues/173)
 
 #### 1.4.1 - release 2013-12-12
 

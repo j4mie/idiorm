@@ -233,7 +233,6 @@
          * @return ORM
          */
         public static function for_table($table_name, $connection_name = self::DEFAULT_CONNECTION) {
-            self::_setup_db($connection_name);
             return new self($table_name, array(), $connection_name);
         }
 
@@ -259,7 +258,7 @@
         }
 
        /**
-        * Ensures configuration (mulitple connections) is at least set to default.
+        * Ensures configuration (multiple connections) is at least set to default.
         * @param string $connection_name Which connection to use
         */
         protected static function _setup_db_config($connection_name) {
@@ -279,8 +278,10 @@
         public static function set_db($db, $connection_name = self::DEFAULT_CONNECTION) {
             self::_setup_db_config($connection_name);
             self::$_db[$connection_name] = $db;
-            self::_setup_identifier_quote_character($connection_name);
-            self::_setup_limit_clause_style($connection_name);
+            if(!is_null(self::$_db[$connection_name])) {
+                self::_setup_identifier_quote_character($connection_name);
+                self::_setup_limit_clause_style($connection_name);
+            }
         }
 
         /**
@@ -324,7 +325,7 @@
          * @return string
          */
         protected static function _detect_identifier_quote_character($connection_name) {
-            switch(self::$_db[$connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME)) {
+            switch(self::get_db($connection_name)->getAttribute(PDO::ATTR_DRIVER_NAME)) {
                 case 'pgsql':
                 case 'sqlsrv':
                 case 'dblib':
@@ -347,7 +348,7 @@
          * @return string Limit clause style keyword/constant
          */
         protected static function _detect_limit_clause_style($connection_name) {
-            switch(self::$_db[$connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME)) {
+            switch(self::get_db($connection_name)->getAttribute(PDO::ATTR_DRIVER_NAME)) {
                 case 'sqlsrv':
                 case 'dblib':
                 case 'mssql':
@@ -405,12 +406,13 @@
         * @return bool Response of PDOStatement::execute()
         */
         protected static function _execute($query, $parameters = array(), $connection_name = self::DEFAULT_CONNECTION) {
-            self::_log_query($query, $parameters, $connection_name);
-            $statement = self::$_db[$connection_name]->prepare($query);
-
+            $statement = self::get_db($connection_name)->prepare($query);
             self::$_last_statement = $statement;
+            $time = microtime(true);
+            $q = $statement->execute($parameters);
+            self::_log_query($query, $parameters, $connection_name, (microtime(true)-$time));
 
-            return $statement->execute($parameters);
+            return $q;
         }
 
         /**
@@ -424,9 +426,10 @@
          * @param string $query
          * @param array $parameters An array of parameters to be bound in to the query
          * @param string $connection_name Which connection to use
+		 * @param float $query_time Query time
          * @return bool
          */
-        protected static function _log_query($query, $parameters, $connection_name) {
+        protected static function _log_query($query, $parameters, $connection_name, $query_time) {
             // If logging is not enabled, do nothing
             if (!self::$_config[$connection_name]['logging']) {
                 return false;
@@ -436,9 +439,14 @@
                 self::$_query_log[$connection_name] = array();
             }
 
+            // Strip out any non-integer indexes from the parameters
+            foreach($parameters as $key => $value) {
+	            if (!is_int($key)) unset($parameters[$key]);
+            }
+
             if (count($parameters) > 0) {
                 // Escape the parameters
-                $parameters = array_map(array(self::$_db[$connection_name], 'quote'), $parameters);
+                $parameters = array_map(array(self::get_db($connection_name), 'quote'), $parameters);
 
                 // Avoid %format collision for vsprintf
                 $query = str_replace("%", "%%", $query);
@@ -462,7 +470,7 @@
             
             if(is_callable(self::$_config[$connection_name]['logger'])){
                 $logger = self::$_config[$connection_name]['logger'];
-                $logger($bound_query);
+                $logger($bound_query, $query_time);
             }
             
             return true;
@@ -695,7 +703,10 @@
 
             $return_value = 0;
             if($result !== false && isset($result->$alias)) {
-                if((int) $result->$alias == (float) $result->$alias) {
+                if (!is_numeric($result->$alias)) {
+                    $return_value = $result->$alias;
+                }
+                elseif((int) $result->$alias == (float) $result->$alias) {
                     $return_value = (int) $result->$alias;
                 } else {
                     $return_value = (float) $result->$alias;
@@ -763,6 +774,18 @@
                 $this->_result_columns[] = $expr;
             }
             return $this;
+        }
+
+        /**
+         * Counts the number of columns that belong to the primary
+         * key and their value is null.
+         */
+        public function count_null_id_columns() {
+            if (is_array($this->_get_id_column_name())) {
+                return count(array_filter($this->id(), 'is_null'));
+            } else {
+                return is_null($this->id()) ? 1 : 0;
+            }
         }
 
         /**
@@ -924,6 +947,30 @@
         }
 
         /**
+         * Add a RAW JOIN source to the query
+         */
+        public function raw_join($table, $constraint, $table_alias, $parameters = array()) {
+            // Add table alias if present
+            if (!is_null($table_alias)) {
+                $table_alias = $this->_quote_identifier($table_alias);
+                $table .= " {$table_alias}";
+            }
+
+            $this->_values = array_merge($this->_values, $parameters);
+
+            // Build the constraint
+            if (is_array($constraint)) {
+                list($first_column, $operator, $second_column) = $constraint;
+                $first_column = $this->_quote_identifier($first_column);
+                $second_column = $this->_quote_identifier($second_column);
+                $constraint = "{$first_column} {$operator} {$second_column}";
+            }
+
+            $this->_join_sources[] = "{$table} ON {$constraint}";
+            return $this;
+        }
+
+        /**
          * Add a simple JOIN source to the query
          */
         public function join($table, $constraint, $table_alias=null) {
@@ -973,6 +1020,37 @@
         }
 
         /**
+         * Internal method to add a HAVING clause with multiple values (like IN and NOT IN)
+         */
+        public function _add_having_placeholder($column_name, $separator, $values) {
+            if (!is_array($column_name)) {
+                $data = array($column_name => $values);
+            } else {
+                $data = $column_name;
+            }
+            $result = $this;
+            foreach ($data as $key => $val) {
+                $column = $result->_quote_identifier($key);
+                $placeholders = $result->_create_placeholders($val);
+                $result = $result->_add_having("{$column} {$separator} ({$placeholders})", $val);    
+            }
+            return $result;
+        }
+
+        /**
+         * Internal method to add a HAVING clause with no parameters(like IS NULL and IS NOT NULL)
+         */
+        public function _add_having_no_value($column_name, $operator) {
+            $conditions = (is_array($column_name)) ? $column_name : array($column_name);
+            $result = $this;
+            foreach($conditions as $column) {
+                $column = $this->_quote_identifier($column);
+                $result = $result->_add_having("{$column} {$operator}");
+            }
+            return $result;
+        }
+
+        /**
          * Internal method to add a WHERE condition to the query
          */
         protected function _add_where($fragment, $values=array()) {
@@ -984,6 +1062,37 @@
          */
         protected function _add_simple_where($column_name, $separator, $value) {
             return $this->_add_simple_condition('where', $column_name, $separator, $value);
+        }
+
+        /**
+         * Add a WHERE clause with multiple values (like IN and NOT IN)
+         */
+        public function _add_where_placeholder($column_name, $separator, $values) {
+            if (!is_array($column_name)) {
+                $data = array($column_name => $values);
+            } else {
+                $data = $column_name;
+            }
+            $result = $this;
+            foreach ($data as $key => $val) {
+                $column = $result->_quote_identifier($key);
+                $placeholders = $result->_create_placeholders($val);
+                $result = $result->_add_where("{$column} {$separator} ({$placeholders})", $val);    
+            }
+            return $result;
+        }
+
+        /**
+         * Add a WHERE clause with no parameters(like IS NULL and IS NOT NULL)
+         */
+        public function _add_where_no_value($column_name, $operator) {
+            $conditions = (is_array($column_name)) ? $column_name : array($column_name);
+            $result = $this;
+            foreach($conditions as $column) {
+                $column = $this->_quote_identifier($column);
+                $result = $result->_add_where("{$column} {$operator}");
+            }
+            return $result;
         }
 
         /**
@@ -1006,19 +1115,27 @@
          * style HAVING or WHERE condition into a string and value ready to
          * be passed to the _add_condition method. Avoids duplication
          * of the call to _quote_identifier
+         *
+         * If column_name is an associative array, it will add a condition for each column
          */
         protected function _add_simple_condition($type, $column_name, $separator, $value) {
-            // Add the table name in case of ambiguous columns
-            if (count($this->_join_sources) > 0 && strpos($column_name, '.') === false) {
-                $table = $this->_table_name;
-                if (!is_null($this->_table_alias)) {
-                    $table = $this->_table_alias;
-                }
+            $multiple = is_array($column_name) ? $column_name : array($column_name => $value);
+            $result = $this;
 
-                $column_name = "{$table}.{$column_name}";
+            foreach($multiple as $key => $val) {
+                // Add the table name in case of ambiguous columns
+                if (count($result->_join_sources) > 0 && strpos($key, '.') === false) {
+                    $table = $result->_table_name;
+                    if (!is_null($result->_table_alias)) {
+                        $table = $result->_table_alias;
+                    }
+
+                    $key = "{$table}.{$key}";
+                }
+                $key = $result->_quote_identifier($key);
+                $result = $result->_add_condition($type, "{$key} {$separator} ?", $val);
             }
-            $column_name = $this->_quote_identifier($column_name);
-            return $this->_add_condition($type, "{$column_name} {$separator} ?", $value);
+            return $result;
         } 
 
         /**
@@ -1039,14 +1156,44 @@
                 return implode(', ', $db_fields);
             }
         }
+        
+        /**
+         * Helper method that filters a column/value array returning only those
+         * columns that belong to a compound primary key.
+         *
+         * If the key contains a column that does not exist in the given array,
+         * a null value will be returned for it.
+         */
+        protected function _get_compound_id_column_values($value) {
+            $filtered = array();
+            foreach($this->_get_id_column_name() as $key) {
+                $filtered[$key] = isset($value[$key]) ? $value[$key] : null;
+            }
+            return $filtered;
+        }
+
+       /**
+         * Helper method that filters an array containing compound column/value
+         * arrays.
+         */
+        protected function _get_compound_id_column_values_array($values) {
+            $filtered = array();
+            foreach($values as $value) {
+                $filtered[] = $this->_get_compound_id_column_values($value);
+            }
+            return $filtered;
+        }
 
         /**
          * Add a WHERE column = value clause to your query. Each time
          * this is called in the chain, an additional WHERE will be
          * added, and these will be ANDed together when the final query
          * is built.
+         *
+         * If you use an array in $column_name, a new clause will be
+         * added for each element. In this case, $value is ignored.
          */
-        public function where($column_name, $value) {
+        public function where($column_name, $value=null) {
             return $this->where_equal($column_name, $value);
         }
 
@@ -1054,63 +1201,105 @@
          * More explicitly named version of for the where() method.
          * Can be used if preferred.
          */
-        public function where_equal($column_name, $value) {
+        public function where_equal($column_name, $value=null) {
             return $this->_add_simple_where($column_name, '=', $value);
         }
 
         /**
          * Add a WHERE column != value clause to your query.
          */
-        public function where_not_equal($column_name, $value) {
+        public function where_not_equal($column_name, $value=null) {
             return $this->_add_simple_where($column_name, '!=', $value);
         }
 
         /**
          * Special method to query the table by its primary key
+         *
+         * If primary key is compound, only the columns that
+         * belong to they key will be used for the query
          */
         public function where_id_is($id) {
-            return $this->where($this->_get_id_column_name(), $id);
+            return (is_array($this->_get_id_column_name())) ?
+                $this->where($this->_get_compound_id_column_values($id), null) :
+                $this->where($this->_get_id_column_name(), $id);
+        }
+
+        /**
+         * Allows adding a WHERE clause that matches any of the conditions
+         * specified in the array. Each element in the associative array will
+         * be a different condition, where the key will be the column name.
+         *
+         * By default, an equal operator will be used against all columns, but
+         * it can be overriden for any or every column using the second parameter.
+         *
+         * Each condition will be ORed together when added to the final query.
+         */        
+        public function where_any_is($values, $operator='=') {
+            $data = array();
+            $query = array("((");
+            $first = true;
+            foreach ($values as $item) {
+                if ($first) {
+                    $first = false;
+                } else {
+                    $query[] = ") OR (";
+                }
+                $firstsub = true;
+                foreach($item as $key => $item) {
+                    $op = is_string($operator) ? $operator : (isset($operator[$key]) ? $operator[$key] : '=');
+                    if ($firstsub) {
+                        $firstsub = false;
+                    } else {
+                        $query[] = "AND";
+                    }
+                    $query[] = $this->_quote_identifier($key);
+                    $data[] = $item;
+                    $query[] = $op . " ?";
+                }
+            }
+            $query[] = "))";
+            return $this->where_raw(join($query, ' '), $data);
         }
 
         /**
          * Add a WHERE ... LIKE clause to your query.
          */
-        public function where_like($column_name, $value) {
+        public function where_like($column_name, $value=null) {
             return $this->_add_simple_where($column_name, 'LIKE', $value);
         }
 
         /**
          * Add where WHERE ... NOT LIKE clause to your query.
          */
-        public function where_not_like($column_name, $value) {
+        public function where_not_like($column_name, $value=null) {
             return $this->_add_simple_where($column_name, 'NOT LIKE', $value);
         }
 
         /**
          * Add a WHERE ... > clause to your query
          */
-        public function where_gt($column_name, $value) {
+        public function where_gt($column_name, $value=null) {
             return $this->_add_simple_where($column_name, '>', $value);
         }
 
         /**
          * Add a WHERE ... < clause to your query
          */
-        public function where_lt($column_name, $value) {
+        public function where_lt($column_name, $value=null) {
             return $this->_add_simple_where($column_name, '<', $value);
         }
 
         /**
          * Add a WHERE ... >= clause to your query
          */
-        public function where_gte($column_name, $value) {
+        public function where_gte($column_name, $value=null) {
             return $this->_add_simple_where($column_name, '>=', $value);
         }
 
         /**
          * Add a WHERE ... <= clause to your query
          */
-        public function where_lte($column_name, $value) {
+        public function where_lte($column_name, $value=null) {
             return $this->_add_simple_where($column_name, '<=', $value);
         }
 
@@ -1118,34 +1307,28 @@
          * Add a WHERE ... IN clause to your query
          */
         public function where_in($column_name, $values) {
-            $column_name = $this->_quote_identifier($column_name);
-            $placeholders = $this->_create_placeholders($values);
-            return $this->_add_where("{$column_name} IN ({$placeholders})", $values);
+            return $this->_add_where_placeholder($column_name, 'IN', $values);
         }
 
         /**
          * Add a WHERE ... NOT IN clause to your query
          */
         public function where_not_in($column_name, $values) {
-            $column_name = $this->_quote_identifier($column_name);
-            $placeholders = $this->_create_placeholders($values);
-            return $this->_add_where("{$column_name} NOT IN ({$placeholders})", $values);
+            return $this->_add_where_placeholder($column_name, 'NOT IN', $values);
         }
 
         /**
          * Add a WHERE column IS NULL clause to your query
          */
         public function where_null($column_name) {
-            $column_name = $this->_quote_identifier($column_name);
-            return $this->_add_where("{$column_name} IS NULL");
+            return $this->_add_where_no_value($column_name, "IS NULL");
         }
 
         /**
          * Add a WHERE column IS NOT NULL clause to your query
          */
         public function where_not_null($column_name) {
-            $column_name = $this->_quote_identifier($column_name);
-            return $this->_add_where("{$column_name} IS NOT NULL");
+            return $this->_add_where_no_value($column_name, "IS NOT NULL");
         }
 
         /**
@@ -1226,8 +1409,11 @@
          * this is called in the chain, an additional HAVING will be
          * added, and these will be ANDed together when the final query
          * is built.
+         *
+         * If you use an array in $column_name, a new clause will be
+         * added for each element. In this case, $value is ignored.
          */
-        public function having($column_name, $value) {
+        public function having($column_name, $value=null) {
             return $this->having_equal($column_name, $value);
         }
 
@@ -1235,98 +1421,97 @@
          * More explicitly named version of for the having() method.
          * Can be used if preferred.
          */
-        public function having_equal($column_name, $value) {
+        public function having_equal($column_name, $value=null) {
             return $this->_add_simple_having($column_name, '=', $value);
         }
 
         /**
          * Add a HAVING column != value clause to your query.
          */
-        public function having_not_equal($column_name, $value) {
+        public function having_not_equal($column_name, $value=null) {
             return $this->_add_simple_having($column_name, '!=', $value);
         }
 
         /**
-         * Special method to query the table by its primary key
+         * Special method to query the table by its primary key.
+         *
+         * If primary key is compound, only the columns that
+         * belong to they key will be used for the query
          */
         public function having_id_is($id) {
-            return $this->having($this->_get_id_column_name(), $id);
+            return (is_array($this->_get_id_column_name())) ?
+                $this->having($this->_get_compound_id_column_values($value)) :
+                $this->having($this->_get_id_column_name(), $id);
         }
 
         /**
          * Add a HAVING ... LIKE clause to your query.
          */
-        public function having_like($column_name, $value) {
+        public function having_like($column_name, $value=null) {
             return $this->_add_simple_having($column_name, 'LIKE', $value);
         }
 
         /**
          * Add where HAVING ... NOT LIKE clause to your query.
          */
-        public function having_not_like($column_name, $value) {
+        public function having_not_like($column_name, $value=null) {
             return $this->_add_simple_having($column_name, 'NOT LIKE', $value);
         }
 
         /**
          * Add a HAVING ... > clause to your query
          */
-        public function having_gt($column_name, $value) {
+        public function having_gt($column_name, $value=null) {
             return $this->_add_simple_having($column_name, '>', $value);
         }
 
         /**
          * Add a HAVING ... < clause to your query
          */
-        public function having_lt($column_name, $value) {
+        public function having_lt($column_name, $value=null) {
             return $this->_add_simple_having($column_name, '<', $value);
         }
 
         /**
          * Add a HAVING ... >= clause to your query
          */
-        public function having_gte($column_name, $value) {
+        public function having_gte($column_name, $value=null) {
             return $this->_add_simple_having($column_name, '>=', $value);
         }
 
         /**
          * Add a HAVING ... <= clause to your query
          */
-        public function having_lte($column_name, $value) {
+        public function having_lte($column_name, $value=null) {
             return $this->_add_simple_having($column_name, '<=', $value);
         }
 
         /**
          * Add a HAVING ... IN clause to your query
          */
-        public function having_in($column_name, $values) {
-            $column_name = $this->_quote_identifier($column_name);
-            $placeholders = $this->_create_placeholders($values);
-            return $this->_add_having("{$column_name} IN ({$placeholders})", $values);
+        public function having_in($column_name, $values=null) {
+            return $this->_add_having_placeholder($column_name, 'IN', $values);
         }
 
         /**
          * Add a HAVING ... NOT IN clause to your query
          */
-        public function having_not_in($column_name, $values) {
-            $column_name = $this->_quote_identifier($column_name);
-            $placeholders = $this->_create_placeholders($values);
-            return $this->_add_having("{$column_name} NOT IN ({$placeholders})", $values);
+        public function having_not_in($column_name, $values=null) {
+            return $this->_add_having_placeholder($column_name, 'NOT IN', $values);
         }
 
         /**
          * Add a HAVING column IS NULL clause to your query
          */
         public function having_null($column_name) {
-            $column_name = $this->_quote_identifier($column_name);
-            return $this->_add_having("{$column_name} IS NULL");
+            return $this->_add_having_no_value($column_name, 'IS NULL');
         }
 
         /**
          * Add a HAVING column IS NOT NULL clause to your query
          */
         public function having_not_null($column_name) {
-            $column_name = $this->_quote_identifier($column_name);
-            return $this->_add_having("{$column_name} IS NOT NULL");
+            return $this->_add_having_no_value($column_name, 'IS NOT NULL');
         }
 
         /**
@@ -1461,7 +1646,7 @@
             $fragment = '';
             if (!is_null($this->_limit) &&
                 self::$_config[$this->_connection_name]['limit_clause_style'] == ORM::LIMIT_STYLE_LIMIT) {
-                if (self::$_db[$this->_connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME) == 'firebird') {
+                if (self::get_db($this->_connection_name)->getAttribute(PDO::ATTR_DRIVER_NAME) == 'firebird') {
                     $fragment = 'ROWS';
                 } else {
                     $fragment = 'LIMIT';
@@ -1477,7 +1662,7 @@
         protected function _build_offset() {
             if (!is_null($this->_offset)) {
                 $clause = 'OFFSET';
-                if (self::$_db[$this->_connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME) == 'firebird') {
+                if (self::get_db($this->_connection_name)->getAttribute(PDO::ATTR_DRIVER_NAME) == 'firebird') {
                     $clause = 'TO';
                 }
                 return "$clause " . $this->_offset;
@@ -1507,10 +1692,25 @@
          * (table names, column names etc). This method can
          * also deal with dot-separated identifiers eg table.column
          */
-        protected function _quote_identifier($identifier) {
+        protected function _quote_one_identifier($identifier) {
             $parts = explode('.', $identifier);
             $parts = array_map(array($this, '_quote_identifier_part'), $parts);
             return join('.', $parts);
+        }
+
+        /**
+         * Quote a string that is used as an identifier
+         * (table names, column names etc) or an array containing
+         * multiple identifiers. This method can also deal with
+         * dot-separated identifiers eg table.column
+         */
+        protected function _quote_identifier($identifier) {
+            if (is_array($identifier)) {
+                $result = array_map(array($this, '_quote_one_identifier'), $identifier);
+                return join(', ', $result);
+            } else {
+                return $this->_quote_one_identifier($identifier);
+            }
         }
 
         /**
@@ -1623,9 +1823,20 @@
         /**
          * Return the value of a property of this object (database row)
          * or null if not present.
+         *
+         * If a column-names array is passed, it will return a associative array
+         * with the value of each column or null if it is not present.
          */
         public function get($key) {
-            return isset($this->_data[$key]) ? $this->_data[$key] : null;
+            if (is_array($key)) {
+                $result = array();
+                foreach($key as $column) {
+                    $result[$column] = isset($this->_data[$column]) ? $this->_data[$column] : null;
+                }
+                return $result;
+            } else {
+                return isset($this->_data[$key]) ? $this->_data[$key] : null;
+            }
         }
 
         /**
@@ -1727,7 +1938,12 @@
                     return true;
                 }
                 $query = $this->_build_update();
-                $values[] = $this->id();
+                $id = $this->id();
+                if (is_array($id)) {
+                    $values = array_merge($values, array_values($id));
+                } else {
+                    $values[] = $id;
+                }
             } else { // INSERT
                 $query = $this->_build_insert();
             }
@@ -1737,17 +1953,48 @@
             // If we've just inserted a new record, set the ID of this object
             if ($this->_is_new) {
                 $this->_is_new = false;
-                if (is_null($this->id())) {
-                    if(self::$_db[$this->_connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql') {
-                        $this->_data[$this->_get_id_column_name()] = self::get_last_statement()->fetchColumn();
+                if ($this->count_null_id_columns() != 0) {
+                    $db = self::get_db($this->_connection_name);
+                    if($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql') {
+                        // it may return several columns if a compound primary
+                        // key is used
+                        $row = self::get_last_statement()->fetch(PDO::FETCH_ASSOC);
+                        foreach($row as $key => $value) {
+                            $this->_data[$key] = $value;
+                        }
                     } else {
-                        $this->_data[$this->_get_id_column_name()] = self::$_db[$this->_connection_name]->lastInsertId();
+                        $column = $this->_get_id_column_name();
+                        // if the primary key is compound, assign the last inserted id
+                        // to the first column
+                        if (is_array($column)) {
+                            $column = array_slice($column, 0, 1);
+                        }
+                        $this->_data[$column] = $db->lastInsertId();
                     }
                 }
             }
 
             $this->_dirty_fields = $this->_expr_fields = array();
             return $success;
+        }
+
+        /**
+         * Add a WHERE clause for every column that belongs to the primary key
+         */
+        public function _add_id_column_conditions(&$query) {
+            $query[] = "WHERE";
+            $keys = is_array($this->_get_id_column_name()) ? $this->_get_id_column_name() : array( $this->_get_id_column_name() );
+            $first = true;
+            foreach($keys as $key) {
+                if ($first) {
+                    $first = false;
+                }
+                else {
+                    $query[] = "AND";
+                }
+                $query[] = $this->_quote_identifier($key);
+                $query[] = "= ?";
+            }
         }
 
         /**
@@ -1765,9 +2012,7 @@
                 $field_list[] = "{$this->_quote_identifier($key)} = $value";
             }
             $query[] = join(", ", $field_list);
-            $query[] = "WHERE";
-            $query[] = $this->_quote_identifier($this->_get_id_column_name());
-            $query[] = "= ?";
+            $this->_add_id_column_conditions($query);
             return join(" ", $query);
         }
 
@@ -1784,7 +2029,7 @@
             $placeholders = $this->_create_placeholders($this->_dirty_fields);
             $query[] = "({$placeholders})";
 
-            if (self::$_db[$this->_connection_name]->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql') {
+            if (self::get_db($this->_connection_name)->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql') {
                 $query[] = 'RETURNING ' . $this->_quote_identifier($this->_get_id_column_name());
             }
 
@@ -1795,15 +2040,12 @@
          * Delete this record from the database
          */
         public function delete() {
-            $query = join(" ", array(
+            $query = array(
                 "DELETE FROM",
-                $this->_quote_identifier($this->_table_name),
-                "WHERE",
-                $this->_quote_identifier($this->_get_id_column_name()),
-                "= ?",
-            ));
-
-            return self::_execute($query, array($this->id()), $this->_connection_name);
+                $this->_quote_identifier($this->_table_name)
+            );
+            $this->_add_id_column_conditions($query);
+            return self::_execute(join(" ", $query), is_array($this->id()) ? array_values($this->id()) : array($this->id()), $this->_connection_name);
         }
 
         /**
@@ -1881,7 +2123,11 @@
         {
             $method = strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $name));
 
-            return call_user_func_array(array($this, $method), $arguments);
+            if (method_exists($this, $method)) {
+                return call_user_func_array(array($this, $method), $arguments);
+            } else {
+                throw new IdiormMethodMissingException("Method $name() does not exist in class " . get_class($this));
+            }
         }
 
         /**
@@ -2131,7 +2377,11 @@
          */
         public function __call($method, $params = array()) {
             foreach($this->_results as $model) {
-                call_user_func_array(array($model, $method), $params);
+                if (method_exists($model, $method)) {
+                    call_user_func_array(array($model, $method), $params);
+                } else {
+                    throw new IdiormMethodMissingException("Method $method() does not exist in class " . get_class($this));
+                }
             }
             return $this;
         }
@@ -2141,3 +2391,5 @@
      * A placeholder for exceptions eminating from the IdiormString class
      */
     class IdiormStringException extends Exception {}
+
+    class IdiormMethodMissingException extends Exception {}

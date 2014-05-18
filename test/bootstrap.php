@@ -9,9 +9,37 @@ require_once dirname(__FILE__) . '/../idiorm.php';
  */
 class MockPDOStatement extends PDOStatement {
    private $current_row = 0;
+   private $statement = NULL;
    
-   public function __construct() {}
-   public function execute($params) {}
+   /**
+    * Store the statement that gets passed to the constructor
+    */
+   public function __construct($statement) {
+       $this->statement = $statement;
+   }
+
+   /**
+    * Check that the array
+    */
+   public function execute($params) {
+       $count = 0;
+       $m = array();
+       if (preg_match_all('/"[^"\\\\]*(?:\\?)[^"\\\\]*"|\'[^\'\\\\]*(?:\\?)[^\'\\\\]*\'|(\\?)/', $this->statement, $m, PREG_SET_ORDER)) {
+           $count = count($m);
+           for ($v = 0; $v < $count; $v++) {
+               if (count($m[$v]) == 1) unset($m[$v]);
+           }
+           $count = count($m);
+           for ($i = 0; $i < $count; $i++) {
+               if (!isset($params[$i])) {
+                   ob_start();
+                   var_dump($m, $params);
+                   $output = ob_get_clean();
+                   throw new Exception('Incorrect parameter count. Expected ' . $count . ' got ' . count($params) . ".\n" . $this->statement . "\n" . $output);
+               }
+           }
+       }
+   }
    
    /**
     * Return some dummy data

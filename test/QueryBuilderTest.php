@@ -82,6 +82,30 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals($expected, ORM::get_last_query());
     }
 
+    public function testWhereAnyIs() {
+        ORM::for_table('widget')->where_any_is(array(
+            array('name' => 'Joe', 'age' => 10),
+            array('name' => 'Fred', 'age' => 20)))->find_many();
+        $expected = "SELECT * FROM `widget` WHERE (( `name` = 'Joe' AND `age` = '10' ) OR ( `name` = 'Fred' AND `age` = '20' ))";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testWhereAnyIsOverrideOneColumn() {
+        ORM::for_table('widget')->where_any_is(array(
+            array('name' => 'Joe', 'age' => 10),
+            array('name' => 'Fred', 'age' => 20)), array('age' => '>'))->find_many();
+        $expected = "SELECT * FROM `widget` WHERE (( `name` = 'Joe' AND `age` > '10' ) OR ( `name` = 'Fred' AND `age` > '20' ))";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testWhereAnyIsOverrideAllOperators() {
+        ORM::for_table('widget')->where_any_is(array(
+            array('score' => '5', 'age' => 10),
+            array('score' => '15', 'age' => 20)), '>')->find_many();
+        $expected = "SELECT * FROM `widget` WHERE (( `score` > '5' AND `age` > '10' ) OR ( `score` > '15' AND `age` > '20' ))";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
     public function testLimit() {
         ORM::for_table('widget')->limit(5)->find_many();
         $expected = "SELECT * FROM `widget` LIMIT 5";
@@ -385,6 +409,28 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals($expected, ORM::get_last_query());
     }
 
+    public function testRawJoin() {
+        ORM::for_table('widget')->raw_join('INNER JOIN ( SELECT * FROM `widget_handle` )', array('widget_handle.widget_id', '=', 'widget.id'), 'widget_handle')->find_many();
+        $expected = "SELECT * FROM `widget` INNER JOIN ( SELECT * FROM `widget_handle` ) `widget_handle` ON `widget_handle`.`widget_id` = `widget`.`id`";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testRawJoinWithParameters() {
+        ORM::for_table('widget')->raw_join('INNER JOIN ( SELECT * FROM `widget_handle` WHERE `widget_handle`.name LIKE ? AND `widget_handle`.category = ?)', array('widget_handle.widget_id', '=', 'widget.id'), 'widget_handle', array('%button%', 2))->find_many();
+        $expected = "SELECT * FROM `widget` INNER JOIN ( SELECT * FROM `widget_handle` WHERE `widget_handle`.name LIKE '%button%' AND `widget_handle`.category = '2') `widget_handle` ON `widget_handle`.`widget_id` = `widget`.`id`";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testRawJoinAndRawWhereWithParameters() {
+        ORM::for_table('widget')
+            ->raw_join('INNER JOIN ( SELECT * FROM `widget_handle` WHERE `widget_handle`.name LIKE ? AND `widget_handle`.category = ?)', array('widget_handle.widget_id', '=', 'widget.id'), 'widget_handle', array('%button%', 2))
+            ->raw_join('INNER JOIN ( SELECT * FROM `person` WHERE `person`.name LIKE ?)', array('person.id', '=', 'widget.person_id'), 'person', array('%Fred%'))
+            ->where_raw('`id` > ? AND `id` < ?', array(5, 10))
+            ->find_many();
+        $expected = "SELECT * FROM `widget` INNER JOIN ( SELECT * FROM `widget_handle` WHERE `widget_handle`.name LIKE '%button%' AND `widget_handle`.category = '2') `widget_handle` ON `widget_handle`.`widget_id` = `widget`.`id` INNER JOIN ( SELECT * FROM `person` WHERE `person`.name LIKE '%Fred%') `person` ON `person`.`id` = `widget`.`person_id` WHERE `id` > '5' AND `id` < '10'";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
     public function testSelectWithDistinct() {
         ORM::for_table('widget')->distinct()->select('name')->find_many();
         $expected = "SELECT DISTINCT `name` FROM `widget`";
@@ -514,6 +560,63 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals($expected, ORM::get_last_query());
     }
 
+    public function test_quote_identifier_part() {
+        $widget = ORM::for_table('widget')->find_one(1);
+        $widget->set('added', '2013-01-04');
+        $widget->save();
+        $expected = "UPDATE `widget` SET `added` = '2013-01-04' WHERE `id` = '1'";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+    
+    public function test_quote_multiple_identifiers_part() {
+        $record = ORM::for_table('widget')->use_id_column(array('id1', 'id2'))->create();
+        $expected = "`id1`, `id2`";
+        $this->assertEquals($expected, $record->_quote_identifier($record->_get_id_column_name()));
+    }
+    
+    /**
+     * Compound primary key tests
+     */
+    public function testFindOneWithCompoundPrimaryKey() {
+        $record = ORM::for_table('widget')->use_id_column(array('id1', 'id2'));
+        $record->findOne(array('id1' => 10, 'name' => 'Joe', 'id2' => 20));
+        $expected = "SELECT * FROM `widget` WHERE `id1` = '10' AND `id2` = '20' LIMIT 1";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testInsertWithCompoundPrimaryKey() {
+        $record = ORM::for_table('widget')->use_id_column(array('id1', 'id2'))->create();
+        $record->set('id1', 10);
+        $record->set('id2', 20);
+        $record->set('name', 'Joe');
+        $record->save();
+        $expected = "INSERT INTO `widget` (`id1`, `id2`, `name`) VALUES ('10', '20', 'Joe')";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testUpdateWithCompoundPrimaryKey() {
+        $record = ORM::for_table('widget')->use_id_column(array('id1', 'id2'))->create();
+        $record->set('id1', 10);
+        $record->set('id2', 20);
+        $record->set('name', 'Joe');
+        $record->save();
+        $record->set('name', 'John');
+        $record->save();
+        $expected = "UPDATE `widget` SET `name` = 'John' WHERE `id1` = '10' AND `id2` = '20'";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testDeleteWithCompoundPrimaryKey() {
+        $record = ORM::for_table('widget')->use_id_column(array('id1', 'id2'))->create();
+        $record->set('id1', 10);
+        $record->set('id2', 20);
+        $record->set('name', 'Joe');
+        $record->save();
+        $record->delete();
+        $expected = "DELETE FROM `widget` WHERE `id1` = '10' AND `id2` = '20'";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
     /**
      * Regression tests
      */
@@ -548,6 +651,12 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
         $widget->set_expr('added', 'NOW()');
         $widget->save();
         $expected = "UPDATE `widget` SET `added` = NOW() WHERE `id` = '1'";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testIssue176LimitDoesntWorkFirstTime() {
+        $rs = ORM::for_table('position')->limit(1)->find_array();
+        $expected = "SELECT * FROM `position` LIMIT 1";
         $this->assertEquals($expected, ORM::get_last_query());
     }
 }
