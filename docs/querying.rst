@@ -275,6 +275,12 @@ Respects the ID column specified in the config. If you are using a compound
 primary key, you must pass an array where the key is the column name. Columns
 that don't belong to the key will be ignored.
 
+Shortcut: ``where_id_in``
+'''''''''''''''''''''''''
+
+This helper method is similar to ``where_id_is`, but it expects an array of
+primary keys to be selected. It is compound primary keys aware.
+
 Less than / greater than: ``where_lt``, ``where_gt``, ``where_lte``, ``where_gte``
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 

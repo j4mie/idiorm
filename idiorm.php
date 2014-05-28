@@ -1173,6 +1173,18 @@
             return $filtered;
         }
 
+       /**
+         * Helper method that filters an array containing compound column/value
+         * arrays.
+         */
+        protected function _get_compound_id_column_values_array($values) {
+            $filtered = array();
+            foreach($values as $value) {
+                $filtered[] = $this->_get_compound_id_column_values($value);
+            }
+            return $filtered;
+        }
+
         /**
          * Add a WHERE column = value clause to your query. Each time
          * this is called in the chain, an additional WHERE will be
@@ -1248,6 +1260,18 @@
             }
             $query[] = "))";
             return $this->where_raw(join($query, ' '), $data);
+        }
+
+        /**
+         * Similar to where_id_is() but allowing multiple primary keys.
+         *
+         * If primary key is compound, only the columns that
+         * belong to they key will be used for the query
+         */
+        public function where_id_in($ids) {
+            return (is_array($this->_get_id_column_name())) ?
+                $this->where_any_is($this->_get_compound_id_column_values_array($ids)) :
+                $this->where_in($this->_get_id_column_name(), $ids);
         }
 
         /**

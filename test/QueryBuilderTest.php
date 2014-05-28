@@ -40,6 +40,12 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals($expected, ORM::get_last_query());
     }
 
+    public function testWhereIdIn() {
+        ORM::for_table('widget')->where_id_in(array(4, 5))->find_many();
+        $expected = "SELECT * FROM `widget` WHERE `id` IN ('4', '5')";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
     public function testSingleWhereClause() {
         ORM::for_table('widget')->where('name', 'Fred')->find_one();
         $expected = "SELECT * FROM `widget` WHERE `name` = 'Fred' LIMIT 1";
@@ -614,6 +620,15 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
         $record->save();
         $record->delete();
         $expected = "DELETE FROM `widget` WHERE `id1` = '10' AND `id2` = '20'";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testWhereIdInWithCompoundPrimaryKey() {
+        $record = ORM::for_table('widget')->use_id_column(array('id1', 'id2'));
+        $record->where_id_in(array(
+            array('id1' => 10, 'name' => 'Joe', 'id2' => 20),
+            array('id1' => 20, 'name' => 'Joe', 'id2' => 30)))->find_many();
+        $expected = "SELECT * FROM `widget` WHERE (( `id1` = '10' AND `id2` = '20' ) OR ( `id1` = '20' AND `id2` = '30' ))";
         $this->assertEquals($expected, ORM::get_last_query());
     }
 
