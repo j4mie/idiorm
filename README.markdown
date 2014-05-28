@@ -76,6 +76,8 @@ Changelog
 
 #### 1.5.0 - release 2014-01-XX
 
+* Multiple OR'ed conditions support [[lrlopez](https://github.com/lrlopez)] - [issue #201](https://github.com/j4mie/idiorm/issues/201)
+* `where_id_in()` for selecting multiple records by primary key [[lrlopez](https://github.com/lrlopez)] - [issue #202](https://github.com/j4mie/idiorm/issues/202)
 * Add compound primary key support [[lrlopez](https://github.com/lrlopez)] - [issue #171](https://github.com/j4mie/idiorm/issues/171)
 * Add a RAW JOIN source to the query [[moiseevigor](https://github.com/moiseevigor)] - [issue #163](https://github.com/j4mie/idiorm/issues/163)
 * Reduce the type casting on aggregate functions to allow characters [[herroffizier](https://github.com/herroffizier)] - [issue #150](https://github.com/j4mie/idiorm/issues/150)
@@ -83,6 +85,7 @@ Changelog
 * Add time to query logging - adds query time parameter to external logger callback function [[AgelxNash](https://github.com/AgelxNash)] - [issue #180](https://github.com/j4mie/idiorm/issues/180)
 * Changed database array access to ensure it's always properly setup [[falmp](https://github.com/falmp)] - [issue #159](https://github.com/j4mie/idiorm/issues/159)
 * Allow unsetting the db (ORM::set_db(null)) to make the test work again [[borrel](https://github.com/borrel)] - [issue #160](https://github.com/j4mie/idiorm/issues/160)
+* Correct [issue #176](https://github.com/j4mie/idiorm/issues/176): Ensure database setup before building select [[kendru](https://github.com/kendru)] - [issue #197](https://github.com/j4mie/idiorm/issues/197)
 * Add HHVM to travis-ci build matrix [[ptarjan](https://github.com/ptarjan)] - [issue #168](https://github.com/j4mie/idiorm/issues/168)
 * Improve where statement precendence documentation [[thomasahle](https://github.com/thomasahle)] - [issue #190](https://github.com/j4mie/idiorm/issues/190)
 * Improve testing checks [[charsleysa](https://github.com/charsleysa)] - [issue #173](https://github.com/j4mie/idiorm/issues/173)
