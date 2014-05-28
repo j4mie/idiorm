@@ -306,6 +306,54 @@ Similarly, to add a ``WHERE ... NOT LIKE`` clause, use:
     <?php
     $people = ORM::for_table('person')->where_not_like('name', '%bob%')->find_many();
 
+Multiple OR'ed conditions
+'''''''''''''''''''''''''
+
+You can add simple OR'ed conditions to the same WHERE clause using ``where_any_is``. You
+should specify multiple conditions using an array of items. Each item will be an
+associative array that contains a multiple conditions. 
+
+.. code-block:: php
+
+    <?php
+    $people = ORM::for_table('person')
+                ->where_any_is(array(
+                    array('name' => 'Joe', 'age' => 10),
+                    array('name' => 'Fred', 'age' => 20)))
+                ->find_many();
+
+    // Creates SQL:
+    SELECT * FROM `widget` WHERE (( `name` = 'Joe' AND `age` = '10' ) OR ( `name` = 'Fred' AND `age` = '20' ));
+
+By default, it uses the equal operator for every column, but it can be overriden for any
+column using a second parameter:
+
+.. code-block:: php
+
+    <?php
+    $people = ORM::for_table('person')
+                ->where_any_is(array(
+                    array('name' => 'Joe', 'age' => 10),
+                    array('name' => 'Fred', 'age' => 20)), array('age' => '>'))
+                ->find_many();
+
+    // Creates SQL:
+    SELECT * FROM `widget` WHERE (( `name` = 'Joe' AND `age` > '10' ) OR ( `name` = 'Fred' AND `age` > '20' ));
+
+If you want to set the default operator for all the columns, just pass it as the second parameter:
+
+.. code-block:: php
+
+    <?php
+    $people = ORM::for_table('person')
+                ->where_any_is(array(
+                    array('score' => '5', 'age' => 10),
+                    array('score' => '15', 'age' => 20)), '>')
+                ->find_many();
+
+    // Creates SQL:
+    SELECT * FROM `widget` WHERE (( `score` > '5' AND `age` > '10' ) OR ( `score` > '15' AND `age` > '20' ));
+
 Set membership: ``where_in`` and ``where_not_in``
 '''''''''''''''''''''''''''''''''''''''''''''''''
 
