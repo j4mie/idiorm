@@ -631,8 +631,14 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testIssue176LimitDoesntWorkFirstTime() {
-        $rs = ORM::for_table('position')->limit(1)->find_array();
-        $expected = "SELECT * FROM `position` LIMIT 1";
+        ORM::reset_config();
+        ORM::reset_db();
+
+        ORM::configure('logging', true);
+        ORM::configure('connection_string', 'sqlite::memory:');
+
+        ORM::for_table('sqlite_master')->limit(1)->find_array();
+        $expected = "SELECT * FROM `sqlite_master` LIMIT 1";
         $this->assertEquals($expected, ORM::get_last_query());
     }
 }
