@@ -50,7 +50,7 @@ class MockPDOStatement extends PDOStatement {
    {
        // Do check on index, and type
        if (!is_int($index)) throw new Exception('Incorrect parameter type. Expected $index to be an integer.');
-       if (!is_int($type) || $type != PDO::PARAM_STR || $type != PDO::PARAM_NULL || $type != PDO::PARAM_BOOL || $type != PDO::PARAM_INT)
+       if (!is_int($type) || ($type != PDO::PARAM_STR && $type != PDO::PARAM_NULL && $type != PDO::PARAM_BOOL && $type != PDO::PARAM_INT))
            throw new Exception('Incorrect parameter type. Expected $type to be an integer.');
 
        // Add param to array
