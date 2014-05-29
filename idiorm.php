@@ -1870,7 +1870,11 @@
          * Get the primary key ID of this object.
          */
         public function id() {
-            return $this->get($this->_get_id_column_name());
+            $id = $this->get($this->_get_id_column_name());
+            if ($id === null) {
+                throw new Exception('Primary key ID missing from row or is null');
+            }
+            return $id;
         }
 
         /**
