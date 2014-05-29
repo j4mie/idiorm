@@ -1869,8 +1869,22 @@
         /**
          * Get the primary key ID of this object.
          */
-        public function id() {
-            return $this->get($this->_get_id_column_name());
+        public function id($disallow_null = false) {
+            $id = $this->get($this->_get_id_column_name());
+
+            if ($disallow_null) {
+                if (is_array($id)) {
+                    foreach ($id as $id_part) {
+                        if ($id_part === null) {
+                            throw new Exception('Primary key ID contains null value(s)');
+                        }
+                    }
+                } else if ($id === null) {
+                    throw new Exception('Primary key ID missing from row or is null');
+                }
+            }
+
+            return $id;
         }
 
         /**
@@ -1951,7 +1965,7 @@
                     return true;
                 }
                 $query = $this->_build_update();
-                $id = $this->id();
+                $id = $this->id(true);
                 if (is_array($id)) {
                     $values = array_merge($values, array_values($id));
                 } else {
@@ -2058,7 +2072,7 @@
                 $this->_quote_identifier($this->_table_name)
             );
             $this->_add_id_column_conditions($query);
-            return self::_execute(join(" ", $query), is_array($this->id()) ? array_values($this->id()) : array($this->id()), $this->_connection_name);
+            return self::_execute(join(" ", $query), is_array($this->id(true)) ? array_values($this->id(true)) : array($this->id(true)), $this->_connection_name);
         }
 
         /**
