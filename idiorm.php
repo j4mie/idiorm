@@ -414,9 +414,9 @@
             $count = count($parameters);
             for ($i = 0; $i < $count; $i++) {
                 $type = PDO::PARAM_STR;
-                if (is_null($parameters[i])) $type = PDO::PARAM_NULL;
-                if (is_bool($parameters[i])) $type = PDO::PARAM_BOOL;
-                if (is_numeric($parameters[i])) {
+                if (is_null($parameters[$i])) $type = PDO::PARAM_NULL;
+                if (is_bool($parameters[$i])) $type = PDO::PARAM_BOOL;
+                if (is_numeric($parameters[$i])) {
                     $type = PDO::PARAM_INT;
                     $parameters[$i] = +($parameters[$i]);
                 }
