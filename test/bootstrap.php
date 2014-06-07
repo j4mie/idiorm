@@ -21,7 +21,7 @@ class MockPDOStatement extends PDOStatement {
    /**
     * Check that the array
     */
-   public function execute($params) {
+   public function execute($params = null) {
        $count = 0;
        $m = array();
        if (preg_match_all('/"[^"\\\\]*(?:\\?)[^"\\\\]*"|\'[^\'\\\\]*(?:\\?)[^\'\\\\]*\'|(\\?)/', $this->statement, $m, PREG_SET_ORDER)) {
