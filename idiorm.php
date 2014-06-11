@@ -72,6 +72,7 @@
             'logging' => false,
             'logger' => null,
             'caching' => false,
+            'table_prefix' => null,
             'return_result_sets' => false,
         );
 
@@ -578,7 +579,7 @@
          * array of data fetched from the database)
          */
         protected function _create_instance_from_row($row) {
-            $instance = self::for_table($this->_table_name, $this->_connection_name);
+            $instance = self::for_table($this->_real_table_name($this->_table_name), $this->_connection_name);
             $instance->use_id_column($this->_instance_id_column);
             $instance->hydrate($row);
             return $instance;
@@ -1588,7 +1589,7 @@
                 $result_columns = 'DISTINCT ' . $result_columns;
             }
 
-            $fragment .= "{$result_columns} FROM " . $this->_quote_identifier($this->_table_name);
+            $fragment .= "{$result_columns} FROM " . $this->_quote_identifier($this->_real_table_name($this->_table_name));
 
             if (!is_null($this->_table_alias)) {
                 $fragment .= " " . $this->_quote_identifier($this->_table_alias);
@@ -1870,8 +1871,8 @@
             if (!is_null($this->_instance_id_column)) {
                 return $this->_instance_id_column;
             }
-            if (isset(self::$_config[$this->_connection_name]['id_column_overrides'][$this->_table_name])) {
-                return self::$_config[$this->_connection_name]['id_column_overrides'][$this->_table_name];
+            if (isset(self::$_config[$this->_connection_name]['id_column_overrides'][$this->_real_table_name($this->_table_name)])) {
+                return self::$_config[$this->_connection_name]['id_column_overrides'][$this->_real_table_name($this->_table_name)];
             }
             return self::$_config[$this->_connection_name]['id_column'];
         }
@@ -2025,7 +2026,7 @@
          */
         protected function _build_update() {
             $query = array();
-            $query[] = "UPDATE {$this->_quote_identifier($this->_table_name)} SET";
+            $query[] = "UPDATE {$this->_quote_identifier($this->_real_table_name($this->_table_name))} SET";
 
             $field_list = array();
             foreach ($this->_dirty_fields as $key => $value) {
@@ -2044,7 +2045,7 @@
          */
         protected function _build_insert() {
             $query[] = "INSERT INTO";
-            $query[] = $this->_quote_identifier($this->_table_name);
+            $query[] = $this->_quote_identifier($this->_real_table_name($this->_table_name));
             $field_list = array_map(array($this, '_quote_identifier'), array_keys($this->_dirty_fields));
             $query[] = "(" . join(", ", $field_list) . ")";
             $query[] = "VALUES";
@@ -2065,7 +2066,7 @@
         public function delete() {
             $query = array(
                 "DELETE FROM",
-                $this->_quote_identifier($this->_table_name)
+                $this->_quote_identifier($this->_real_table_name($this->_table_name))
             );
             $this->_add_id_column_conditions($query);
             return self::_execute(join(" ", $query), is_array($this->id()) ? array_values($this->id()) : array($this->id()), $this->_connection_name);
@@ -2079,7 +2080,7 @@
             // the results of calling each separate builder method.
             $query = $this->_join_if_not_empty(" ", array(
                 "DELETE FROM",
-                $this->_quote_identifier($this->_table_name),
+                $this->_quote_identifier($this->_real_table_name($this->_table_name)),
                 $this->_build_where(),
             ));
 
@@ -2130,6 +2131,18 @@
             return $this->offsetExists($key);
         }
 
+
+        /**
+         * Gets table name with prefix
+         */
+        protected static function _real_table_name($alias) {
+
+            return self::$_config[self::DEFAULT_CONNECTION]['table_prefix'].$alias;
+        }
+        
+        
+        
+        
         /**
          * Magic method to capture calls to undefined class methods.
          * In this case we are attempting to convert camel case formatted 
