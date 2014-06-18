@@ -46,7 +46,7 @@ class MockPDOStatement extends PDOStatement {
    /**
     * Add data to arrays
     */
-   public function bindParams($index, $value, $type)
+   public function bindParam($index, $value, $type)
    {
        // Do check on index, and type
        if (!is_int($index)) throw new Exception('Incorrect parameter type. Expected $index to be an integer.');
