@@ -193,7 +193,7 @@
                 }
             } else {
                 if (is_null($value)) {
-                    // Shortcut: If only one string argument is passed,
+                    // Shortcut: If only one string argument is passed, 
                     // assume it's a connection string
                     $value = $key;
                     $key = 'connection_string';
@@ -221,7 +221,7 @@
         public static function reset_config() {
             self::$_config = array();
         }
-
+        
         /**
          * Despite its slightly odd name, this is actually the factory
          * method used to acquire instances of the class. It is named
@@ -306,7 +306,7 @@
 
         /**
          * Detect and initialise the limit clause style ("SELECT TOP 5" /
-         * "... LIMIT 5"). If this has been specified manually using
+         * "... LIMIT 5"). If this has been specified manually using 
          * ORM::configure('limit_clause_style', 'top'), this will do nothing.
          * @param string $connection_name Which connection to use
          */
@@ -458,13 +458,13 @@
 
             self::$_last_query = $bound_query;
             self::$_query_log[$connection_name][] = $bound_query;
-
-
+            
+            
             if(is_callable(self::$_config[$connection_name]['logger'])){
                 $logger = self::$_config[$connection_name]['logger'];
                 $logger($bound_query);
             }
-
+            
             return true;
         }
 
@@ -631,7 +631,7 @@
          * @return array
          */
         public function find_array() {
-            return $this->_run();
+            return $this->_run(); 
         }
 
         /**
@@ -788,14 +788,14 @@
          * Add columns to the list of columns returned by the SELECT
          * query. This defaults to '*'. Many columns can be supplied
          * as either an array or as a list of parameters to the method.
-         *
+         * 
          * Note that the alias must not be numeric - if you want a
          * numeric alias then prepend it with some alpha chars. eg. a1
-         *
+         * 
          * @example select_many(array('alias' => 'column', 'column2', 'alias2' => 'column3'), 'column4', 'column5');
          * @example select_many('column', 'column2', 'column3');
          * @example select_many(array('column', 'column2', 'column3'), 'column4', 'column5');
-         *
+         * 
          * @return \ORM
          */
         public function select_many() {
@@ -814,16 +814,16 @@
 
         /**
          * Add an unquoted expression to the list of columns returned
-         * by the SELECT query. Many columns can be supplied as either
+         * by the SELECT query. Many columns can be supplied as either 
          * an array or as a list of parameters to the method.
-         *
+         * 
          * Note that the alias must not be numeric - if you want a
          * numeric alias then prepend it with some alpha chars. eg. a1
-         *
+         * 
          * @example select_many_expr(array('alias' => 'column', 'column2', 'alias2' => 'column3'), 'column4', 'column5')
          * @example select_many_expr('column', 'column2', 'column3')
          * @example select_many_expr(array('column', 'column2', 'column3'), 'column4', 'column5')
-         *
+         * 
          * @return \ORM
          */
         public function select_many_expr() {
@@ -843,11 +843,11 @@
         /**
          * Take a column specification for the select many methods and convert it
          * into a normalised array of columns and aliases.
-         *
+         * 
          * It is designed to turn the following styles into a normalised array:
-         *
+         * 
          * array(array('alias' => 'column', 'column2', 'alias2' => 'column3'), 'column4', 'column5'))
-         *
+         * 
          * @param array $columns
          * @return array
          */
@@ -1019,7 +1019,7 @@
             }
             $column_name = $this->_quote_identifier($column_name);
             return $this->_add_condition($type, "{$column_name} {$separator} ?", $value);
-        }
+        } 
 
         /**
          * Return a string containing the given number of question marks,
@@ -1214,7 +1214,7 @@
         }
 
         /**
-         * Add an unquoted expression to the list of columns to GROUP BY
+         * Add an unquoted expression to the list of columns to GROUP BY 
          */
         public function group_by_expr($expr) {
             $this->_group_by[] = $expr;
@@ -1536,9 +1536,6 @@
          * Create a cache key for the given query and parameters.
          */
         protected static function _create_cache_key($query, $parameters) {
-
-
-
             $parameter_string = join(',', $parameters);
             $key = $query . ':' . $parameter_string;
             return sha1($key);
@@ -1549,13 +1546,11 @@
          * is cached for the key, return the value. Otherwise, return false.
          */
         protected static function _check_query_cache($cache_key, $connection_name = self::DEFAULT_CONNECTION) {
-
             if(isset(self::$_config[$connection_name]['check_query_cache']) and is_callable(self::$_config[$connection_name]['check_query_cache'])){
                 return call_user_func_array(self::$_config[$connection_name]['check_query_cache'],array($cache_key,$connection_name));
-            } else if (isset(self::$_query_cache[$connection_name][$cache_key])) {
+            } elseif (isset(self::$_query_cache[$connection_name][$cache_key])) {
                 return self::$_query_cache[$connection_name][$cache_key];
             }
-
             return false;
         }
 
@@ -1563,23 +1558,20 @@
          * Clear the query cache
          */
         public static function clear_cache() {
-
             if(isset(self::$_config[$connection_name]['clear_cache']) and is_callable(self::$_config[$connection_name]['clear_cache'])){
                 return call_user_func_array(self::$_config[$connection_name]['clear_cache'],array($_config[$connection_name],self::$_query_cache));
             }  else {
                 self::$_query_cache = array();
             }
-
-
         }
 
         /**
          * Add the given value to the query cache.
          */
         protected static function _cache_query_result($cache_key, $value, $connection_name = self::DEFAULT_CONNECTION) {
-             if(isset(self::$_config[$connection_name]['cache_query_result']) and is_callable(self::$_config[$connection_name]['cache_query_result'])){
+            if(isset(self::$_config[$connection_name]['cache_query_result']) and is_callable(self::$_config[$connection_name]['cache_query_result'])){
                 return call_user_func_array(self::$_config[$connection_name]['cache_query_result'],array($cache_key,$value,$connection_name));
-            } else if (!isset(self::$_query_cache[$connection_name])) {
+            } elseif (!isset(self::$_query_cache[$connection_name])) {
                 self::$_query_cache[$connection_name] = array();
             }
             self::$_query_cache[$connection_name][$cache_key] = $value;
@@ -1681,7 +1673,7 @@
          * To set multiple properties at once, pass an associative array
          * as the first parameter and leave out the second parameter.
          * Flags the properties as 'dirty' so they will be saved to the
-         * database when save() is called.
+         * database when save() is called. 
          * @param string|array $key
          * @param string|null $value
          */
@@ -1883,12 +1875,12 @@
 
         /**
          * Magic method to capture calls to undefined class methods.
-         * In this case we are attempting to convert camel case formatted
+         * In this case we are attempting to convert camel case formatted 
          * methods into underscore formatted methods.
          *
-         * This allows us to call ORM methods using camel case and remain
+         * This allows us to call ORM methods using camel case and remain 
          * backwards compatible.
-         *
+         * 
          * @param  string   $name
          * @param  array    $arguments
          * @return ORM
@@ -1901,13 +1893,13 @@
         }
 
         /**
-         * Magic method to capture calls to undefined static class methods.
-         * In this case we are attempting to convert camel case formatted
+         * Magic method to capture calls to undefined static class methods. 
+         * In this case we are attempting to convert camel case formatted 
          * methods into underscore formatted methods.
          *
-         * This allows us to call ORM methods using camel case and remain
+         * This allows us to call ORM methods using camel case and remain 
          * backwards compatible.
-         *
+         * 
          * @param  string   $name
          * @param  array    $arguments
          * @return ORM
@@ -2066,7 +2058,7 @@
         public function as_array() {
             return $this->get_results();
         }
-
+        
         /**
          * Get the number of records in the result set
          * @return int
@@ -2101,7 +2093,7 @@
         public function offsetGet($offset) {
             return $this->_results[$offset];
         }
-
+        
         /**
          * ArrayAccess
          * @param int|string $offset
