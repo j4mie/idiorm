@@ -1557,13 +1557,12 @@
         /**
          * Clear the query cache
          */
-        public static function clear_cache() {
+         public static function clear_cache() {
+            self::$_query_cache = array();
             if(isset(self::$_config[$connection_name]['clear_cache']) and is_callable(self::$_config[$connection_name]['clear_cache'])){
                 return call_user_func_array(self::$_config[$connection_name]['clear_cache'],array($_config[$connection_name],self::$_query_cache));
-            }  else {
-                self::$_query_cache = array();
             }
-        }
+            }
 
         /**
          * Add the given value to the query cache.
