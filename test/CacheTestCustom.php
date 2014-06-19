@@ -23,16 +23,15 @@ class CacheTestCustom extends PHPUnit_Framework_TestCase {
 
     // Test caching. This is a bit of a hack.
     public function testCustomCacheCallback() {
-		ORM::for_table('widget')->where('name', 'Fred')->where('age', 17)->find_one();
+        ORM::for_table('widget')->where('name', 'Fred')->where('age', 17)->find_one();
         ORM::for_table('widget')->where('name', 'Bob')->where('age', 42)->find_one();
-	
-	
-         ORM::configure('cache_query_result', function ($hash) {
-			$this->assertEquals(true, is_string($hash));
+      
+        ORM::configure('cache_query_result', function ($hash) {
+            $this->assertEquals(true, is_string($hash));
         });
 
         ORM::configure('check_query_cache', function ($cache_key,$connection_name) {
-            $this->assertEquals(true, is_string($hash));
+            $this->assertEquals(true, is_string($cache_key));
             $this->assertEquals(true, is_string($connection_name));
         });
         ORM::configure('clear_cache', function ($connection_name) {
