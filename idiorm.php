@@ -2081,7 +2081,7 @@
         // --------------------- //
 
         public function offsetExists($key) {
-            return isset($this->_data[$key]);
+            return array_key_exists($key, $this->_data);
         }
 
         public function offsetGet($key) {
