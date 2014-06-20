@@ -1571,9 +1571,9 @@
         /**
          * Add the given value to the query cache.
          */
-        protected static function _cache_query_result($cache_key, $value, $connection_name = self::DEFAULT_CONNECTION) {
+        protected static function _cache_query_result($cache_key, $value, $connection_name = self::DEFAULT_CONNECTION,$table_name=null) {
             if(isset(self::$_config[$connection_name]['cache_query_result']) and is_callable(self::$_config[$connection_name]['cache_query_result'])){
-                return call_user_func_array(self::$_config[$connection_name]['cache_query_result'], array($cache_key, $value, $connection_name));
+                return call_user_func_array(self::$_config[$connection_name]['cache_query_result'], array($cache_key, $value, $connection_name,$table_name));
             } elseif (!isset(self::$_query_cache[$connection_name])) {
                 self::$_query_cache[$connection_name] = array();
             }
@@ -1606,7 +1606,7 @@
             }
 
             if ($caching_enabled) {
-                self::_cache_query_result($cache_key, $rows, $this->_connection_name);
+                self::_cache_query_result($cache_key, $rows, $this->_connection_name, $this->_table_name);
             }
 
             // reset Idiorm after executing the query

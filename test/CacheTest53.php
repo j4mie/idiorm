@@ -31,14 +31,15 @@ class CacheTest53 extends PHPUnit_Framework_TestCase {
             $phpunit->assertEquals(true, is_string($query));
             $phpunit->assertEquals(true, is_array($parameters));
             $phpunit->assertEquals(true, is_string($connection));
-            $phpunit->assertEquals('widget', ($table_name));
+            $phpunit->assertEquals('widget', $table_name);
             $parameter_string = join(',', $parameters);
             $key = $query . ':' . $parameter_string;
             $my_key = 'some-prefix'.crc32($key);
             return $my_key;
         });
-        ORM::configure('cache_query_result', function ($cache_key, $value, $connection_name) use ($phpunit, &$my_cache) {
+        ORM::configure('cache_query_result', function ($cache_key, $value, $connection_name,$table_name) use ($phpunit, &$my_cache) {
             $phpunit->assertEquals(true, is_string($cache_key));
+			$phpunit->assertEquals('widget', $table_name);
             $my_cache[$cache_key] = $value;
         });
         ORM::configure('check_query_cache', function ($cache_key, $connection_name) use ($phpunit, &$my_cache) {
