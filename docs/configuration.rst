@@ -287,6 +287,21 @@ Idiorm can cache the queries it executes during a request. To enable
 query caching, set the ``caching`` option to ``true`` (it is ``false``
 by default).
 
+.. code-block:: php
+
+    <?php
+    ORM::configure('caching', true);
+    
+    
+Setting: ``caching_auto_clear``
+
+Idiorm's cache is never cleared by default. If you wish to automatically clear it on save, set ``caching_auto_clear`` to ``true``
+
+.. code-block:: php
+
+    <?php
+    ORM::configure('caching_auto_clear', true);
+
 When query caching is enabled, Idiorm will cache the results of every
 ``SELECT`` query it executes. If Idiorm encounters a query that has
 already been run, it will fetch the results directly from its cache and
@@ -313,6 +328,34 @@ Warnings and gotchas
    application, as all database rows that are fetched during each
    request are held in memory. If you are working with large quantities
    of data, you may wish to disable the cache.
+   
+If you wish to use custom caching functions, you can set them from the configure options. 
+
+.. code-block:: php
+
+    <?php
+        $my_cache = array();
+        ORM::configure('cache_query_result', function ($cache_key, $value, $table_name, $connection_name) use (&$my_cache) {
+            $my_cache[$cache_key] = $value;
+        });
+        ORM::configure('check_query_cache', function ($cache_key, $table_name, $connection_name) use (&$my_cache) {
+            if(isset($my_cache[$cache_key])){
+               return $my_cache[$cache_key];
+            } else {
+                return false;
+            }
+        });
+        ORM::configure('clear_cache', function ($table_name, $connection_name) use (&$my_cache) {
+             $my_cache = array();
+        });
+        
+        ORM::configure('create_cache_key', function ($query, $parameters, $table_name, $connection_name) {
+            $parameter_string = join(',', $parameters);
+            $key = $query . ':' . $parameter_string;
+            $my_key = 'my-prefix'.crc32($key);
+            return $my_key;
+        });
+
 
 .. _PDO documentation: http://php.net/manual/en/pdo.construct.php
 .. _the PDO documentation: http://www.php.net/manual/en/pdo.construct.php

@@ -38,4 +38,5 @@ class CacheTest extends PHPUnit_Framework_TestCase {
         ORM::for_table('widget', self::ALTERNATE)->where('name', 'Steve')->where('age', 80)->find_one(); // this shouldn't run a query!
         $this->assertEquals($expected, ORM::get_last_query(self::ALTERNATE));
     }
+    
 }
