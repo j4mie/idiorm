@@ -322,17 +322,17 @@ If you wish to use custom caching functions, you can set them from the configure
 
     <?php
         $my_cache = array();
-        ORM::configure('cache_query_result', function ($cache_key,$value,$connection_name) use (&$my_cache) {
+        ORM::configure('cache_query_result', function ($cache_key, $value,$connection_name) use (&$my_cache) {
             $my_cache[$cache_key] = $value;
         });
-        ORM::configure('check_query_cache', function ($cache_key,$connection_name) use (&$my_cache) {
+        ORM::configure('check_query_cache', function ($cache_key, $connection_name) use (&$my_cache) {
             if(isset($my_cache[$cache_key])){
                return $my_cache[$cache_key];
             } else {
                 return false;
             }
         });
-        ORM::configure('clear_cache', function ($connection_name) use (&$my_cache) {
+        ORM::configure('clear_cache', function ($table_name, $connection_name) use (&$my_cache) {
              $my_cache = array();
         });
         

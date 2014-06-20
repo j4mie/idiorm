@@ -1561,10 +1561,10 @@
         /**
          * Clear the query cache
          */
-        public static function clear_cache($connection_name = self::DEFAULT_CONNECTION) {
+        public static function clear_cache($table_name=null,$connection_name = self::DEFAULT_CONNECTION) {
             self::$_query_cache = array();
             if(isset(self::$_config[$connection_name]['clear_cache']) and is_callable(self::$_config[$connection_name]['clear_cache'])){
-                return call_user_func_array(self::$_config[$connection_name]['clear_cache'], array($connection_name, true));
+                return call_user_func_array(self::$_config[$connection_name]['clear_cache'], array($table_name,$connection_name));
             }
         }
 
@@ -1746,7 +1746,7 @@
             $success = self::_execute($query, $values, $this->_connection_name);
             $caching_auto_clear_enabled = self::$_config[$this->_connection_name]['caching_auto_clear'];
             if($caching_auto_clear_enabled){
-                self::clear_cache();
+                self::clear_cache($this->_table_name,$this->_connection_name);
             }
             // If we've just inserted a new record, set the ID of this object
             if ($this->_is_new) {

@@ -35,11 +35,11 @@ class CacheTest53 extends PHPUnit_Framework_TestCase {
             $my_key = 'some-prefix'.crc32($key);
             return $my_key;
         });
-        ORM::configure('cache_query_result', function ($cache_key,$value,$connection_name) use ($phpunit, &$my_cache) {
+        ORM::configure('cache_query_result', function ($cache_key, $value, $connection_name) use ($phpunit, &$my_cache) {
             $phpunit->assertEquals(true, is_string($cache_key));
             $my_cache[$cache_key] = $value;
         });
-        ORM::configure('check_query_cache', function ($cache_key,$connection_name) use ($phpunit, &$my_cache) {
+        ORM::configure('check_query_cache', function ($cache_key, $connection_name) use ($phpunit, &$my_cache) {
             $phpunit->assertEquals(true, is_string($cache_key));
             $phpunit->assertEquals(true, is_string($connection_name));
             if(isset($my_cache) and isset($my_cache[$cache_key])){
@@ -49,7 +49,8 @@ class CacheTest53 extends PHPUnit_Framework_TestCase {
                 return false;
             }
         });
-        ORM::configure('clear_cache', function ($connection_name) use ($phpunit, &$my_cache) {
+        ORM::configure('clear_cache', function ($table_name, $connection_name) use ($phpunit, &$my_cache) {
+             $phpunit->assertEquals(true, is_string($table_name)); 
              $phpunit->assertEquals(true, is_string($connection_name));
              $my_cache = array();
         });
