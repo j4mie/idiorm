@@ -27,9 +27,11 @@ class CacheTest53 extends PHPUnit_Framework_TestCase {
         $my_cache = array();
         ORM::configure('caching_auto_clear', true);
  
-        ORM::configure('create_cache_key', function ($query, $parameters) use ($phpunit, &$my_cache) {
+        ORM::configure('create_cache_key', function ($query, $parameters,$connection,$table_name) use ($phpunit, &$my_cache) {
             $phpunit->assertEquals(true, is_string($query));
             $phpunit->assertEquals(true, is_array($parameters));
+            $phpunit->assertEquals(true, is_string($connection));
+            $phpunit->assertEquals('widget', ($table_name));
             $parameter_string = join(',', $parameters);
             $key = $query . ':' . $parameter_string;
             $my_key = 'some-prefix'.crc32($key);
