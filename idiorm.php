@@ -1549,9 +1549,9 @@
          * Check the query cache for the given cache key. If a value
          * is cached for the key, return the value. Otherwise, return false.
          */
-        protected static function _check_query_cache($cache_key, $connection_name = self::DEFAULT_CONNECTION) {
+        protected static function _check_query_cache($cache_key, $connection_name = self::DEFAULT_CONNECTION, $table_name=null) {
             if(isset(self::$_config[$connection_name]['check_query_cache']) and is_callable(self::$_config[$connection_name]['check_query_cache'])){
-                return call_user_func_array(self::$_config[$connection_name]['check_query_cache'], array($cache_key, $connection_name));
+                return call_user_func_array(self::$_config[$connection_name]['check_query_cache'], array($cache_key, $connection_name, $table_name));
             } elseif (isset(self::$_query_cache[$connection_name][$cache_key])) {
                 return self::$_query_cache[$connection_name][$cache_key];
             }
@@ -1590,7 +1590,7 @@
 
             if ($caching_enabled) {
                 $cache_key = self::_create_cache_key($query, $this->_values, $this->_connection_name, $this->_table_name);
-                $cached_result = self::_check_query_cache($cache_key, $this->_connection_name);
+                $cached_result = self::_check_query_cache($cache_key, $this->_connection_name, $this->_table_name);
 
                 if ($cached_result !== false) {
                     return $cached_result;
