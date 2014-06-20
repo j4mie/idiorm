@@ -1536,7 +1536,7 @@
         /**
          * Create a cache key for the given query and parameters.
          */
-        protected static function _create_cache_key($query, $parameters, $connection_name = self::DEFAULT_CONNECTION) {
+        protected static function _create_cache_key($query, $parameters, $connection_name = self::DEFAULT_CONNECTION,$table_name=null) {
             if(isset(self::$_config[$connection_name]['create_cache_key']) and is_callable(self::$_config[$connection_name]['create_cache_key'])){
                 return call_user_func_array(self::$_config[$connection_name]['create_cache_key'], array($query,$parameters));
             }
@@ -1589,7 +1589,7 @@
             $caching_enabled = self::$_config[$this->_connection_name]['caching'];
 
             if ($caching_enabled) {
-                $cache_key = self::_create_cache_key($query, $this->_values);
+                $cache_key = self::_create_cache_key($query, $this->_values,$this->_connection_name,$this->_table_name);
                 $cached_result = self::_check_query_cache($cache_key, $this->_connection_name);
 
                 if ($cached_result !== false) {
