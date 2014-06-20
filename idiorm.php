@@ -1547,7 +1547,7 @@
          */
         protected static function _check_query_cache($cache_key, $connection_name = self::DEFAULT_CONNECTION) {
             if(isset(self::$_config[$connection_name]['check_query_cache']) and is_callable(self::$_config[$connection_name]['check_query_cache'])){
-                return call_user_func_array(self::$_config[$connection_name]['check_query_cache'],array($cache_key,$connection_name));
+                return call_user_func_array(self::$_config[$connection_name]['check_query_cache'], array($cache_key,$connection_name));
             } elseif (isset(self::$_query_cache[$connection_name][$cache_key])) {
                 return self::$_query_cache[$connection_name][$cache_key];
             }
@@ -1559,8 +1559,8 @@
          */
         public static function clear_cache() {
             self::$_query_cache = array();
-			if(isset(self::$_config[$connection_name]['clear_cache']) and is_callable(self::$_config[$connection_name]['clear_cache'])){
-                return call_user_func_array(self::$_config[$connection_name]['clear_cache'],array($_config[$connection_name],self::$_query_cache));
+            if(isset(self::$_config[$connection_name]['clear_cache']) and is_callable(self::$_config[$connection_name]['clear_cache'])){
+                return call_user_func_array(self::$_config[$connection_name]['clear_cache'], array($_config[$connection_name],self::$_query_cache));
             }
         }
 
@@ -1569,7 +1569,7 @@
          */
         protected static function _cache_query_result($cache_key, $value, $connection_name = self::DEFAULT_CONNECTION) {
             if(isset(self::$_config[$connection_name]['cache_query_result']) and is_callable(self::$_config[$connection_name]['cache_query_result'])){
-                return call_user_func_array(self::$_config[$connection_name]['cache_query_result'],array($cache_key,$value,$connection_name));
+                return call_user_func_array(self::$_config[$connection_name]['cache_query_result'], array($cache_key,$value,$connection_name));
             } elseif (!isset(self::$_query_cache[$connection_name])) {
                 self::$_query_cache[$connection_name] = array();
             }

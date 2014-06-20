@@ -38,18 +38,34 @@ class CacheTest extends PHPUnit_Framework_TestCase {
         ORM::for_table('widget', self::ALTERNATE)->where('name', 'Steve')->where('age', 80)->find_one(); // this shouldn't run a query!
         $this->assertEquals($expected, ORM::get_last_query(self::ALTERNATE));
     }
-	public function testCustomCacheCallback() {
-        ORM::configure('check_query_cache', function ($cache_key,$connection_name) {
-            $this->assertEquals(true, is_string($cache_key));
-            $this->assertEquals(true, is_string($connection_name));
+    public function testCustomCacheCallback() {
+        $phpunit = $this;
+        $my_cache = array();
+        
+        ORM::configure('cache_query_result', function ($cache_key,$value,$connection_name) use ($phpunit,&$my_cache) {
+            $phpunit->assertEquals(true, is_string($cache_key));
+            $my_cache[$connection_name][$cache_key] = $value;
         });
-		ORM::configure('cache_query_result', function ($hash) {
-            $this->assertEquals(true, is_string($hash));
+        ORM::configure('check_query_cache', function ($cache_key,$connection_name) use ($phpunit,&$my_cache) {
+            $phpunit->assertEquals(true, is_string($cache_key));
+            $phpunit->assertEquals(true, is_string($connection_name));
+            if(isset($my_cache[$connection_name]) and isset($my_cache[$connection_name][$cache_key])){
+               $phpunit->assertEquals(true, is_array($my_cache[$connection_name][$cache_key]));
+               return $my_cache[$connection_name][$cache_key];
+            } else {
+                return false;
+            }
         });
-        ORM::configure('clear_cache', function ($connection_name) {
-             $this->assertEquals(true, is_string($connection_name));
+        ORM::configure('clear_cache', function ($connection_name) use ($phpunit,$my_cache) {
+             $phpunit->assertEquals(true, is_string($connection_name));
         });
-		ORM::for_table('widget')->where('name', 'Fred')->where('age', 67)->find_one();
+        ORM::for_table('widget')->where('name', 'Fred')->where('age', 21)->find_one();
+        ORM::for_table('widget')->where('name', 'Fred')->where('age', 21)->find_one();
         ORM::for_table('widget')->where('name', 'Bob')->where('age', 42)->find_one();
+        
+        $new = ORM::for_table('widget')->create();
+        $new->name = "Joe";
+        $new->age = 25;
+        $saved = $new->save();
     }
 }
