@@ -27,7 +27,7 @@ class CacheTest53 extends PHPUnit_Framework_TestCase {
         $my_cache = array();
         ORM::configure('caching_auto_clear', true);
  
-        ORM::configure('create_cache_key', function ($query, $parameters,$connection, $table_name) use ($phpunit, &$my_cache) {
+        ORM::configure('create_cache_key', function ($query, $parameters, $table_name, $connection) use ($phpunit, &$my_cache) {
             $phpunit->assertEquals(true, is_string($query));
             $phpunit->assertEquals(true, is_array($parameters));
             $phpunit->assertEquals(true, is_string($connection));
@@ -37,12 +37,12 @@ class CacheTest53 extends PHPUnit_Framework_TestCase {
             $my_key = 'some-prefix'.crc32($key);
             return $my_key;
         });
-        ORM::configure('cache_query_result', function ($cache_key, $value, $connection_name, $table_name) use ($phpunit, &$my_cache) {
+        ORM::configure('cache_query_result', function ($cache_key, $value, $table_name, $connection_name) use ($phpunit, &$my_cache) {
             $phpunit->assertEquals(true, is_string($cache_key));
             $phpunit->assertEquals('widget', $table_name);
             $my_cache[$cache_key] = $value;
         });
-        ORM::configure('check_query_cache', function ($cache_key, $connection_name, $table_name) use ($phpunit, &$my_cache) {
+        ORM::configure('check_query_cache', function ($cache_key, $table_name, $connection_name) use ($phpunit, &$my_cache) {
             $phpunit->assertEquals(true, is_string($cache_key));
             $phpunit->assertEquals(true, is_string($connection_name));
             $phpunit->assertEquals('widget', $table_name);

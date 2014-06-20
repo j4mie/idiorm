@@ -322,10 +322,10 @@ If you wish to use custom caching functions, you can set them from the configure
 
     <?php
         $my_cache = array();
-        ORM::configure('cache_query_result', function ($cache_key, $value,$connection_name) use (&$my_cache) {
+        ORM::configure('cache_query_result', function ($cache_key, $value, $table_name, $connection_name) use (&$my_cache) {
             $my_cache[$cache_key] = $value;
         });
-        ORM::configure('check_query_cache', function ($cache_key, $connection_name) use (&$my_cache) {
+        ORM::configure('check_query_cache', function ($cache_key, $table_name, $connection_name) use (&$my_cache) {
             if(isset($my_cache[$cache_key])){
                return $my_cache[$cache_key];
             } else {
@@ -336,7 +336,7 @@ If you wish to use custom caching functions, you can set them from the configure
              $my_cache = array();
         });
         
-        ORM::configure('create_cache_key', function ($query, $parameters) {
+        ORM::configure('create_cache_key', function ($query, $parameters, $table_name, $connection_name) {
             $parameter_string = join(',', $parameters);
             $key = $query . ':' . $parameter_string;
             $my_key = 'my-prefix'.crc32($key);

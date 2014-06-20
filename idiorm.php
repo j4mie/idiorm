@@ -1536,9 +1536,9 @@
         /**
          * Create a cache key for the given query and parameters.
          */
-        protected static function _create_cache_key($query, $parameters, $connection_name = self::DEFAULT_CONNECTION, $table_name=null) {
+        protected static function _create_cache_key($query, $parameters, $table_name=null, $connection_name = self::DEFAULT_CONNECTION) {
             if(isset(self::$_config[$connection_name]['create_cache_key']) and is_callable(self::$_config[$connection_name]['create_cache_key'])){
-                return call_user_func_array(self::$_config[$connection_name]['create_cache_key'], array($query, $parameters, $connection_name, $table_name));
+                return call_user_func_array(self::$_config[$connection_name]['create_cache_key'], array($query, $parameters, $table_name, $connection_name));
             }
             $parameter_string = join(',', $parameters);
             $key = $query . ':' . $parameter_string;
@@ -1549,9 +1549,9 @@
          * Check the query cache for the given cache key. If a value
          * is cached for the key, return the value. Otherwise, return false.
          */
-        protected static function _check_query_cache($cache_key, $connection_name = self::DEFAULT_CONNECTION, $table_name=null) {
+        protected static function _check_query_cache($cache_key, $table_name=null, $connection_name = self::DEFAULT_CONNECTION) {
             if(isset(self::$_config[$connection_name]['check_query_cache']) and is_callable(self::$_config[$connection_name]['check_query_cache'])){
-                return call_user_func_array(self::$_config[$connection_name]['check_query_cache'], array($cache_key, $connection_name, $table_name));
+                return call_user_func_array(self::$_config[$connection_name]['check_query_cache'], array($cache_key, $table_name, $connection_name));
             } elseif (isset(self::$_query_cache[$connection_name][$cache_key])) {
                 return self::$_query_cache[$connection_name][$cache_key];
             }
@@ -1571,9 +1571,9 @@
         /**
          * Add the given value to the query cache.
          */
-        protected static function _cache_query_result($cache_key, $value, $connection_name = self::DEFAULT_CONNECTION, $table_name=null) {
+        protected static function _cache_query_result($cache_key, $value, $table_name=null, $connection_name = self::DEFAULT_CONNECTION) {
             if(isset(self::$_config[$connection_name]['cache_query_result']) and is_callable(self::$_config[$connection_name]['cache_query_result'])){
-                return call_user_func_array(self::$_config[$connection_name]['cache_query_result'], array($cache_key, $value, $connection_name, $table_name));
+                return call_user_func_array(self::$_config[$connection_name]['cache_query_result'], array($cache_key, $value, $table_name, $connection_name));
             } elseif (!isset(self::$_query_cache[$connection_name])) {
                 self::$_query_cache[$connection_name] = array();
             }
@@ -1589,8 +1589,8 @@
             $caching_enabled = self::$_config[$this->_connection_name]['caching'];
 
             if ($caching_enabled) {
-                $cache_key = self::_create_cache_key($query, $this->_values, $this->_connection_name, $this->_table_name);
-                $cached_result = self::_check_query_cache($cache_key, $this->_connection_name, $this->_table_name);
+                $cache_key = self::_create_cache_key($query, $this->_values, $this->_table_name, $this->_connection_name);
+                $cached_result = self::_check_query_cache($cache_key, $this->_table_name, $this->_connection_name);
 
                 if ($cached_result !== false) {
                     return $cached_result;
@@ -1606,7 +1606,7 @@
             }
 
             if ($caching_enabled) {
-                self::_cache_query_result($cache_key, $rows, $this->_connection_name, $this->_table_name);
+                self::_cache_query_result($cache_key, $rows, $this->_table_name, $this->_connection_name);
             }
 
             // reset Idiorm after executing the query
