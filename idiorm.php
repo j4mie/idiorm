@@ -1536,9 +1536,9 @@
         /**
          * Create a cache key for the given query and parameters.
          */
-        protected static function _create_cache_key($query, $parameters, $connection_name = self::DEFAULT_CONNECTION,$table_name=null) {
+        protected static function _create_cache_key($query, $parameters, $connection_name = self::DEFAULT_CONNECTION, $table_name=null) {
             if(isset(self::$_config[$connection_name]['create_cache_key']) and is_callable(self::$_config[$connection_name]['create_cache_key'])){
-                return call_user_func_array(self::$_config[$connection_name]['create_cache_key'], array($query,$parameters,$connection_name,$table_name));
+                return call_user_func_array(self::$_config[$connection_name]['create_cache_key'], array($query, $parameters, $connection_name, $table_name));
             }
             $parameter_string = join(',', $parameters);
             $key = $query . ':' . $parameter_string;
@@ -1551,7 +1551,7 @@
          */
         protected static function _check_query_cache($cache_key, $connection_name = self::DEFAULT_CONNECTION) {
             if(isset(self::$_config[$connection_name]['check_query_cache']) and is_callable(self::$_config[$connection_name]['check_query_cache'])){
-                return call_user_func_array(self::$_config[$connection_name]['check_query_cache'], array($cache_key,$connection_name));
+                return call_user_func_array(self::$_config[$connection_name]['check_query_cache'], array($cache_key, $connection_name));
             } elseif (isset(self::$_query_cache[$connection_name][$cache_key])) {
                 return self::$_query_cache[$connection_name][$cache_key];
             }
@@ -1561,19 +1561,19 @@
         /**
          * Clear the query cache
          */
-        public static function clear_cache($table_name=null,$connection_name = self::DEFAULT_CONNECTION) {
+        public static function clear_cache($table_name=null, $connection_name = self::DEFAULT_CONNECTION) {
             self::$_query_cache = array();
             if(isset(self::$_config[$connection_name]['clear_cache']) and is_callable(self::$_config[$connection_name]['clear_cache'])){
-                return call_user_func_array(self::$_config[$connection_name]['clear_cache'], array($table_name,$connection_name));
+                return call_user_func_array(self::$_config[$connection_name]['clear_cache'], array($table_name, $connection_name));
             }
         }
 
         /**
          * Add the given value to the query cache.
          */
-        protected static function _cache_query_result($cache_key, $value, $connection_name = self::DEFAULT_CONNECTION,$table_name=null) {
+        protected static function _cache_query_result($cache_key, $value, $connection_name = self::DEFAULT_CONNECTION, $table_name=null) {
             if(isset(self::$_config[$connection_name]['cache_query_result']) and is_callable(self::$_config[$connection_name]['cache_query_result'])){
-                return call_user_func_array(self::$_config[$connection_name]['cache_query_result'], array($cache_key, $value, $connection_name,$table_name));
+                return call_user_func_array(self::$_config[$connection_name]['cache_query_result'], array($cache_key, $value, $connection_name, $table_name));
             } elseif (!isset(self::$_query_cache[$connection_name])) {
                 self::$_query_cache[$connection_name] = array();
             }
@@ -1589,7 +1589,7 @@
             $caching_enabled = self::$_config[$this->_connection_name]['caching'];
 
             if ($caching_enabled) {
-                $cache_key = self::_create_cache_key($query, $this->_values,$this->_connection_name,$this->_table_name);
+                $cache_key = self::_create_cache_key($query, $this->_values, $this->_connection_name, $this->_table_name);
                 $cached_result = self::_check_query_cache($cache_key, $this->_connection_name);
 
                 if ($cached_result !== false) {
@@ -1746,7 +1746,7 @@
             $success = self::_execute($query, $values, $this->_connection_name);
             $caching_auto_clear_enabled = self::$_config[$this->_connection_name]['caching_auto_clear'];
             if($caching_auto_clear_enabled){
-                self::clear_cache($this->_table_name,$this->_connection_name);
+                self::clear_cache($this->_table_name, $this->_connection_name);
             }
             // If we've just inserted a new record, set the ID of this object
             if ($this->_is_new) {
