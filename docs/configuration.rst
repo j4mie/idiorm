@@ -278,6 +278,16 @@ by default).
 
     <?php
     ORM::configure('caching', true);
+    
+    
+Setting: ``caching_auto_clear``
+
+Idiorm's cache in never cleared by default. If you wish to automatically clear it on save, set ``caching_auto_clear`` to ``true``
+
+.. code-block:: php
+
+    <?php
+    ORM::configure('caching_auto_clear', true);
 
 When query caching is enabled, Idiorm will cache the results of every
 ``SELECT`` query it executes. If Idiorm encounters a query that has
@@ -311,18 +321,20 @@ If you wish to use custom caching functions, you can set them from the configure
 .. code-block:: php
 
     <?php
-    ORM::configure('check_query_cache', function ($cache_key,$connection_name) {
-     // your code here       
-    });
-    
-    ORM::configure('cache_query_result', function ($hash) {
-     // your code here       
-    });
-    
-    
-    ORM::configure('clear_cache', function ($connection_name) {
-     // your code here       
-    });
+        $my_cache = array();
+        ORM::configure('cache_query_result', function ($cache_key,$value,$connection_name) use (&$my_cache) {
+            $my_cache[$cache_key] = $value;
+        });
+        ORM::configure('check_query_cache', function ($cache_key,$connection_name) use (&$my_cache) {
+            if(isset($my_cache[$cache_key])){
+               return $my_cache[$cache_key];
+            } else {
+                return false;
+            }
+        });
+        ORM::configure('clear_cache', function ($connection_name) use (&$my_cache) {
+             $my_cache = array();
+        });
 
 
 .. _PDO documentation: http://php.net/manual/en/pdo.construct.php
