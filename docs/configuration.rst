@@ -316,7 +316,7 @@ Warnings and gotchas
    request are held in memory. If you are working with large quantities
    of data, you may wish to disable the cache.
    
-If you wish to use custom caching functions, you can set them from the configure option. 
+If you wish to use custom caching functions, you can set them from the configure options. 
 
 .. code-block:: php
 
@@ -334,6 +334,13 @@ If you wish to use custom caching functions, you can set them from the configure
         });
         ORM::configure('clear_cache', function ($connection_name) use (&$my_cache) {
              $my_cache = array();
+        });
+        
+        ORM::configure('create_cache_key', function ($query, $parameters) {
+            $parameter_string = join(',', $parameters);
+            $key = $query . ':' . $parameter_string;
+            $my_key = 'my-prefix'.crc32($key);
+            return $my_key;
         });
 
 

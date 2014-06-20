@@ -1536,7 +1536,10 @@
         /**
          * Create a cache key for the given query and parameters.
          */
-        protected static function _create_cache_key($query, $parameters) {
+        protected static function _create_cache_key($query, $parameters, $connection_name = self::DEFAULT_CONNECTION) {
+            if(isset(self::$_config[$connection_name]['create_cache_key']) and is_callable(self::$_config[$connection_name]['create_cache_key'])){
+                return call_user_func_array(self::$_config[$connection_name]['create_cache_key'], array($query,$parameters));
+            }
             $parameter_string = join(',', $parameters);
             $key = $query . ':' . $parameter_string;
             return sha1($key);
