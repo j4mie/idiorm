@@ -38,4 +38,18 @@ class CacheTest extends PHPUnit_Framework_TestCase {
         ORM::for_table('widget', self::ALTERNATE)->where('name', 'Steve')->where('age', 80)->find_one(); // this shouldn't run a query!
         $this->assertEquals($expected, ORM::get_last_query(self::ALTERNATE));
     }
+	public function testCustomCacheCallback() {
+        ORM::configure('check_query_cache', function ($cache_key,$connection_name) {
+            $this->assertEquals(true, is_string($cache_key));
+            $this->assertEquals(true, is_string($connection_name));
+        });
+		ORM::configure('cache_query_result', function ($hash) {
+            $this->assertEquals(true, is_string($hash));
+        });
+        ORM::configure('clear_cache', function ($connection_name) {
+             $this->assertEquals(true, is_string($connection_name));
+        });
+		ORM::for_table('widget')->where('name', 'Fred')->where('age', 67)->find_one();
+        ORM::for_table('widget')->where('name', 'Bob')->where('age', 42)->find_one();
+    }
 }
