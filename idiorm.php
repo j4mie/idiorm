@@ -1570,7 +1570,7 @@
          */
         protected static function _cache_query_result($cache_key, $value, $connection_name = self::DEFAULT_CONNECTION) {
             if(isset(self::$_config[$connection_name]['cache_query_result']) and is_callable(self::$_config[$connection_name]['cache_query_result'])){
-                return call_user_func_array(self::$_config[$connection_name]['cache_query_result'], array($cache_key,$value,$connection_name));
+                return call_user_func_array(self::$_config[$connection_name]['cache_query_result'], array($cache_key, $value, $connection_name));
             } elseif (!isset(self::$_query_cache[$connection_name])) {
                 self::$_query_cache[$connection_name] = array();
             }
