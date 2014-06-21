@@ -282,7 +282,7 @@ by default).
     
 Setting: ``caching_auto_clear``
 
-Idiorm's cache in never cleared by default. If you wish to automatically clear it on save, set ``caching_auto_clear`` to ``true``
+Idiorm's cache is never cleared by default. If you wish to automatically clear it on save, set ``caching_auto_clear`` to ``true``
 
 .. code-block:: php
 

@@ -1536,7 +1536,7 @@
         /**
          * Create a cache key for the given query and parameters.
          */
-        protected static function _create_cache_key($query, $parameters, $table_name=null, $connection_name = self::DEFAULT_CONNECTION) {
+        protected static function _create_cache_key($query, $parameters, $table_name = null, $connection_name = self::DEFAULT_CONNECTION) {
             if(isset(self::$_config[$connection_name]['create_cache_key']) and is_callable(self::$_config[$connection_name]['create_cache_key'])){
                 return call_user_func_array(self::$_config[$connection_name]['create_cache_key'], array($query, $parameters, $table_name, $connection_name));
             }
@@ -1549,7 +1549,7 @@
          * Check the query cache for the given cache key. If a value
          * is cached for the key, return the value. Otherwise, return false.
          */
-        protected static function _check_query_cache($cache_key, $table_name=null, $connection_name = self::DEFAULT_CONNECTION) {
+        protected static function _check_query_cache($cache_key, $table_name = null, $connection_name = self::DEFAULT_CONNECTION) {
             if(isset(self::$_config[$connection_name]['check_query_cache']) and is_callable(self::$_config[$connection_name]['check_query_cache'])){
                 return call_user_func_array(self::$_config[$connection_name]['check_query_cache'], array($cache_key, $table_name, $connection_name));
             } elseif (isset(self::$_query_cache[$connection_name][$cache_key])) {
@@ -1561,7 +1561,7 @@
         /**
          * Clear the query cache
          */
-        public static function clear_cache($table_name=null, $connection_name = self::DEFAULT_CONNECTION) {
+        public static function clear_cache($table_name = null, $connection_name = self::DEFAULT_CONNECTION) {
             self::$_query_cache = array();
             if(isset(self::$_config[$connection_name]['clear_cache']) and is_callable(self::$_config[$connection_name]['clear_cache'])){
                 return call_user_func_array(self::$_config[$connection_name]['clear_cache'], array($table_name, $connection_name));
@@ -1571,7 +1571,7 @@
         /**
          * Add the given value to the query cache.
          */
-        protected static function _cache_query_result($cache_key, $value, $table_name=null, $connection_name = self::DEFAULT_CONNECTION) {
+        protected static function _cache_query_result($cache_key, $value, $table_name = null, $connection_name = self::DEFAULT_CONNECTION) {
             if(isset(self::$_config[$connection_name]['cache_query_result']) and is_callable(self::$_config[$connection_name]['cache_query_result'])){
                 return call_user_func_array(self::$_config[$connection_name]['cache_query_result'], array($cache_key, $value, $table_name, $connection_name));
             } elseif (!isset(self::$_query_cache[$connection_name])) {
