@@ -99,4 +99,81 @@ class ORMTest extends PHPUnit_Framework_TestCase {
         $resultSet = ORM::for_table('test')->find_result_set();
         $resultSet->invalidFunctionCall();
     }
+
+    /**
+     * These next two tests are needed because if you have select()ed some fields,
+     * but not the primary key, then the primary key is not available for the
+     * update/delete query - see issue #203.
+     * We need to change the primary key here to something other than `id`
+     * becuase MockPDOStatement->fetch() always returns an id.
+     */
+    public function testUpdateNullPrimaryKey() {
+        try {
+            $widget = ORM::for_table('widget')
+                ->use_id_column('primary')
+                ->select('foo')
+                ->where('primary', 1)
+                ->find_one()
+            ;
+
+            $widget->foo = 'bar';
+            $widget->save();
+
+            throw new Exception('Test did not throw expected exception');
+        } catch (Exception $e) {
+            $this->assertEquals($e->getMessage(), 'Primary key ID missing from row or is null');
+        }
+    }
+
+    public function testDeleteNullPrimaryKey() {
+        try {
+            $widget = ORM::for_table('widget')
+                ->use_id_column('primary')
+                ->select('foo')
+                ->where('primary', 1)
+                ->find_one()
+            ;
+
+            $widget->delete();
+
+            throw new Exception('Test did not throw expected exception');
+        } catch (Exception $e) {
+            $this->assertEquals($e->getMessage(), 'Primary key ID missing from row or is null');
+        }
+    }
+
+    public function testNullPrimaryKey() {
+        try {
+            $widget = ORM::for_table('widget')
+                ->use_id_column('primary')
+                ->select('foo')
+                ->where('primary', 1)
+                ->find_one()
+            ;
+
+            $widget->id(true);
+
+            throw new Exception('Test did not throw expected exception');
+        } catch (Exception $e) {
+            $this->assertEquals($e->getMessage(), 'Primary key ID missing from row or is null');
+        }
+    }
+
+    public function testNullPrimaryKeyPart() {
+        try {
+            $widget = ORM::for_table('widget')
+                ->use_id_column(array('id', 'primary'))
+                ->select('foo')
+                ->where('id', 1)
+                ->where('primary', 1)
+                ->find_one()
+            ;
+
+            $widget->id(true);
+
+            throw new Exception('Test did not throw expected exception');
+        } catch (Exception $e) {
+            $this->assertEquals($e->getMessage(), 'Primary key ID contains null value(s)');
+        }
+    }
 }
