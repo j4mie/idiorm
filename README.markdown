@@ -76,7 +76,7 @@ foreach ($tweets as $tweet) {
 Changelog
 ---------
 
-#### 1.5.0 - release 2014-06-XX
+#### 1.5.0 - release 2014-06-22
 
 * Multiple OR'ed conditions support [[lrlopez](https://github.com/lrlopez)] - [issue #201](https://github.com/j4mie/idiorm/issues/201)
 * `where_id_in()` for selecting multiple records by primary key [[lrlopez](https://github.com/lrlopez)] - [issue #202](https://github.com/j4mie/idiorm/issues/202)
