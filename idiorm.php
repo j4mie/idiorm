@@ -413,22 +413,14 @@
             $time = microtime(true);
 
             foreach ($parameters as $key => &$param) {
-                switch (true) {
-                    case is_null($param):
-                        $type = PDO::PARAM_NULL;
-                        break;
-
-                    case is_bool($param):
-                        $type = PDO::PARAM_BOOL;
-                        break;
-
-                    case is_int($param):
-                        $type = PDO::PARAM_INT;
-                        break;
-
-                    default:
-                        $type = PDO::PARAM_STR;
-                        break;
+                if (is_null($param)) {
+                    $type = PDO::PARAM_NULL;
+                } else if (is_bool($param)) {
+                    $type = PDO::PARAM_BOOL;
+                } else if (is_int($param)) {
+                    $type = PDO::PARAM_INT;
+                } else {
+                    $type = PDO::PARAM_STR;
                 }
 
                 $statement->bindParam(is_int($key) ? ++$key : $key, $param, $type);
