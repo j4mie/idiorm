@@ -434,15 +434,6 @@
                 $statement->bindParam(is_int($key) ? ++$key : $key, $param, $type);
             }
 
-            $count = count($parameters);
-            for ($i = 0; $i < $count; $i++) {
-                $type = PDO::PARAM_STR;
-                if (is_null($parameters[$i])) $type = PDO::PARAM_NULL;
-                if (is_bool($parameters[$i])) $type = PDO::PARAM_BOOL;
-                if (is_int($parameters[$i])) $type = PDO::PARAM_INT;
-                $statement->bindParam($i + 1, $parameters[$i], $type);
-            }
-
             $q = $statement->execute();
             self::_log_query($query, $parameters, $connection_name, (microtime(true)-$time));
 
