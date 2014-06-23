@@ -412,6 +412,28 @@
             self::$_last_statement = $statement;
             $time = microtime(true);
 
+            foreach ($parameters as $key => &$param) {
+                switch (true) {
+                    case is_null($param):
+                        $type = PDO::PARAM_NULL;
+                        break;
+
+                    case is_bool($param):
+                        $type = PDO::PARAM_BOOL;
+                        break;
+
+                    case is_int($param):
+                        $type = PDO::PARAM_INT;
+                        break;
+
+                    default:
+                        $type = PDO::PARAM_STR;
+                        break;
+                }
+
+                $statement->bindParam(is_int($key) ? ++$key : $key, $param, $type);
+            }
+
             $count = count($parameters);
             for ($i = 0; $i < $count; $i++) {
                 $type = PDO::PARAM_STR;
