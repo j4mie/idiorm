@@ -412,13 +412,12 @@
             self::$_last_statement = $statement;
             $time = microtime(true);
 
-            $count = count($parameters);
-            for ($i = 0; $i < $count; $i++) {
+            foreach ($parameters as $key => $value) {
                 $type = PDO::PARAM_STR;
-                if (is_null($parameters[$i])) $type = PDO::PARAM_NULL;
-                if (is_bool($parameters[$i])) $type = PDO::PARAM_BOOL;
-                if (is_int($parameters[$i])) $type = PDO::PARAM_INT;
-                $statement->bindParam($i + 1, $parameters[$i], $type);
+                if (is_null($parameters[$key])) $type = PDO::PARAM_NULL;
+                if (is_bool($parameters[$key])) $type = PDO::PARAM_BOOL;
+                if (is_int($parameters[$key])) $type = PDO::PARAM_INT;
+                $statement->bindParam(is_int($key) ? ($key + 1) : $key, $parameters[$key], $type);
             }
 
             $q = $statement->execute();
