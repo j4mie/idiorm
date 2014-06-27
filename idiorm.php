@@ -456,29 +456,33 @@
                 self::$_query_log[$connection_name] = array();
             }
 
-            // Strip out any non-integer indexes from the parameters
-            foreach($parameters as $key => $value) {
-	            if (!is_int($key)) unset($parameters[$key]);
-            }
-
-            if (count($parameters) > 0) {
+            if (empty($parameters)) {
+                $bound_query = $query;
+            } else {
                 // Escape the parameters
                 $parameters = array_map(array(self::get_db($connection_name), 'quote'), $parameters);
 
-                // Avoid %format collision for vsprintf
-                $query = str_replace("%", "%%", $query);
+                if (array_values($parameters) === $parameters) {
+                    // ? placeholders
+                    // Avoid %format collision for vsprintf
+                    $query = str_replace("%", "%%", $query);
 
-                // Replace placeholders in the query for vsprintf
-                if(false !== strpos($query, "'") || false !== strpos($query, '"')) {
-                    $query = IdiormString::str_replace_outside_quotes("?", "%s", $query);
+                    // Replace placeholders in the query for vsprintf
+                    if(false !== strpos($query, "'") || false !== strpos($query, '"')) {
+                        $query = IdiormString::str_replace_outside_quotes("?", "%s", $query);
+                    } else {
+                        $query = str_replace("?", "%s", $query);
+                    }
+
+                    // Replace the question marks in the query with the parameters
+                    $bound_query = vsprintf($query, $parameters);
                 } else {
-                    $query = str_replace("?", "%s", $query);
+                    // named placeholders
+                    foreach ($parameters as $key => $val) {
+                        $query = str_replace($key, $val, $query);
+                    }
+                    $bound_query = $query;
                 }
-
-                // Replace the question marks in the query with the parameters
-                $bound_query = vsprintf($query, $parameters);
-            } else {
-                $bound_query = $query;
             }
 
             self::$_last_query = $bound_query;

@@ -304,6 +304,12 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals($expected, ORM::get_last_query());
     }
 
+    public function testRawQueryWithNamedPlaceholders() {
+        ORM::for_table('widget')->raw_query('SELECT `w`.* FROM `widget` w WHERE `name` = :name AND `age` = :age', array(':name' => 'Fred', ':age' => 5))->find_many();
+        $expected = "SELECT `w`.* FROM `widget` w WHERE `name` = 'Fred' AND `age` = '5'";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
     public function testSimpleResultColumn() {
         ORM::for_table('widget')->select('name')->find_many();
         $expected = "SELECT `name` FROM `widget`";
