@@ -75,12 +75,16 @@ foreach ($tweets as $tweet) {
 
 Changelog
 ---------
+#### 1.5.2 - released 2014-06-27
 
-#### 1.5.1 - release 2014-06-23
+* Support named placeholders logging and test [[m92o](https://github.com/m92o)] - [issue #223](https://github.com/j4mie/idiorm/issues/223)
+* `having_id_is()` reference undefined variable `$value` [[Treffynnon](https://github.com/treffynnon)] - [issue #224](https://github.com/j4mie/idiorm/issues/224)
+
+#### 1.5.1 - released 2014-06-23
 
 * Binding of named parameters was broken [[cainmi](https://github.com/cainmi)] - [issue #221](https://github.com/j4mie/idiorm/pull/221)
 
-#### 1.5.0 - release 2014-06-22
+#### 1.5.0 - released 2014-06-22
 
 * Multiple OR'ed conditions support [[lrlopez](https://github.com/lrlopez)] - [issue #201](https://github.com/j4mie/idiorm/issues/201)
 * `where_id_in()` for selecting multiple records by primary key [[lrlopez](https://github.com/lrlopez)] - [issue #202](https://github.com/j4mie/idiorm/issues/202)
@@ -100,13 +104,13 @@ Changelog
 * Improve where statement precendence documentation [[thomasahle](https://github.com/thomasahle)] - [issue #190](https://github.com/j4mie/idiorm/issues/190)
 * Improve testing checks [[charsleysa](https://github.com/charsleysa)] - [issue #173](https://github.com/j4mie/idiorm/issues/173)
 
-#### 1.4.1 - release 2013-12-12
+#### 1.4.1 - released 2013-12-12
 
 **Patch update to remove a broken pull request** - may have consequences for users of 1.4.0 that exploited the "`find_many()` now returns an associative array with the databases primary ID as the array keys" change that was merged in 1.4.0.
 
 * Back out pull request/issue [#133](https://github.com/j4mie/idiorm/pull/133) as it breaks backwards compatibility in previously unexpected ways (see [#162](https://github.com/j4mie/idiorm/pull/162), [#156](https://github.com/j4mie/idiorm/issues/156) and [#133](https://github.com/j4mie/idiorm/pull/133#issuecomment-29063108)) - sorry for merging this change into Idiorm - closes [issue 156](https://github.com/j4mie/idiorm/issues/156)
 
-#### 1.4.0 - release 2013-09-05
+#### 1.4.0 - released 2013-09-05
 
 * `find_many()` now returns an associative array with the databases primary ID as the array keys [[Surt](https://github.com/Surt)] - [issue #133](https://github.com/j4mie/idiorm/issues/133)
 * Calls to `set()` and `set_expr()` return `$this` allowing them to be chained [[Surt](https://github.com/Surt)]
@@ -123,7 +127,7 @@ Changelog
 * Fix docblock [[ulrikjohansson](https://github.com/ulrikjohansson)] - [issue #147](https://github.com/j4mie/idiorm/issues/147)
 * Fix incorrect variable name in querying documentation [[fridde](https://github.com/fridde)] - [issue #146](https://github.com/j4mie/idiorm/issues/146)
 
-#### 1.3.0 - release 2013-01-31
+#### 1.3.0 - released 2013-01-31
 
 * Documentation moved to [idiorm.rtfd.org](http://idiorm.rtfd.org) and now built using [Sphinx](http://sphinx-doc.org/)
 * Add support for multiple database connections - closes [issue #15](https://github.com/j4mie/idiorm/issues/15) [[tag](https://github.com/tag)]
@@ -143,19 +147,19 @@ Changelog
 * Fix issue with aggregate functions always returning `int` when is `float` sometimes required - closes [issue #92](https://github.com/j4mie/idiorm/issues/92)
 * Move testing into PHPUnit to unify method testing and query generation testing
 
-#### 1.2.3 - release 2012-11-28
+#### 1.2.3 - released 2012-11-28
 
 * Fix [issue #78](https://github.com/j4mie/idiorm/issues/78) - remove use of PHP 5.3 static call
 
-#### 1.2.2 - release 2012-11-15
+#### 1.2.2 - released 2012-11-15
 
 * Fix bug where input parameters were sent as part-indexed, part associative
 
-#### 1.2.1 - release 2012-11-15
+#### 1.2.1 - released 2012-11-15
 
 * Fix minor bug caused by IdiormStringException not extending Exception
 
-#### 1.2.0 - release 2012-11-14
+#### 1.2.0 - released 2012-11-14
 
 * Setup composer for installation via packagist (j4mie/idiorm)
 * Add `order_by_expr` method [[sandermarechal](http://github.com/sandermarechal)]
@@ -173,7 +177,7 @@ Changelog
 * Add `find_array` to get the records as associative arrays [[Surt](https://github.com/Surt)] - closes [issue #17](https://github.com/j4mie/idiorm/issues/17)
 * Fix bug in `_log_query` with `?` and `%` supplied in raw where statements etc. - closes [issue #57](https://github.com/j4mie/idiorm/issues/57) [[ridgerunner](https://github.com/ridgerunner)]
 
-#### 1.1.1 - release 2011-01-30
+#### 1.1.1 - released 2011-01-30
 
 * Fix bug in quoting column wildcard. j4mie/paris#12
 * Small documentation improvements
