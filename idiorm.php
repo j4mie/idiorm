@@ -390,6 +390,24 @@
         }
 
         /**
+         * Use ORM::for_table('tablename')->insert(array('field1'=>'value1', 'field2'=>'value2'));
+         * @param $fields
+         * @param array  $parameters Optional bound parameters
+         * @param string $connection_name Which connection to use
+         * @return int lastInserId
+         */
+        public function insert($fields, $parameters = array(), $connection_name = self::DEFAULT_CONNECTION) {
+            $columns = implode(", ",array_keys($fields));
+            $escaped_values = array_map('mysql_real_escape_string', array_values($fields));
+            $values  = implode("', '", $escaped_values);
+            $query = "INSERT INTO ".$this->_table_name." (".$columns.") VALUES ('".$values."')";
+
+            $this->raw_execute($query, $parameters, $connection_name);
+            return self::$_db[$this->_connection_name]->lastInsertId();
+        }
+
+
+        /**
          * Returns the PDOStatement instance last used by any connection wrapped by the ORM.
          * Useful for access to PDOStatement::rowCount() or error information
          * @return PDOStatement
