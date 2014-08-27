@@ -1,4 +1,4 @@
-Mulitple Connections
+Multiple Connections
 ====================
 Idiorm now works with multiple conections. Most of the static functions
 work with an optional connection name as an extra parameter. For the
