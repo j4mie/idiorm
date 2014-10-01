@@ -36,6 +36,11 @@
      * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
      * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
      *
+     *
+     * The methods documented below are magic methods that conform to PSR-1.
+     * This documentation exposes these methods to doc generators and IDEs.
+     * @see http://www.php-fig.org/psr/psr-1/
+     *
      * @method static array|string getConfig($key = null, $connection_name = self::DEFAULT_CONNECTION)
      * @method static null resetConfig()
      * @method static \ORM forTable($table_name, $connection_name = self::DEFAULT_CONNECTION)
