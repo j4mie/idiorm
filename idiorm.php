@@ -1829,7 +1829,7 @@
             $statement = self::get_last_statement();
 
             $rows = array();
-            while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
+            while ($row = $statement->fetch(PDO::FETCH_NAMED)) {
                 $rows[] = $row;
             }
 
@@ -1856,9 +1856,7 @@
                 return $this->_data;
             }
             $args = func_get_args();
-            return array_intersect_key($this->_data, array_flip($args));
-        }
-
+            return array_intersect_key($this->_data, array_flip($args)); } 
         /**
          * Return the value of a property of this object (database row)
          * or null if not present.
