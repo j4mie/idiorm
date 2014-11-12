@@ -1,13 +1,9 @@
 {
-    "name": "j4mie/idiorm",
+    "name": "josgilmo/idiorm",
     "type": "library",
     "description": "A lightweight nearly-zero-configuration object-relational mapper and fluent query builder for PHP5",
     "keywords": ["idiorm", "orm", "query builder"],
     "homepage": "http://j4mie.github.com/idiormandparis",
-    "support": {
-        "issues": "https://github.com/j4mie/idiorm/issues",
-        "source": "https://github.com/j4mie/idiorm"
-    },
     "authors": [
         {
             "name": "Jamie Matthews",
