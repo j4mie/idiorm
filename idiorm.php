@@ -2007,7 +2007,7 @@
                 self::clear_cache($this->_table_name, $this->_connection_name);
             }
             // If we've just inserted a new record, set the ID of this object
-            if ($this->_is_new) {
+            if ($success && $this->_is_new) {
                 $this->_is_new = false;
                 if ($this->count_null_id_columns() != 0) {
                     $db = self::get_db($this->_connection_name);
