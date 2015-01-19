@@ -361,7 +361,7 @@ If you wish to use custom caching functions, you can set them from the configure
 
 
 .. _PDO documentation: http://php.net/manual/en/pdo.construct.php
-.. _the PDO documentation: http://www.php.net/manual/en/pdo.construct.php
-.. _the PDO set attribute documentation: http://uk2.php.net/manual/en/pdo.setattribute.php
-.. _PDOStatement documentation: http://www.php.net/manual/en/class.pdostatement.php
+.. _the PDO documentation: http://php.net/manual/en/pdo.construct.php
+.. _the PDO set attribute documentation: http://php.net/manual/en/pdo.setattribute.php
+.. _PDOStatement documentation: http://php.net/manual/en/class.pdostatement.php
 .. _Memcached: http://www.memcached.org/
