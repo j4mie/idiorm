@@ -75,12 +75,11 @@ foreach ($tweets as $tweet) {
 
 Changelog
 ---------
-#### 1.5.3 - released 2014-10-01
+#### 1.5.2 - released 2014-XX-XX
 
-* Add @method tags for magic methods [[stellis](https://github.com/stellis)]
-
-#### 1.5.2 - released 2014-06-27
-
+* Add @method tags for magic methods [[stellis](https://github.com/stellis)] - [issue #237](https://github.com/j4mie/idiorm/issues/237)
+* Adding Code Climate badge to the readme file [[e3betht](https://github.com/e3betht)] - [issue #260](https://github.com/j4mie/idiorm/issues/260)
+* Typo in navigation [[leongersen](https://github.com/leongersen)] - [issue #257](https://github.com/j4mie/idiorm/issues/257)
 * Support named placeholders logging and test [[m92o](https://github.com/m92o)] - [issue #223](https://github.com/j4mie/idiorm/issues/223)
 * `having_id_is()` reference undefined variable `$value` [[Treffynnon](https://github.com/treffynnon)] - [issue #224](https://github.com/j4mie/idiorm/issues/224)
 
