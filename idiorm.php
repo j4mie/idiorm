@@ -36,6 +36,80 @@
      * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
      * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
      *
+     *
+     * The methods documented below are magic methods that conform to PSR-1.
+     * This documentation exposes these methods to doc generators and IDEs.
+     * @see http://www.php-fig.org/psr/psr-1/
+     *
+     * @method static array|string getConfig($key = null, $connection_name = self::DEFAULT_CONNECTION)
+     * @method static null resetConfig()
+     * @method static \ORM forTable($table_name, $connection_name = self::DEFAULT_CONNECTION)
+     * @method static null setDb($db, $connection_name = self::DEFAULT_CONNECTION)
+     * @method static null resetDb()
+     * @method static null setupLimitClauseStyle($connection_name)
+     * @method static \PDO getDb($connection_name = self::DEFAULT_CONNECTION)
+     * @method static bool rawExecute($query, $parameters = array())
+     * @method static \PDOStatement getLastStatement()
+     * @method static string getLastQuery($connection_name = null)
+     * @method static array getQueryLog($connection_name = self::DEFAULT_CONNECTION)
+     * @method array getConnectionNames()
+     * @method $this useIdColumn($id_column)
+     * @method \ORM|bool findOne($id=null)
+     * @method array|\IdiormResultSet findMany()
+     * @method \IdiormResultSet findResultSet()
+     * @method array findArray()
+     * @method $this forceAllDirty()
+     * @method $this rawQuery($query, $parameters = array())
+     * @method $this tableAlias($alias)
+     * @method int countNullIdColumns()
+     * @method $this selectExpr($expr, $alias=null)
+     * @method \ORM selectMany()
+     * @method \ORM selectManyExpr()
+     * @method $this rawJoin($table, $constraint, $table_alias, $parameters = array())
+     * @method $this innerJoin($table, $constraint, $table_alias=null)
+     * @method $this leftOuterJoin($table, $constraint, $table_alias=null)
+     * @method $this rightOuterJoin($table, $constraint, $table_alias=null)
+     * @method $this fullOuterJoin($table, $constraint, $table_alias=null)
+     * @method $this whereEqual($column_name, $value=null)
+     * @method $this whereNotEqual($column_name, $value=null)
+     * @method $this whereIdIs($id)
+     * @method $this whereAnyIs($values, $operator='=')
+     * @method array|string whereIdIn($ids)
+     * @method $this whereLike($column_name, $value=null)
+     * @method $this whereNotLike($column_name, $value=null)
+     * @method $this whereGt($column_name, $value=null)
+     * @method $this whereLt($column_name, $value=null)
+     * @method $this whereGte($column_name, $value=null)
+     * @method $this whereLte($column_name, $value=null)
+     * @method $this whereIn($column_name, $values)
+     * @method $this whereNotIn($column_name, $values)
+     * @method $this whereNull($column_name)
+     * @method $this whereNotNull($column_name)
+     * @method $this whereRaw($clause, $parameters=array())
+     * @method $this orderByDesc($column_name)
+     * @method $this orderByAsc($column_name)
+     * @method $this orderByExpr($clause)
+     * @method $this groupBy($column_name)
+     * @method $this groupByExpr($expr)
+     * @method $this havingEqual($column_name, $value=null)
+     * @method $this havingNotEqual($column_name, $value=null)
+     * @method $this havingIdIs($id)
+     * @method $this havingLike($column_name, $value=null)
+     * @method $this havingNotLike($column_name, $value=null)
+     * @method $this havingGt($column_name, $value=null)
+     * @method $this havingLt($column_name, $value=null)
+     * @method $this havingGte($column_name, $value=null)
+     * @method $this havingLte($column_name, $value=null)
+     * @method $this havingIn($column_name, $values=null)
+     * @method $this havingNotIn($column_name, $values=null)
+     * @method $this havingNull($column_name)
+     * @method $this havingNotNull($column_name)
+     * @method $this havingRaw($clause, $parameters=array())
+     * @method static this clearCache($table_name = null, $connection_name = self::DEFAULT_CONNECTION)
+     * @method array asArray()
+     * @method bool setExpr($key, $value = null)
+     * @method bool isDirty($key)
+     * @method bool isNew()
      */
 
     class ORM implements ArrayAccess {
@@ -2317,6 +2391,8 @@
     /**
      * A result set class for working with collections of model instances
      * @author Simon Holywell <treffynnon@php.net>
+     * @method null setResults(array $results)
+     * @method array getResults()
      */
     class IdiormResultSet implements Countable, IteratorAggregate, ArrayAccess, Serializable {
         /**

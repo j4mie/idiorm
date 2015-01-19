@@ -75,6 +75,10 @@ foreach ($tweets as $tweet) {
 
 Changelog
 ---------
+#### 1.5.3 - released 2014-10-01
+
+* Add @method tags for magic methods [[stellis](https://github.com/stellis)]
+
 #### 1.5.2 - released 2014-06-27
 
 * Support named placeholders logging and test [[m92o](https://github.com/m92o)] - [issue #223](https://github.com/j4mie/idiorm/issues/223)
