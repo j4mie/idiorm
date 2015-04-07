@@ -1964,7 +1964,7 @@
          * object was saved.
          */
         public function is_dirty($key) {
-            return isset($this->_dirty_fields[$key]);
+            return array_key_exists($key, $this->_dirty_fields);
         }
 
         /**
