@@ -176,4 +176,11 @@ class ORMTest extends PHPUnit_Framework_TestCase {
             $this->assertEquals($e->getMessage(), 'Primary key ID contains null value(s)');
         }
     }
+
+    public function testAsArray() {
+        $model = ORM::for_table('test')->create(array('foo' => 1, 'bar' => 2));
+        $this->assertEquals($model->as_array(), array('foo' => 1, 'bar' => 2));
+        $this->assertEquals($model->as_array('foo'), array('foo' => 1));
+    }
+
 }
