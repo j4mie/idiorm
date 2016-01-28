@@ -2,3 +2,4 @@
 *.sqlite
 docs/_build
 /phpunit.phar
+nbproject/*

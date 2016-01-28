@@ -165,6 +165,12 @@
         // Name of the column to use as the primary key for
         // this instance only. Overrides the config settings.
         protected $_instance_id_column = null;
+        
+        // Refresh cache for current query
+        protected $_refresh_cache = false;
+
+        // Disable caching for current query
+        protected $_no_caching = false;
 
         // ---------------------- //
         // --- STATIC METHODS --- //
@@ -1553,6 +1559,26 @@
         }
 
         /**
+        * Activate cache refreshing for current query
+        *
+        * @return \ORM
+        */
+        public function refresh_cache() {
+           $this->_refresh_cache = true;
+           return $this;
+        }
+
+        /**
+        * Disable caching for current query
+        *
+        * @return \ORM
+        */
+        public function no_caching() {
+           $this->_no_caching = true;
+           return $this;
+        }
+
+        /**
          * Build a SELECT statement based on the clauses that have
          * been passed to this instance by chaining method calls.
          */
@@ -1815,13 +1841,16 @@
         protected function _run() {
             $query = $this->_build_select();
             $caching_enabled = self::$_config[$this->_connection_name]['caching'];
-
-            if ($caching_enabled) {
+            
+            if ($caching_enabled && !$this->_no_caching) {
                 $cache_key = self::_create_cache_key($query, $this->_values, $this->_table_name, $this->_connection_name);
-                $cached_result = self::_check_query_cache($cache_key, $this->_table_name, $this->_connection_name);
 
-                if ($cached_result !== false) {
-                    return $cached_result;
+                if (!$this->_refresh_cache) {
+                    $cached_result = self::_check_query_cache($cache_key, $this->_table_name, $this->_connection_name);
+
+                    if ($cached_result !== false) {
+                        return $cached_result;
+                    }
                 }
             }
 
@@ -1833,7 +1862,7 @@
                 $rows[] = $row;
             }
 
-            if ($caching_enabled) {
+            if ($caching_enabled && !$this->_no_caching) {
                 self::_cache_query_result($cache_key, $rows, $this->_table_name, $this->_connection_name);
             }
 
