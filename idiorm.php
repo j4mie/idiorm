@@ -193,7 +193,7 @@
                     self::configure($conf_key, $conf_value, $connection_name);
                 }
             } else {
-                if (is_null($value)) {
+                if (null === $value) {
                     // Shortcut: If only one string argument is passed, 
                     // assume it's a connection string
                     $value = $key;
@@ -280,7 +280,7 @@
         public static function set_db($db, $connection_name = self::DEFAULT_CONNECTION) {
             self::_setup_db_config($connection_name);
             self::$_db[$connection_name] = $db;
-            if(!is_null(self::$_db[$connection_name])) {
+            if(null !== self::$_db[$connection_name]) {
                 self::_setup_identifier_quote_character($connection_name);
                 self::_setup_limit_clause_style($connection_name);
             }
@@ -301,7 +301,7 @@
          * @param string $connection_name Which connection to use
          */
         protected static function _setup_identifier_quote_character($connection_name) {
-            if (is_null(self::$_config[$connection_name]['identifier_quote_character'])) {
+            if (null === self::$_config[$connection_name]['identifier_quote_character']) {
                 self::$_config[$connection_name]['identifier_quote_character'] =
                     self::_detect_identifier_quote_character($connection_name);
             }
@@ -314,7 +314,7 @@
          * @param string $connection_name Which connection to use
          */
         public static function _setup_limit_clause_style($connection_name) {
-            if (is_null(self::$_config[$connection_name]['limit_clause_style'])) {
+            if (null === self::$_config[$connection_name]['limit_clause_style']) {
                 self::$_config[$connection_name]['limit_clause_style'] =
                     self::_detect_limit_clause_style($connection_name);
             }
@@ -413,7 +413,7 @@
             $time = microtime(true);
 
             foreach ($parameters as $key => &$param) {
-                if (is_null($param)) {
+                if (null === $param) {
                     $type = PDO::PARAM_NULL;
                 } else if (is_bool($param)) {
                     $type = PDO::PARAM_BOOL;
@@ -560,7 +560,7 @@
          */
         public function create($data=null) {
             $this->_is_new = true;
-            if (!is_null($data)) {
+            if (null !== $data) {
                 return $this->hydrate($data)->force_all_dirty();
             }
             return $this;
@@ -600,7 +600,7 @@
          * lookup on the table.
          */
         public function find_one($id=null) {
-            if (!is_null($id)) {
+            if (null !== $id) {
                 $this->where_id_is($id);
             }
             $this->limit(1);
@@ -780,7 +780,7 @@
          * argument is the alias to return the expression as.
          */
         protected function _add_result_column($expr, $alias=null) {
-            if (!is_null($alias)) {
+            if (null !== $alias) {
                 $expr .= " AS " . $this->_quote_identifier($alias);
             }
 
@@ -801,7 +801,7 @@
             if (is_array($this->_get_id_column_name())) {
                 return count(array_filter($this->id(), 'is_null'));
             } else {
-                return is_null($this->id()) ? 1 : 0;
+                return (null === $this->id()) ? 1 : 0;
             }
         }
 
@@ -946,7 +946,7 @@
             $table = $this->_quote_identifier($table);
 
             // Add table alias if present
-            if (!is_null($table_alias)) {
+            if (null !== $table_alias) {
                 $table_alias = $this->_quote_identifier($table_alias);
                 $table .= " {$table_alias}";
             }
@@ -968,7 +968,7 @@
          */
         public function raw_join($table, $constraint, $table_alias, $parameters = array()) {
             // Add table alias if present
-            if (!is_null($table_alias)) {
+            if (null !== $table_alias) {
                 $table_alias = $this->_quote_identifier($table_alias);
                 $table .= " {$table_alias}";
             }
@@ -1143,7 +1143,7 @@
                 // Add the table name in case of ambiguous columns
                 if (count($result->_join_sources) > 0 && strpos($key, '.') === false) {
                     $table = $result->_table_name;
-                    if (!is_null($result->_table_alias)) {
+                    if (null !== $result->_table_alias) {
                         $table = $result->_table_alias;
                     }
 
@@ -1585,7 +1585,7 @@
             $fragment = 'SELECT ';
             $result_columns = join(', ', $this->_result_columns);
 
-            if (!is_null($this->_limit) &&
+            if (null !== $this->_limit &&
                 self::$_config[$this->_connection_name]['limit_clause_style'] === ORM::LIMIT_STYLE_TOP_N) {
                 $fragment .= "TOP {$this->_limit} ";
             }
@@ -1596,7 +1596,7 @@
 
             $fragment .= "{$result_columns} FROM " . $this->_quote_identifier($this->_table_name);
 
-            if (!is_null($this->_table_alias)) {
+            if (null !== $this->_table_alias) {
                 $fragment .= " " . $this->_quote_identifier($this->_table_alias);
             }
             return $fragment;
@@ -1673,7 +1673,7 @@
          */
         protected function _build_limit() {
             $fragment = '';
-            if (!is_null($this->_limit) &&
+            if (null !== $this->_limit &&
                 self::$_config[$this->_connection_name]['limit_clause_style'] == ORM::LIMIT_STYLE_LIMIT) {
                 if (self::get_db($this->_connection_name)->getAttribute(PDO::ATTR_DRIVER_NAME) == 'firebird') {
                     $fragment = 'ROWS';
@@ -1689,7 +1689,7 @@
          * Build OFFSET
          */
         protected function _build_offset() {
-            if (!is_null($this->_offset)) {
+            if (null !== $this->_offset) {
                 $clause = 'OFFSET';
                 if (self::get_db($this->_connection_name)->getAttribute(PDO::ATTR_DRIVER_NAME) == 'firebird') {
                     $clause = 'TO';
@@ -1883,7 +1883,7 @@
          * the primary key ID of the row.
          */
         protected function _get_id_column_name() {
-            if (!is_null($this->_instance_id_column)) {
+            if (null !== $this->_instance_id_column) {
                 return $this->_instance_id_column;
             }
             if (isset(self::$_config[$this->_connection_name]['id_column_overrides'][$this->_table_name])) {
@@ -2132,7 +2132,7 @@
         }
 
         public function offsetSet($key, $value) {
-            if(is_null($key)) {
+            if(null === $key) {
                 throw new InvalidArgumentException('You must specify a key/array index.');
             }
             $this->set($key, $value);
