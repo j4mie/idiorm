@@ -50,6 +50,8 @@ class ORM implements ArrayAccess {
 
   const DEFAULT_CONNECTION = 'default';
 
+  const MAX_PER_PAGE = 25;
+
   // Limit clause style
   const LIMIT_STYLE_TOP_N = "top";
   const LIMIT_STYLE_LIMIT = "limit";
@@ -57,6 +59,7 @@ class ORM implements ArrayAccess {
   // ------------------------ //
   // --- CLASS PROPERTIES --- //
   // ------------------------ //
+
 
   // Class configuration
   protected static $_default_config = array(
@@ -165,6 +168,11 @@ class ORM implements ArrayAccess {
   // Name of the column to use as the primary key for
   // this instance only. Overrides the config settings.
   protected $_instance_id_column = null;
+
+  protected $_page = 1;
+  protected $_pages = null;
+  protected $_rows_all = null;
+  protected $_rows_page = null;
 
   // ---------------------- //
   // --- STATIC METHODS --- //
@@ -712,6 +720,84 @@ class ORM implements ArrayAccess {
   public function count($column = '*') {
     return $this->_call_aggregate_db_function(__FUNCTION__, $column);
   }
+
+  /**
+   * Set max rows per page
+   *
+   * @param  int   [$max]
+   * @return $this
+   */
+  public function max_per_page($max = self::MAX_PER_PAGE) {
+    $this->_rows_page = intval($max);
+    return $this;
+  }
+
+  /**
+   * Count Pages
+   *
+   * @param  string  [$column]
+   * @return int
+   */
+  public function count_pages($column = '*') {
+    $old_limit  = $this->_limit;
+    $old_offset = $this->_offset;
+
+    if (is_null($this->_rows_page)) {
+      $this->max_per_page();
+    }
+    $this->_pages = 1;
+    $this->_limit = null;
+    $this->_offset = null;
+    $this->_rows_all = $this->count($column);
+    if (intval($this->_rows_all) > 0) {
+      $this->_pages = intval(ceil($this->_rows_all / $this->_rows_page));
+    }
+    $this->_limit = $old_limit;
+    $this->_offset = $old_offset;
+    return $this->_pages;
+  }
+
+  /**
+   * Get current page
+   *
+   * @return int
+   */
+  public function current_page() {
+    return $this->_page;
+  }
+
+  /**
+   * Load data for page
+   * @param int                     [$page]
+   * @return array|IdiormResultSet
+   */
+  public function page($page = 1) {
+    if ($page > $this->_pages) {
+      $page = 1;
+    }
+    if ($page < 1) {
+      $page = $this->_pages;
+    }
+    $this->_offset = (($page-1) * $this->_rows_page);
+    $this->_limit = $this->_rows_page;
+    $this->_page = $page;
+    return $this->find_many();
+  }
+
+  /**
+   * @return array|IdiormResultSet
+   */
+  public function page_next() {
+    return $this->page($this->_page+1);
+  }
+
+  /**
+   * @return array|IdiormResultSet
+   */
+  public function page_previous() {
+    return $this->page($this->_page-1);
+  }
+
 
   /**
    * Tell the ORM that you wish to execute a MAX query.
