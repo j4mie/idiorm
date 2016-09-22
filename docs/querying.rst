@@ -344,7 +344,7 @@ column using a second parameter:
                 ->find_many();
 
     // Creates SQL:
-    SELECT * FROM `widget` WHERE (( `name` = 'Joe' AND `age` > '10' ) OR ( `name` = 'Fred' AND `age` > '20' ));
+    SELECT * FROM `widget` WHERE (( `name` = 'Joe' AND `age` = '10' ) OR ( `name` = 'Fred' AND `age` > '20' ));
 
 If you want to set the default operator for all the columns, just pass it as the second parameter:
 
