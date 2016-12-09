@@ -1985,6 +1985,7 @@
             // remove any expression fields as they are already baked into the query
             $values = array_values(array_diff_key($this->_dirty_fields, $this->_expr_fields));
 
+            $this->_is_new = is_null($this->id());
             if (!$this->_is_new) { // UPDATE
                 // If there are no dirty values, do nothing
                 if (empty($values) && empty($this->_expr_fields)) {
