@@ -1,4 +1,4 @@
-Mulitple Connections
+Multiple Connections
 ====================
 Idiorm now works with multiple conections. Most of the static functions
 work with an optional connection name as an extra parameter. For the
@@ -77,3 +77,4 @@ Notes
 * Caching *should* work with multiple connections (remember to turn caching
   on for each connection), but the unit tests are not robust. Please report
   any errors.
+  
