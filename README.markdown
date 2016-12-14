@@ -75,13 +75,18 @@ foreach ($tweets as $tweet) {
 
 Changelog
 ---------
-#### 1.5.2 - released 2014-XX-XX
+#### 1.5.2 - released 2016-XX-XX
 
+* Fix autoincremented compound keys inserts [[lrlopez](https://github.com/lrlopez)] - [issue #233](https://github.com/j4mie/idiorm/issues/233) and [pull #235](https://github.com/j4mie/idiorm/pull/235)
 * Add @method tags for magic methods [[stellis](https://github.com/stellis)] - [issue #237](https://github.com/j4mie/idiorm/issues/237)
+* Ensure `is_dirty()` returns correctly when fed null or an empty string [[tentwofour](https://github.com/tentwofour)] - [issue #268](https://github.com/j4mie/idiorm/issues/268)
 * Adding Code Climate badge to the readme file [[e3betht](https://github.com/e3betht)] - [issue #260](https://github.com/j4mie/idiorm/issues/260)
 * Typo in navigation [[leongersen](https://github.com/leongersen)] - [issue #257](https://github.com/j4mie/idiorm/issues/257)
 * Support named placeholders logging and test [[m92o](https://github.com/m92o)] - [issue #223](https://github.com/j4mie/idiorm/issues/223)
 * `having_id_is()` reference undefined variable `$value` [[Treffynnon](https://github.com/treffynnon)] - [issue #224](https://github.com/j4mie/idiorm/issues/224)
+* Documentation fix - ORM query output for `where_any_is()` [[uovidiu](https://github.com/uovidiu)] - [issue #306](https://github.com/j4mie/idiorm/issues/306)
+* Code style fix preventing nested loops from using the same variable names [[mkkeck](https://github.com/mkkeck)] - [issue #301](https://github.com/j4mie/idiorm/issues/301)
+* Document shortcomings of the built in query logger [[Treffynnon](https://github.com/treffynnon)] - [issue #307](https://github.com/j4mie/idiorm/issues/307)
 
 #### 1.5.1 - released 2014-06-23
 
