@@ -254,6 +254,17 @@ the log. ``ORM::get_last_query()`` returns the most recent query
 executed. ``ORM::get_query_log()`` returns an array of all queries
 executed.
 
+.. note::
+
+    The code that does the query log is an approximation of that provided by PDO/the
+    database (see the Idiorm source code for detail). The actual query isn't even available
+    to idiorm to log as the database/PDO handles the binding outside of idiorm's reach and
+    doesn't pass it back.
+
+    This means that you might come across some inconsistencies between what is logged and
+    what is actually run. In these case you'll need to look at the query log provided by
+    your database vendor (eg. MySQL).
+
 Query logger
 ^^^^^^^^^^^^
 

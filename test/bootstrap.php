@@ -46,15 +46,14 @@ class MockPDOStatement extends PDOStatement {
    /**
     * Add data to arrays
     */
-   public function bindParam($index, $value, $type)
+   public function bindParam($paramno, &$param, $type = NULL, $maxlen = NULL, $driverdata = NULL)
    {
-       // Do check on index, and type
-       if (!is_int($index)) throw new Exception('Incorrect parameter type. Expected $index to be an integer.');
+       // Do check on type
        if (!is_int($type) || ($type != PDO::PARAM_STR && $type != PDO::PARAM_NULL && $type != PDO::PARAM_BOOL && $type != PDO::PARAM_INT))
            throw new Exception('Incorrect parameter type. Expected $type to be an integer.');
 
        // Add param to array
-       $this->bindParams[$index - 1] = $value;
+       $this->bindParams[is_int($paramno) ? --$paramno : $paramno] = $param;
    }
    
    /**

@@ -292,6 +292,12 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals($expected, ORM::get_last_query());
     }
 
+    public function testRawWhereClauseMultiples() {
+        ORM::for_table('widget')->where('age', 18)->where_raw('(`name` = ? OR `name` = ?)', array('Fred', 'Bob'))->where_raw('(`name` = ? OR `name` = ?)', array('Sarah', 'Jane'))->where('size', 'large')->find_many();
+        $expected = "SELECT * FROM `widget` WHERE `age` = '18' AND (`name` = 'Fred' OR `name` = 'Bob') AND (`name` = 'Sarah' OR `name` = 'Jane') AND `size` = 'large'";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
     public function testRawQuery() {
         ORM::for_table('widget')->raw_query('SELECT `w`.* FROM `widget` w')->find_many();
         $expected = "SELECT `w`.* FROM `widget` w";
@@ -300,6 +306,12 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 
     public function testRawQueryWithParameters() {
         ORM::for_table('widget')->raw_query('SELECT `w`.* FROM `widget` w WHERE `name` = ? AND `age` = ?', array('Fred', 5))->find_many();
+        $expected = "SELECT `w`.* FROM `widget` w WHERE `name` = 'Fred' AND `age` = '5'";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testRawQueryWithNamedPlaceholders() {
+        ORM::for_table('widget')->raw_query('SELECT `w`.* FROM `widget` w WHERE `name` = :name AND `age` = :age', array(':name' => 'Fred', ':age' => 5))->find_many();
         $expected = "SELECT `w`.* FROM `widget` w WHERE `name` = 'Fred' AND `age` = '5'";
         $this->assertEquals($expected, ORM::get_last_query());
     }
