@@ -88,6 +88,8 @@ Changelog
 * Code style fix preventing nested loops from using the same variable names [[mkkeck](https://github.com/mkkeck)] - [issue #301](https://github.com/j4mie/idiorm/issues/301)
 * Document shortcomings of the built in query logger [[Treffynnon](https://github.com/treffynnon)] - [issue #307](https://github.com/j4mie/idiorm/issues/307)
 * Add phpunit to dev dependencies, add `composer test` script shortcut and fix PDO mock in test bootstrap [[Treffynnon](https://github.com/treffynnon)]
+* New test for multiple raw where clauses [[Treffynnon](https://github.com/treffynnon)] - [issue #236](https://github.com/j4mie/idiorm/issues/236)
+* Remove PHP 5.2 from travis-ci containers to test against (**note** Idiorm still supports PHP 5.2 despite this) [[Treffynnon](https://github.com/treffynnon)]
 
 #### 1.5.1 - released 2014-06-23
 
