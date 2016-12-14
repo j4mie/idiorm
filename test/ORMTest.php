@@ -43,8 +43,14 @@ class ORMTest extends PHPUnit_Framework_TestCase {
     public function testIsDirty() {
         $model = ORM::for_table('test')->create();
         $this->assertFalse($model->is_dirty('test'));
-        
+
         $model = ORM::for_table('test')->create(array('test' => 'test'));
+        $this->assertTrue($model->is_dirty('test'));
+
+        $model->test = null;
+        $this->assertTrue($model->is_dirty('test'));
+
+        $model->test = '';
         $this->assertTrue($model->is_dirty('test'));
     }
 
