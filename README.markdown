@@ -75,7 +75,7 @@ foreach ($tweets as $tweet) {
 
 Changelog
 ---------
-#### 1.5.2 - released 2016-XX-XX
+#### 1.5.2 - released 2016-12-14
 
 * Fix autoincremented compound keys inserts [[lrlopez](https://github.com/lrlopez)] - [issue #233](https://github.com/j4mie/idiorm/issues/233) and [pull #235](https://github.com/j4mie/idiorm/pull/235)
 * Add @method tags for magic methods [[stellis](https://github.com/stellis)] - [issue #237](https://github.com/j4mie/idiorm/issues/237)
