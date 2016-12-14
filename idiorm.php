@@ -1333,14 +1333,14 @@
             $data = array();
             $query = array("((");
             $first = true;
-            foreach ($values as $item) {
+            foreach ($values as $value) {
                 if ($first) {
                     $first = false;
                 } else {
                     $query[] = ") OR (";
                 }
                 $firstsub = true;
-                foreach($item as $key => $item) {
+                foreach($value as $key => $item) {
                     $op = is_string($operator) ? $operator : (isset($operator[$key]) ? $operator[$key] : '=');
                     if ($firstsub) {
                         $firstsub = false;
