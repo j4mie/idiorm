@@ -87,6 +87,7 @@ Changelog
 * Documentation fix - ORM query output for `where_any_is()` [[uovidiu](https://github.com/uovidiu)] - [issue #306](https://github.com/j4mie/idiorm/issues/306)
 * Code style fix preventing nested loops from using the same variable names [[mkkeck](https://github.com/mkkeck)] - [issue #301](https://github.com/j4mie/idiorm/issues/301)
 * Document shortcomings of the built in query logger [[Treffynnon](https://github.com/treffynnon)] - [issue #307](https://github.com/j4mie/idiorm/issues/307)
+* Add phpunit to dev dependencies, add `composer test` script shortcut and fix PDO mock in test bootstrap [[Treffynnon](https://github.com/treffynnon)]
 
 #### 1.5.1 - released 2014-06-23
 
