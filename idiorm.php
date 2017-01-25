@@ -501,7 +501,7 @@
             }
 
             $q = $statement->execute();
-            self::_log_query($query, $parameters, $connection_name, (microtime(true)-$time));
+            self::_log_query($query, $parameters, $connection_name, number_format(microtime(true) - $time, 10));
 
             return $q;
         }
