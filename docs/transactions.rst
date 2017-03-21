@@ -18,4 +18,4 @@ it’s very easy to use PDO’s built-in methods:
 
 For more details, see `the PDO documentation on Transactions`_.
 
-.. _the PDO documentation on Transactions: http://www.php.net/manual/en/pdo.transactions.php
+.. _the PDO documentation on Transactions: https://secure.php.net/manual/en/pdo.transactions.php
