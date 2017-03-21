@@ -848,7 +848,7 @@ Selecting rows
 
 .. warning::
 
-    You really, should not be doing this, use Idiorm with ``raw_query`()` instead
+    You really, should not be doing this, use Idiorm with ``raw_query()`` instead
     where possible.
 
 Here is a simple query implemented using ``raw_execute()`` - note the call to 
@@ -857,6 +857,7 @@ Here is a simple query implemented using ``raw_execute()`` - note the call to
 
 .. code-block:: php
 
+    <?php
     $res = ORM::raw_execute('SHOW TABLES');
     $statement = ORM::get_last_statement();
     $rows = array();
@@ -885,6 +886,7 @@ return a configured instance of `PDO`_.
 
 .. code-block:: php
 
+    <?php
     $pdo = ORM::get_db();
     foreach($pdo->query('SHOW TABLES') as $row) {
         var_dump($row);
