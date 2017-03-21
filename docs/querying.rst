@@ -798,9 +798,97 @@ to stop you from specifying a completely different table in the query.
 This is because if you wish to later called ``save``, the ORM will need
 to know which table to update.
 
-Note that using ``raw_query`` is advanced and possibly dangerous, and
-Idiorm does not make any attempt to protect you from making errors when
-using this method. If you find yourself calling ``raw_query`` often, you
-may have misunderstood the purpose of using an ORM, or your application
-may be too complex for Idiorm. Consider using a more full-featured
-database abstraction system.
+.. note::
+
+    Using ``raw_query`` is advanced and possibly dangerous, and
+    Idiorm does not make any attempt to protect you from making errors when
+    using this method. If you find yourself calling ``raw_query`` often, you
+    may have misunderstood the purpose of using an ORM, or your application
+    may be too complex for Idiorm. Consider using a more full-featured
+    database abstraction system.
+
+Raw SQL execution using PDO
+'''''''''''''''''''''''''''
+
+.. warning::
+
+    By using this function you're dropping down to PHPs PDO directly. Idiorm
+    does not make any attempt to protect you from making errors when using this
+    method.
+
+    You're essentially just using Idiorm to manage the connection and configuration
+    when you implement ``raw_execute()``.
+
+It can be handy, in some instances, to make use of the PDO instance underneath
+Idiorm to make advanced queries. These can be things like dropping a table from
+the database that Idiorm doesn't support and will not support in the future. These
+are operations that fall outside the 80/20 philosophy of Idiorm. That said there is
+a lot of interest in this function and quite a lot of support requests related to
+it.
+
+This method directly maps to `PDOStatement::execute()`_ underneath so please
+familiarise yourself with it's documentation.
+
+Dropping tables
+~~~~~~~~~~~~~~~
+
+This can be done very simply using ``raw_execute()``.
+
+.. code-block:: php
+
+    <?php
+    if (ORM::raw_execute('DROP TABLE my_table')) {
+        echo "Table dropped";
+    } else {
+        echo "Drop query failed";
+    }
+
+Selecting rows
+~~~~~~~~~~~~~~
+
+.. warning::
+
+    You really, should not be doing this, use Idiorm with ``raw_query`()` instead
+    where possible.
+
+Here is a simple query implemented using ``raw_execute()`` - note the call to 
+``ORM::get_last_statement()`` as ``raw_execute()`` returns a boolean as per the
+`PDOStatement::execute()`_ underneath.
+
+.. code-block:: php
+
+    $res = ORM::raw_execute('SHOW TABLES');
+    $statement = ORM::get_last_statement();
+    $rows = array();
+    while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
+        var_dump($row);
+    }
+
+It is also worth noting that ``$statement`` is a ``PDOStatement`` instance so calling
+its ``fetch()`` method is the same as if you had called against PDO without Idiorm.
+
+Getting the PDO instance
+''''''''''''''''''''''''
+
+.. warning::
+
+    By using this function you're dropping down to PHPs PDO directly. Idiorm
+    does not make any attempt to protect you from making errors when using this
+    method.
+
+    You're essentially just using Idiorm to manage the connection and configuration
+    when you implement against ``get_db()``.
+
+If none of the preceeding methods suit your purposes then you can also get direct
+access to the PDO instance underneath Idiorm using ``ORM::get_db()``. This will
+return a configured instance of `PDO`_.
+
+.. code-block:: php
+
+    $pdo = ORM::get_db();
+    foreach($pdo->query('SHOW TABLES') as $row) {
+        var_dump($row);
+    }
+
+.. _PDOStatement::execute(): https://secure.php.net/manual/en/pdostatement.execute.php
+.. _PDO: https://secure.php.net/manual/en/class.pdo.php

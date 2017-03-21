@@ -75,6 +75,10 @@ foreach ($tweets as $tweet) {
 
 Changelog
 ---------
+#### 1.5.3 - released 2017-03-21
+
+* Document the `raw_execute()` method and add a note for `get_db()` in the querying documentation [[treffynnon](https://github.com/treffynnon)]
+
 #### 1.5.2 - released 2016-12-14
 
 * Fix autoincremented compound keys inserts [[lrlopez](https://github.com/lrlopez)] - [issue #233](https://github.com/j4mie/idiorm/issues/233) and [pull #235](https://github.com/j4mie/idiorm/pull/235)
