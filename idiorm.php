@@ -1205,6 +1205,29 @@
             return $this;
         }
 
+        /**
+         * Add a WHERE clause width DATE
+         */
+        protected function _add_date_condition($type, $column_name, $separator, $value) {
+            $multiple = is_array($column_name) ? $column_name : array($column_name => $value);
+            $result = $this;
+
+            foreach($multiple as $key => $val) {
+                // Add the table name in case of ambiguous columns
+                if (count($result->_join_sources) > 0 && strpos($key, '.') === false) {
+                    $table = $result->_table_name;
+                    if (!is_null($result->_table_alias)) {
+                        $table = $result->_table_alias;
+                    }
+
+                    $key = "{$table}.{$key}";
+                }
+                $key = 'DATE(' . $result->_quote_identifier($key) . ')' ;
+                $result = $result->_add_condition($type, "{$key} {$separator} ?", $val);
+            }
+            return $result;
+        }
+
        /**
          * Helper method to compile a simple COLUMN SEPARATOR VALUE
          * style HAVING or WHERE condition into a string and value ready to
@@ -1432,6 +1455,21 @@
         }
 
         /**
+         *
+         */
+        public function where_date($column_name, $value=null) {
+            return $this->_add_date_condition('where', $column_name, '=', $value);
+        }
+
+        public function where_date_lte($column_name, $value=null) {
+            return $this->_add_date_condition('where', $column_name, '<=', $value);
+        }
+
+        public function where_date_gte($column_name, $value=null) {
+            return $this->_add_date_condition('where', $column_name, '>=', $value);
+        }
+
+        /**
          * Add a WHERE column IS NOT NULL clause to your query
          */
         public function where_not_null($column_name) {
@@ -1469,6 +1507,14 @@
         protected function _add_order_by($column_name, $ordering) {
             $column_name = $this->_quote_identifier($column_name);
             $this->_order_by[] = "{$column_name} {$ordering}";
+            return $this;
+        }
+
+        /**
+         * Add an ORDER BY RAND clause
+         */
+        public function order_by_rand() {
+            $this->_order_by[] = "RAND()";
             return $this;
         }
 
