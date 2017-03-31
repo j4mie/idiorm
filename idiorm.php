@@ -2426,11 +2426,19 @@
         }
 
         /**
-         * Get the current result set as an array
+         * Return the content of the result set
+         * as an array of associative arrays. Column
+         * names may optionally be supplied as arguments,
+         * if so, only those keys will be returned.
          * @return array
          */
         public function as_array() {
-            return $this->get_results();
+            $rows = array();
+            $args = func_get_args();
+            foreach($this->_results as $row) {
+                $rows[] = call_user_func_array(array($row, 'as_array'), $args);
+            }
+            return $rows;
         }
         
         /**
