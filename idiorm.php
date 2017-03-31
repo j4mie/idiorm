@@ -1495,6 +1495,14 @@
         }
 
         /**
+         * Reset the ORDER BY clause
+         */
+        public function reset_order_by() {
+            $this->_order_by = array();
+            return $this;
+        }
+
+        /**
          * Add a column to the list of columns to GROUP BY
          */
         public function group_by($column_name) {
