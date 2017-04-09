@@ -2079,6 +2079,7 @@
                 $query = $this->_build_insert();
             }
 
+            self::_setup_db($this->_connection_name);
             $success = self::_execute($query, $values, $this->_connection_name);
             $caching_auto_clear_enabled = self::$_config[$this->_connection_name]['caching_auto_clear'];
             if($caching_auto_clear_enabled){
