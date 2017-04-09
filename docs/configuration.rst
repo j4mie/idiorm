@@ -339,6 +339,34 @@ Warnings and gotchas
    application, as all database rows that are fetched during each
    request are held in memory. If you are working with large quantities
    of data, you may wish to disable the cache.
+   
+If you wish to use custom caching functions, you can set them from the configure options. 
+
+.. code-block:: php
+
+    <?php
+        $my_cache = array();
+        ORM::configure('cache_query_result', function ($cache_key, $value, $table_name, $connection_name) use (&$my_cache) {
+            $my_cache[$cache_key] = $value;
+        });
+        ORM::configure('check_query_cache', function ($cache_key, $table_name, $connection_name) use (&$my_cache) {
+            if(isset($my_cache[$cache_key])){
+               return $my_cache[$cache_key];
+            } else {
+                return false;
+            }
+        });
+        ORM::configure('clear_cache', function ($table_name, $connection_name) use (&$my_cache) {
+             $my_cache = array();
+        });
+        
+        ORM::configure('create_cache_key', function ($query, $parameters, $table_name, $connection_name) {
+            $parameter_string = join(',', $parameters);
+            $key = $query . ':' . $parameter_string;
+            $my_key = 'my-prefix'.crc32($key);
+            return $my_key;
+        });
+
 
 Custom caching
 ''''''''''''''
