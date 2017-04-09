@@ -2026,8 +2026,13 @@
                 $key = array($key => $value);
             }
             foreach ($key as $field => $value) {
+
+                // dirty field only in case of real change
+                if(!isset($this->_data[$field]) || $this->_data[$field]!==$value)
+                    $this->_dirty_fields[$field] = $value;
+                    
                 $this->_data[$field] = $value;
-                $this->_dirty_fields[$field] = $value;
+                
                 if (false === $expr and isset($this->_expr_fields[$field])) {
                     unset($this->_expr_fields[$field]);
                 } else if (true === $expr) {
