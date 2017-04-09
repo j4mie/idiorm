@@ -123,6 +123,13 @@
         const CONDITION_VALUES = 1;
 
         const DEFAULT_CONNECTION = 'default';
+        
+        // internal types
+        const TYPE_BOOL = 'boolean';
+        const TYPE_INT = 'integer';
+        const TYPE_FLOAT = 'float';
+        const TYPE_STRING = 'string';
+        const TYPE_TIME = 'time';
 
         // Limit clause style
         const LIMIT_STYLE_TOP_N = "top";
@@ -186,6 +193,9 @@
 
         // Columns to select in the result
         protected $_result_columns = array('*');
+
+        // internal types to bind php/mysql types
+        protected $_fields_type = array();
 
         // Are we using the default result column or have these been manually changed?
         protected $_using_default_result_columns = true;
@@ -305,11 +315,12 @@
          * this will normally be the first method called in a chain.
          * @param string $table_name
          * @param string $connection_name Which connection to use
+         * @param array $fields_type with php type
          * @return ORM
          */
-        public static function for_table($table_name, $connection_name = self::DEFAULT_CONNECTION) {
+        public static function for_table($table_name, $connection_name = self::DEFAULT_CONNECTION, $fields_type = array()) {
             self::_setup_db($connection_name);
-            return new self($table_name, array(), $connection_name);
+            return new self($table_name, array(), $connection_name, $fields_type);
         }
 
         /**
@@ -620,9 +631,10 @@
          * "Private" constructor; shouldn't be called directly.
          * Use the ORM::for_table factory method instead.
          */
-        protected function __construct($table_name, $data = array(), $connection_name = self::DEFAULT_CONNECTION) {
+        protected function __construct($table_name, $data = array(), $connection_name = self::DEFAULT_CONNECTION, $fields_type = array()) {
             $this->_table_name = $table_name;
             $this->_data = $data;
+            $this->_fields_type = $fields_type;
 
             $this->_connection_name = $connection_name;
             self::_setup_db_config($connection_name);
@@ -817,10 +829,32 @@
          * but it's public in case you need to call it directly.
          */
         public function hydrate($data=array()) {
-            $this->_data = $data;
+            $this->_data = $this->_php_convert_fields($data);
             return $this;
         }
+        
 
+        /**
+         * Convert sql string to php type
+         */
+        protected function _php_convert_fields($data){
+            foreach($this->_fields_type as $field => $type){
+                if(isset($data[$field])){
+                    switch($type){
+                        case self::TYPE_BOOL:
+                        case self::TYPE_INT:
+                        case self::TYPE_FLOAT:
+                        case self::TYPE_STRING:
+                            settype($data[$field], $type);
+                            break; 
+                        case self::TYPE_TIME:
+                            $data[$field] = new DateTime($data[$field]);
+                    }
+                }
+            }
+            return $data;
+        }
+        
         /**
          * Force the ORM to flag all the fields in the $data array
          * as "dirty" and therefore update them when save() is called.
@@ -2079,6 +2113,7 @@
                 $query = $this->_build_insert();
             }
 
+            $values = $this->_sql_convert_fields($values);
             $success = self::_execute($query, $values, $this->_connection_name);
             $caching_auto_clear_enabled = self::$_config[$this->_connection_name]['caching_auto_clear'];
             if($caching_auto_clear_enabled){
@@ -2110,6 +2145,31 @@
 
             $this->_dirty_fields = $this->_expr_fields = array();
             return $success;
+        }
+        
+        /**
+         * Convert php type to string to send them to sql
+         */
+        protected function _sql_convert_fields($data){
+            foreach($this->_fields_type as $field => $type){
+                if(isset($data[$field])){
+                    switch($type){
+                        case self::TYPE_BOOL:
+                            $data[$field] = $data[$field]? '1' : '0';
+                            break;
+                        case self::TYPE_INT:
+                        case self::TYPE_FLOAT:
+                        case self::TYPE_STRING:
+                            settype($data[$field], 'string');
+                            break; 
+                        case self::TYPE_TIME:
+                            if(is_a($data[$field], 'DateTime')){
+                                $data[$field] = $data[$field]->format('Y-m-d H:i:s');
+                            }
+                    }
+                }
+            }
+            return $data;
         }
 
         /**
