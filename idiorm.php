@@ -738,6 +738,23 @@
         }
 
         /**
+         * Tell the ORM that you wish to execute a EXPLAIN query.
+         * Will return an array or false if explain fail
+         * @return array
+         */
+        public function explain(){
+            $query = 'EXPLAIN ' . $this->_build_select();
+
+            self::_execute($query, $this->_values, $this->_connection_name);
+            $statement = self::get_last_statement();
+
+            if ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
+                return $row;
+            }
+            return false;
+        }
+
+        /**
          * Tell the ORM that you wish to execute a COUNT query.
          * Will return an integer representing the number of
          * rows returned.
