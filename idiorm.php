@@ -553,7 +553,7 @@
                 } else {
                     // named placeholders
                     foreach ($parameters as $key => $val) {
-                        $query = str_replace($key, $val, $query);
+                        $query = str_replace(':'.$key, ':'.$val, $query);
                     }
                     $bound_query = $query;
                 }
