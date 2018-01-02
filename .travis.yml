@@ -13,6 +13,6 @@ matrix:
       dist: precise
 install: "if [ `command -v composer` ]; then composer install; else curl -sSfL https://phar.phpunit.de/phpunit-4.phar -o ~/phpunit.phar; fi"
 script: |
-  if [ `command -v composer` ]; then X="composer run-script test --"; else X="~/phpunit.phar"; fi; "$X --colors --coverage-text"
+  if [ `command -v composer` ]; then X="composer run-script test --"; else X="~/phpunit.phar"; fi; $X --colors --coverage-text
 
 
