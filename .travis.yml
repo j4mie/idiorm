@@ -5,7 +5,7 @@ php:
   - 7.0
   - 7.1
   - hhvm
-env: # important - please keep
+env: PHPV=0
 matrix:
   include:
     - php: 5.2
