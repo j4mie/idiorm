@@ -14,7 +14,7 @@ Idiorm is now considered to be feature complete as of version 1.5.0. Whilst it w
 
 ---
 
-A lightweight nearly-zero-configuration object-relational mapper and fluent query builder for PHP5.
+A lightweight nearly-zero-configuration object-relational mapper and fluent query builder for PHP5 and above.
 
 Tested on PHP 5.2.0+ - may work on earlier versions with PDO and the correct database drivers.
 
