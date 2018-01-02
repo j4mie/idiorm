@@ -14,8 +14,8 @@ matrix:
     - php: 5.3
       dist: precise
 install: |
-  if [ "$PHPV" -ne "52" ]; then composer install; else curl -sSfL https://phar.phpunit.de/phpunit-4.phar -o ~/phpunit.phar; fi
+  if [ "$PHPV" -ne 52 ]; then composer install; else curl -sSfL https://phar.phpunit.de/phpunit-4.phar -o ~/phpunit.phar; fi
 script: |
-  if [ "$PHPV" -ne "52" ]; then X="composer run-script test --"; else X="~/phpunit.phar"; fi; $X --colors --coverage-text
+  if [ "$PHPV" -ne 52 ]; then X="composer run-script test --"; else X="~/phpunit.phar"; fi; $X --colors --coverage-text
 
 
