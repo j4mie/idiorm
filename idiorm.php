@@ -63,8 +63,8 @@
      * @method $this tableAlias($alias)
      * @method int countNullIdColumns()
      * @method $this selectExpr($expr, $alias=null)
-     * @method \ORM selectMany()
-     * @method \ORM selectManyExpr()
+     * @method \ORM selectMany($values)
+     * @method \ORM selectManyExpr($values)
      * @method $this rawJoin($table, $constraint, $table_alias, $parameters = array())
      * @method $this innerJoin($table, $constraint, $table_alias=null)
      * @method $this leftOuterJoin($table, $constraint, $table_alias=null)
@@ -253,7 +253,7 @@
          * required to use Idiorm). If you have more than one setting
          * you wish to configure, another shortcut is to pass an array
          * of settings (and omit the second argument).
-         * @param string $key
+         * @param string|array $key
          * @param mixed $value
          * @param string $connection_name Which connection to use
          */
