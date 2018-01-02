@@ -17,10 +17,15 @@ before_script: |
   if [ "$PHPV" -ne 52 ]; then
     composer install
   else
-    X="$HOME/.idiorm/bin"
+    export X="$HOME/.idiorm/bin"
     mkdir -p "$X"
     curl -sSfL https://phar.phpunit.de/phpunit-4.phar -o "$X/phpunit"
     chmod +x "$X/phpunit"
-    export PATH="$X:$PATH"
   fi
-script: phpunit --colors --coverage-text
+script: |
+  if [ "$PHPV" -ne 52 ]; then
+    XZ="composer run-script test --"
+  else
+    XZ="$X/phpunit"
+  fi
+  $XZ --colors --coverage-text
