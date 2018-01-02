@@ -5,15 +5,17 @@ php:
   - 7.0
   - 7.1
   - hhvm
+env: # important - please keep
 matrix:
   include:
     - php: 5.2
       dist: precise
+      env: PHPV=52
     - php: 5.3
       dist: precise
 install: |
-  command -v composer; if [ `command -v composer` ]; then composer install; else curl -sSfL https://phar.phpunit.de/phpunit-4.phar -o ~/phpunit.phar; fi
+  if [ $PHPV != 52 ]; then composer install; else curl -sSfL https://phar.phpunit.de/phpunit-4.phar -o ~/phpunit.phar; fi
 script: |
-  if [ `command -v composer` ]; then X="composer run-script test --"; else X="~/phpunit.phar"; fi; $X --colors --coverage-text
+  if [ $PHPV != 52 ]; then X="composer run-script test --"; else X="~/phpunit.phar"; fi; $X --colors --coverage-text
 
 
