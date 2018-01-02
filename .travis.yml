@@ -17,15 +17,17 @@ before_script: |
   if [ "$PHPV" -ne 52 ]; then
     composer install
   else
+    # special handling for PHP 5.2 testing as there is no composer available
     export X="$HOME/.idiorm/bin"
     mkdir -p "$X"
-    curl -sSfL https://phar.phpunit.de/phpunit-4.phar -o "$X/phpunit"
+    curl -sSfL https://phar.phpunit.de/phpunit-3.phar -o "$X/phpunit"
     chmod +x "$X/phpunit"
   fi
 script: |
   if [ "$PHPV" -ne 52 ]; then
     XZ="composer run-script test --"
   else
+    # special handling for PHP 5.2 testing as there is no composer available
     XZ="$X/phpunit"
   fi
   $XZ --colors --coverage-text
