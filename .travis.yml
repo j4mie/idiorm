@@ -25,9 +25,8 @@ before_script: |
   fi
 script: |
   if [ "$PHPV" -ne 52 ]; then
-    XZ="composer run-script test --"
+    composer run-script test -- --colors --coverage-text
   else
     # special handling for PHP 5.2 testing as there is no composer available
-    XZ="$X/phpunit"
+    $X/phpunit --colors --coverage-text
   fi
-  $XZ --colors --coverage-text
