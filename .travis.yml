@@ -13,9 +13,14 @@ matrix:
       env: PHPV=52
     - php: 5.3
       dist: precise
-install: |
-  if [ "$PHPV" -ne 52 ]; then composer install; else curl -sSfL https://phar.phpunit.de/phpunit-4.phar -o ~/phpunit.phar; fi
-script: |
-  if [ "$PHPV" -ne 52 ]; then X="composer run-script test --"; else X="~/phpunit.phar"; fi; $X --colors --coverage-text
-
-
+before_script: |
+  if [ "$PHPV" -ne 52 ]; then
+    composer install
+  else
+    X="$HOME/.idiorm/bin"
+    mkdir -p "$X"
+    curl -sSfL https://phar.phpunit.de/phpunit-4.phar -o "$X/phpunit"
+    chmod +x "$X/phpunit"
+    export PATH="$X:$PATH"
+  fi
+script: phpunit --colors --coverage-text
