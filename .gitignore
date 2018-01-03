@@ -4,3 +4,4 @@ docs/_build
 /phpunit.phar
 /vendor
 /composer.lock
+.DS_Store

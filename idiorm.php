@@ -1899,6 +1899,7 @@
                 $cached_result = self::_check_query_cache($cache_key, $this->_table_name, $this->_connection_name);
 
                 if ($cached_result !== false) {
+                    $this->_reset_idiorm_state();
                     return $cached_result;
                 }
             }
@@ -1915,12 +1916,17 @@
                 self::_cache_query_result($cache_key, $rows, $this->_table_name, $this->_connection_name);
             }
 
-            // reset Idiorm after executing the query
+            $this->_reset_idiorm_state();
+            return $rows;
+        }
+
+        /**
+         * Reset the Idiorm instance state
+         */
+        private function _reset_idiorm_state() {
             $this->_values = array();
             $this->_result_columns = array('*');
             $this->_using_default_result_columns = true;
-
-            return $rows;
         }
 
         /**
