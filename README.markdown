@@ -75,9 +75,16 @@ foreach ($tweets as $tweet) {
 
 Changelog
 ---------
+#### 1.5.4 - released 2018-01-XX
+
+* Reset Idiorm state when a cached result is returned - [issue #319](https://github.com/j4mie/idiorm/issues/319) [[fayland](https://github.com/fayland) (and [treffynnon](https://github.com/treffynnon))]
+* Fix travis builds for PHP 5.3+ (adding 7.0 and 7.1) and document support for newer PHP versions - [[treffynnon](https://github.com/treffynnon)]
+* Correct PHPDoc comments for `selectMany()` - [issue #325](github.com/j4mie/idiorm/issues/325) [[kawausokun](https://github.com/kawausokun)]
+* Add pdo_sqlite to the composer require-dev dependencies - [issue #328](github.com/j4mie/idiorm/issues/328) [[qyanu](https://github.com/qyanu)]
+
 #### 1.5.3 - released 2017-03-21
 
-* Document the `raw_execute()` method and add a note for `get_db()` in the querying documentation [[treffynnon](https://github.com/treffynnon)]
+* Document the `raw_execute()` method and add a note for `get_db()` in the querying documentation - [[treffynnon](https://github.com/treffynnon)]
 
 #### 1.5.2 - released 2016-12-14
 
