@@ -75,7 +75,7 @@ foreach ($tweets as $tweet) {
 
 Changelog
 ---------
-#### 1.5.4 - released 2018-01-XX
+#### 1.5.4 - released 2018-01-04
 
 * Reset Idiorm state when a cached result is returned [[fayland](https://github.com/fayland) (and [Treffynnon](https://github.com/treffynnon))] - [issue #319](https://github.com/j4mie/idiorm/issues/319)
 * Fix travis builds for PHP 5.3+ (adding 7.0 and 7.1) and document support for newer PHP versions [[Treffynnon](https://github.com/treffynnon)]
