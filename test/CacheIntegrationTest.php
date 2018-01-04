@@ -8,7 +8,14 @@ class CacheIntegrationTest extends PHPUnit_Framework_TestCase {
         ORM::configure('caching', true);
 
         ORM::raw_execute('CREATE TABLE `league` ( `class_id` INTEGER )');
-        ORM::raw_execute('INSERT INTO `league`(`class_id`) VALUES (1), (2), (3)');
+        // needs to be individually inserted to support SQLite before
+        // version 3.7.11
+        ORM::raw_execute('INSERT INTO `league`(`class_id`) VALUES (1)');
+        ORM::raw_execute('INSERT INTO `league`(`class_id`) VALUES (2)');
+        ORM::raw_execute('INSERT INTO `league`(`class_id`) VALUES (3)');
+
+        $x = ORM::for_table('league')->count();
+        $this->assertEquals(3, $x);
     }
 
     public function tearDown() {
