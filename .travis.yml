@@ -13,7 +13,11 @@ matrix:
       env: PHPV=52
     - php: 5.3
       dist: precise
-before_script: |
+before_install: |
+  if [ "$PHPV" -eq 52 ]; then
+    pecl install phar
+  fi
+install: |
   if [ "$PHPV" -ne 52 ]; then
     composer install
   else
