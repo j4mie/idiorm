@@ -20,7 +20,7 @@ before_script: |
     # special handling for PHP 5.2 testing as there is no composer available
     export X="$HOME/.idiorm/bin"
     mkdir -p "$X"
-    curl -sSfL https://github.com/treffynnon/php5.2-phpunit3.6.12-phar/releases/download/latest/php52-phpunit.phar -o "$X/phpunit"
+    curl -sSfL https://github.com/treffynnon/php5.2-phpunit3.6.12-phar/releases/download/1.0.0/php52-phpunit.phar -o "$X/phpunit"
     chmod +x "$X/phpunit"
   fi
 script: |
