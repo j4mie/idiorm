@@ -78,7 +78,7 @@ Changelog
 #### 1.5.4 - released 2018-01-04
 
 * Reset Idiorm state when a cached result is returned [[fayland](https://github.com/fayland) (and [Treffynnon](https://github.com/treffynnon))] - [issue #319](https://github.com/j4mie/idiorm/issues/319)
-* Fix travis builds for PHP 5.3+ (adding 7.0 and 7.1) and document support for newer PHP versions [[Treffynnon](https://github.com/treffynnon)]
+* Fix travis builds for PHP 5.2+ (adding 7.0 and 7.1) and document support for newer PHP versions [[Treffynnon](https://github.com/treffynnon)]
 * Correct PHPDoc comments for `selectMany()` [[kawausokun](https://github.com/kawausokun)] - [issue #325](github.com/j4mie/idiorm/issues/325)
 * Add pdo_sqlite to the composer require-dev dependencies [[qyanu](https://github.com/qyanu)] - [issue #328](github.com/j4mie/idiorm/issues/328)
 
