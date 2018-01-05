@@ -73,8 +73,22 @@ foreach ($tweets as $tweet) {
 }
 ```
 
+Tests
+-----
+
+Tests are written with PHPUnit and be run through composer
+
+    composer test
+
+To make testing on PHP 5.2 (Idiorm maintains support back to this version of PHP) there
+is a Docker setup in `./test/docker_for_php52` - check the readme in there for more.
+
 Changelog
 ---------
+#### 1.5.5 - released 2018-01-XX
+
+* Add a docker setup for testing with PHP 5.2 (uses PHPUnit 3.6.12, which is the last version released compatible with PHP 5.2) [Treffynnon](https://github.com/treffynnon)
+
 #### 1.5.4 - released 2018-01-04
 
 * Reset Idiorm state when a cached result is returned [[fayland](https://github.com/fayland) (and [Treffynnon](https://github.com/treffynnon))] - [issue #319](https://github.com/j4mie/idiorm/issues/319)
