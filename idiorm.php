@@ -1261,18 +1261,17 @@
          * @return string
          */
         protected function _create_placeholders($fields) {
-            if(!empty($fields)) {
-                $db_fields = array();
-                foreach($fields as $key => $value) {
-                    // Process expression fields directly into the query
-                    if(array_key_exists($key, $this->_expr_fields)) {
-                        $db_fields[] = $value;
-                    } else {
-                        $db_fields[] = '?';
-                    }
+            if(empty($fields)) return '';
+            $db_fields = array();
+            foreach($fields as $key => $value) {
+                // Process expression fields directly into the query
+                if(array_key_exists($key, $this->_expr_fields)) {
+                    $db_fields[] = $value;
+                } else {
+                    $db_fields[] = '?';
                 }
-                return implode(', ', $db_fields);
             }
+            return implode(', ', $db_fields);
         }
 
         /**
