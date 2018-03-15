@@ -484,6 +484,7 @@
          * @throws IdiormStringException
          */
         protected static function _execute($query, $parameters = array(), $connection_name = self::DEFAULT_CONNECTION) {
+            if (static::$_last_statement) static::$_last_statement->closeCursor();
             $statement = static::get_db($connection_name)->prepare($query);
             static::$_last_statement = $statement;
             $time = microtime(true);
