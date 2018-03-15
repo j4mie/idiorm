@@ -41,20 +41,20 @@
      * This documentation exposes these methods to doc generators and IDEs.
      * @see http://www.php-fig.org/psr/psr-1/
      *
-     * @method static array|string getConfig($key = null, $connection_name = self::DEFAULT_CONNECTION)
+     * @method static array|string getConfig($key = null, $connection_name = ORM::DEFAULT_CONNECTION)
      * @method static null resetConfig()
-     * @method static \ORM forTable($table_name, $connection_name = self::DEFAULT_CONNECTION)
-     * @method static null setDb($db, $connection_name = self::DEFAULT_CONNECTION)
+     * @method static self forTable($table_name, $connection_name = ORM::DEFAULT_CONNECTION)
+     * @method static null setDb($db, $connection_name = ORM::DEFAULT_CONNECTION)
      * @method static null resetDb()
      * @method static null setupLimitClauseStyle($connection_name)
-     * @method static \PDO getDb($connection_name = self::DEFAULT_CONNECTION)
+     * @method static \PDO getDb($connection_name = ORM::DEFAULT_CONNECTION)
      * @method static bool rawExecute($query, $parameters = array())
      * @method static \PDOStatement getLastStatement()
      * @method static string getLastQuery($connection_name = null)
-     * @method static array getQueryLog($connection_name = self::DEFAULT_CONNECTION)
+     * @method static array getQueryLog($connection_name = ORM::DEFAULT_CONNECTION)
      * @method array getConnectionNames()
      * @method $this useIdColumn($id_column)
-     * @method \ORM|bool findOne($id=null)
+     * @method self|bool findOne($id=null)
      * @method array|\IdiormResultSet findMany()
      * @method \IdiormResultSet findResultSet()
      * @method array findArray()
@@ -63,8 +63,8 @@
      * @method $this tableAlias($alias)
      * @method int countNullIdColumns()
      * @method $this selectExpr($expr, $alias=null)
-     * @method \ORM selectMany($values)
-     * @method \ORM selectManyExpr($values)
+     * @method self selectMany($values)
+     * @method self selectManyExpr($values)
      * @method $this rawJoin($table, $constraint, $table_alias, $parameters = array())
      * @method $this innerJoin($table, $constraint, $table_alias=null)
      * @method $this leftOuterJoin($table, $constraint, $table_alias=null)
@@ -105,7 +105,7 @@
      * @method $this havingNull($column_name)
      * @method $this havingNotNull($column_name)
      * @method $this havingRaw($clause, $parameters=array())
-     * @method static this clearCache($table_name = null, $connection_name = self::DEFAULT_CONNECTION)
+     * @method static clearCache($table_name = null, $connection_name = ORM::DEFAULT_CONNECTION)
      * @method array asArray()
      * @method bool setExpr($key, $value = null)
      * @method bool isDirty($key)
@@ -153,7 +153,7 @@
         // Map of configuration settings
         protected static $_config = array();
 
-        // Map of database connections, instances of the PDO class
+        /** @var PDO[] Map of database connections, instances of the PDO class */
         protected static $_db = array();
 
         // Last query run, only populated if logging is enabled
@@ -165,7 +165,7 @@
         // Query cache, only used if query caching is enabled
         protected static $_query_cache = array();
 
-        // Reference to previously used PDOStatement object to enable low-level access, if needed
+        /** @var PDOStatement Reference to previously used PDOStatement object to enable low-level access, if needed */
         protected static $_last_statement = null;
 
         // --------------------------- //
@@ -268,7 +268,7 @@
                 }
             } else {
                 if (is_null($value)) {
-                    // Shortcut: If only one string argument is passed, 
+                    // Shortcut: If only one string argument is passed,
                     // assume it's a connection string
                     $value = $key;
                     $key = 'connection_string';
@@ -281,6 +281,7 @@
          * Retrieve configuration options by key, or as whole array.
          * @param string $key
          * @param string $connection_name Which connection to use
+         * @return mixed
          */
         public static function get_config($key = null, $connection_name = self::DEFAULT_CONNECTION) {
             if ($key) {
@@ -296,7 +297,7 @@
         public static function reset_config() {
             self::$_config = array();
         }
-        
+
         /**
          * Despite its slightly odd name, this is actually the factory
          * method used to acquire instances of the class. It is named
@@ -305,7 +306,7 @@
          * this will normally be the first method called in a chain.
          * @param string $table_name
          * @param string $connection_name Which connection to use
-         * @return ORM
+         * @return static
          */
         public static function for_table($table_name, $connection_name = self::DEFAULT_CONNECTION) {
             self::_setup_db($connection_name);
@@ -383,7 +384,7 @@
 
         /**
          * Detect and initialise the limit clause style ("SELECT TOP 5" /
-         * "... LIMIT 5"). If this has been specified manually using 
+         * "... LIMIT 5"). If this has been specified manually using
          * ORM::configure('limit_clause_style', 'top'), this will do nothing.
          * @param string $connection_name Which connection to use
          */
@@ -454,9 +455,10 @@
          * @example raw_execute('SELECT `name`, AVG(`order`) FROM `customer` GROUP BY `name` HAVING AVG(`order`) > 10')
          * @example raw_execute('INSERT OR REPLACE INTO `widget` (`id`, `name`) SELECT `id`, `name` FROM `other_table`')
          * @param string $query The raw SQL query
-         * @param array  $parameters Optional bound parameters
+         * @param array $parameters Optional bound parameters
          * @param string $connection_name Which connection to use
          * @return bool Success
+         * @throws IdiormStringException
          */
         public static function raw_execute($query, $parameters = array(), $connection_name = self::DEFAULT_CONNECTION) {
             self::_setup_db($connection_name);
@@ -472,15 +474,16 @@
             return self::$_last_statement;
         }
 
-       /**
-        * Internal helper method for executing statments. Logs queries, and
-        * stores statement object in ::_last_statment, accessible publicly
-        * through ::get_last_statement()
-        * @param string $query
-        * @param array $parameters An array of parameters to be bound in to the query
-        * @param string $connection_name Which connection to use
-        * @return bool Response of PDOStatement::execute()
-        */
+        /**
+         * Internal helper method for executing statments. Logs queries, and
+         * stores statement object in ::_last_statment, accessible publicly
+         * through ::get_last_statement()
+         * @param string $query
+         * @param array $parameters An array of parameters to be bound in to the query
+         * @param string $connection_name Which connection to use
+         * @return bool Response of PDOStatement::execute()
+         * @throws IdiormStringException
+         */
         protected static function _execute($query, $parameters = array(), $connection_name = self::DEFAULT_CONNECTION) {
             $statement = self::get_db($connection_name)->prepare($query);
             self::$_last_statement = $statement;
@@ -517,8 +520,9 @@
          * @param string $query
          * @param array $parameters An array of parameters to be bound in to the query
          * @param string $connection_name Which connection to use
-		 * @param float $query_time Query time
+         * @param float $query_time Query time
          * @return bool
+         * @throws IdiormStringException
          */
         protected static function _log_query($query, $parameters, $connection_name, $query_time) {
             // If logging is not enabled, do nothing
@@ -561,13 +565,13 @@
 
             self::$_last_query = $bound_query;
             self::$_query_log[$connection_name][] = $bound_query;
-            
-            
+
+
             if(is_callable(self::$_config[$connection_name]['logger'])){
                 $logger = self::$_config[$connection_name]['logger'];
                 $logger($bound_query, $query_time);
             }
-            
+
             return true;
         }
 
@@ -596,6 +600,7 @@
          * Only works if the 'logging' config option is
          * set to true. Otherwise, returned array will be empty.
          * @param string $connection_name Which connection to use
+         * @return array
          */
         public static function get_query_log($connection_name = self::DEFAULT_CONNECTION) {
             if (isset(self::$_query_log[$connection_name])) {
@@ -635,6 +640,8 @@
          * the instance. If so, all fields will be flagged as
          * dirty so all will be saved to the database when
          * save() is called.
+         * @param array $data
+         * @return $this
          */
         public function create($data=null) {
             $this->_is_new = true;
@@ -676,6 +683,9 @@
          * As a shortcut, you may supply an ID as a parameter
          * to this method. This will perform a primary key
          * lookup on the table.
+         * @param int|string $id
+         * @return self|false
+         * @throws IdiormStringException
          */
         public function find_one($id=null) {
             if (!is_null($id)) {
@@ -697,6 +707,7 @@
          * of instances of the ORM class, or an empty array if
          * no rows were returned.
          * @return array|\IdiormResultSet
+         * @throws IdiormStringException
          */
         public function find_many() {
             if(self::$_config[$this->_connection_name]['return_result_sets']) {
@@ -711,6 +722,7 @@
          * of instances of the ORM class, or an empty array if
          * no rows were returned.
          * @return array
+         * @throws IdiormStringException
          */
         protected function _find_many() {
             $rows = $this->_run();
@@ -722,6 +734,7 @@
          * from your query, and execute it. Will return a result set object
          * containing instances of the ORM class.
          * @return \IdiormResultSet
+         * @throws IdiormStringException
          */
         public function find_result_set() {
             return new IdiormResultSet($this->_find_many());
@@ -732,15 +745,17 @@
          * from your query, and execute it. Will return an array,
          * or an empty array if no rows were returned.
          * @return array
+         * @throws IdiormStringException
          */
         public function find_array() {
-            return $this->_run(); 
+            return $this->_run();
         }
 
         /**
          * Tell the ORM that you wish to execute a COUNT query.
          * Will return an integer representing the number of
          * rows returned.
+         * @throws IdiormStringException
          */
         public function count($column = '*') {
             return $this->_call_aggregate_db_function(__FUNCTION__, $column);
@@ -748,7 +763,8 @@
 
         /**
          * Tell the ORM that you wish to execute a MAX query.
-         * Will return the max value of the choosen column.
+         * Will return the max value of the chosen column.
+         * @throws IdiormStringException
          */
         public function max($column)  {
             return $this->_call_aggregate_db_function(__FUNCTION__, $column);
@@ -756,7 +772,8 @@
 
         /**
          * Tell the ORM that you wish to execute a MIN query.
-         * Will return the min value of the choosen column.
+         * Will return the min value of the chosen column.
+         * @throws IdiormStringException
          */
         public function min($column)  {
             return $this->_call_aggregate_db_function(__FUNCTION__, $column);
@@ -764,7 +781,8 @@
 
         /**
          * Tell the ORM that you wish to execute a AVG query.
-         * Will return the average value of the choosen column.
+         * Will return the average value of the chosen column.
+         * @throws IdiormStringException
          */
         public function avg($column)  {
             return $this->_call_aggregate_db_function(__FUNCTION__, $column);
@@ -772,7 +790,8 @@
 
         /**
          * Tell the ORM that you wish to execute a SUM query.
-         * Will return the sum of the choosen column.
+         * Will return the sum of the chosen column.
+         * @throws IdiormStringException
          */
         public function sum($column)  {
             return $this->_call_aggregate_db_function(__FUNCTION__, $column);
@@ -783,6 +802,7 @@
          * @param string $sql_function The aggregate function to call eg. MIN, COUNT, etc
          * @param string $column The column to execute the aggregate query against
          * @return int
+         * @throws IdiormStringException
          */
         protected function _call_aggregate_db_function($sql_function, $column) {
             $alias = strtolower($sql_function);
@@ -874,6 +894,7 @@
         /**
          * Counts the number of columns that belong to the primary
          * key and their value is null.
+         * @throws Exception
          */
         public function count_null_id_columns() {
             if (is_array($this->_get_id_column_name())) {
@@ -906,14 +927,14 @@
          * Add columns to the list of columns returned by the SELECT
          * query. This defaults to '*'. Many columns can be supplied
          * as either an array or as a list of parameters to the method.
-         * 
+         *
          * Note that the alias must not be numeric - if you want a
          * numeric alias then prepend it with some alpha chars. eg. a1
-         * 
+         *
          * @example select_many(array('alias' => 'column', 'column2', 'alias2' => 'column3'), 'column4', 'column5');
          * @example select_many('column', 'column2', 'column3');
          * @example select_many(array('column', 'column2', 'column3'), 'column4', 'column5');
-         * 
+         *
          * @return \ORM
          */
         public function select_many() {
@@ -932,16 +953,16 @@
 
         /**
          * Add an unquoted expression to the list of columns returned
-         * by the SELECT query. Many columns can be supplied as either 
+         * by the SELECT query. Many columns can be supplied as either
          * an array or as a list of parameters to the method.
-         * 
+         *
          * Note that the alias must not be numeric - if you want a
          * numeric alias then prepend it with some alpha chars. eg. a1
-         * 
+         *
          * @example select_many_expr(array('alias' => 'column', 'column2', 'alias2' => 'column3'), 'column4', 'column5')
          * @example select_many_expr('column', 'column2', 'column3')
          * @example select_many_expr(array('column', 'column2', 'column3'), 'column4', 'column5')
-         * 
+         *
          * @return \ORM
          */
         public function select_many_expr() {
@@ -961,11 +982,11 @@
         /**
          * Take a column specification for the select many methods and convert it
          * into a normalised array of columns and aliases.
-         * 
+         *
          * It is designed to turn the following styles into a normalised array:
-         * 
+         *
          * array(array('alias' => 'column', 'column2', 'alias2' => 'column3'), 'column4', 'column5'))
-         * 
+         *
          * @param array $columns
          * @return array
          */
@@ -1127,7 +1148,7 @@
             foreach ($data as $key => $val) {
                 $column = $result->_quote_identifier($key);
                 $placeholders = $result->_create_placeholders($val);
-                $result = $result->_add_having("{$column} {$separator} ({$placeholders})", $val);    
+                $result = $result->_add_having("{$column} {$separator} ({$placeholders})", $val);
             }
             return $result;
         }
@@ -1172,7 +1193,7 @@
             foreach ($data as $key => $val) {
                 $column = $result->_quote_identifier($key);
                 $placeholders = $result->_create_placeholders($val);
-                $result = $result->_add_where("{$column} {$separator} ({$placeholders})", $val);    
+                $result = $result->_add_where("{$column} {$separator} ({$placeholders})", $val);
             }
             return $result;
         }
@@ -1205,7 +1226,7 @@
             return $this;
         }
 
-       /**
+        /**
          * Helper method to compile a simple COLUMN SEPARATOR VALUE
          * style HAVING or WHERE condition into a string and value ready to
          * be passed to the _add_condition method. Avoids duplication
@@ -1231,11 +1252,13 @@
                 $result = $result->_add_condition($type, "{$key} {$separator} ?", $val);
             }
             return $result;
-        } 
+        }
 
         /**
          * Return a string containing the given number of question marks,
          * separated by commas. Eg "?, ?, ?"
+         * @param array $fields
+         * @return string
          */
         protected function _create_placeholders($fields) {
             if(!empty($fields)) {
@@ -1251,7 +1274,7 @@
                 return implode(', ', $db_fields);
             }
         }
-        
+
         /**
          * Helper method that filters a column/value array returning only those
          * columns that belong to a compound primary key.
@@ -1267,7 +1290,7 @@
             return $filtered;
         }
 
-       /**
+        /**
          * Helper method that filters an array containing compound column/value
          * arrays.
          */
@@ -1328,7 +1351,7 @@
          * it can be overriden for any or every column using the second parameter.
          *
          * Each condition will be ORed together when added to the final query.
-         */        
+         */
         public function where_any_is($values, $operator='=') {
             $data = array();
             $query = array("((");
@@ -1504,7 +1527,7 @@
         }
 
         /**
-         * Add an unquoted expression to the list of columns to GROUP BY 
+         * Add an unquoted expression to the list of columns to GROUP BY
          */
         public function group_by_expr($expr) {
             $this->_group_by[] = $expr;
@@ -1889,6 +1912,7 @@
         /**
          * Execute the SELECT query that has been built up by chaining methods
          * on this class. Return an array of rows as associative arrays.
+         * @throws IdiormStringException
          */
         protected function _run() {
             $query = $this->_build_select();
@@ -1978,6 +2002,7 @@
 
         /**
          * Get the primary key ID of this object.
+         * @throws Exception
          */
         public function id($disallow_null = false) {
             $id = $this->get($this->_get_id_column_name());
@@ -2013,9 +2038,10 @@
          * To set multiple properties at once, pass an associative array
          * as the first parameter and leave out the second parameter.
          * Flags the properties as 'dirty' so they will be saved to the
-         * database when save() is called. 
+         * database when save() is called.
          * @param string|array $key
          * @param string|null $value
+         * @return $this
          */
         public function set_expr($key, $value = null) {
             return $this->_set_orm_property($key, $value, true);
@@ -2026,6 +2052,7 @@
          * @param string|array $key
          * @param string|null $value
          * @param bool $raw Whether this value should be treated as raw or not
+         * @return $this
          */
         protected function _set_orm_property($key, $value = null, $expr = false) {
             if (!is_array($key)) {
@@ -2062,6 +2089,7 @@
         /**
          * Save any fields which have been modified on this object
          * to the database.
+         * @throws Exception
          */
         public function save() {
             $query = array();
@@ -2178,6 +2206,7 @@
 
         /**
          * Delete this record from the database
+         * @throws Exception
          */
         public function delete() {
             $query = array(
@@ -2190,6 +2219,7 @@
 
         /**
          * Delete many records from the database
+         * @throws IdiormStringException
          */
         public function delete_many() {
             // Build and return the full DELETE statement by concatenating
@@ -2249,15 +2279,16 @@
 
         /**
          * Magic method to capture calls to undefined class methods.
-         * In this case we are attempting to convert camel case formatted 
+         * In this case we are attempting to convert camel case formatted
          * methods into underscore formatted methods.
          *
-         * This allows us to call ORM methods using camel case and remain 
+         * This allows us to call ORM methods using camel case and remain
          * backwards compatible.
-         * 
-         * @param  string   $name
-         * @param  array    $arguments
-         * @return ORM
+         *
+         * @param  string $name
+         * @param  array $arguments
+         * @return mixed
+         * @throws IdiormMethodMissingException
          */
         public function __call($name, $arguments)
         {
@@ -2271,16 +2302,16 @@
         }
 
         /**
-         * Magic method to capture calls to undefined static class methods. 
-         * In this case we are attempting to convert camel case formatted 
+         * Magic method to capture calls to undefined static class methods.
+         * In this case we are attempting to convert camel case formatted
          * methods into underscore formatted methods.
          *
-         * This allows us to call ORM methods using camel case and remain 
+         * This allows us to call ORM methods using camel case and remain
          * backwards compatible.
-         * 
+         *
          * @param  string   $name
          * @param  array    $arguments
-         * @return ORM
+         * @return mixed
          */
         public static function __callStatic($name, $arguments)
         {
@@ -2306,7 +2337,7 @@
         /**
          * Get an easy to use instance of the class
          * @param string $subject
-         * @return \self
+         * @return static
          */
         public static function value($subject) {
             return new self($subject);
@@ -2319,6 +2350,7 @@
          * @param string $replace
          * @param string $subject
          * @return string
+         * @throws IdiormStringException
          */
         public static function str_replace_outside_quotes($search, $replace, $subject) {
             return self::value($subject)->replace_outside_quotes($search, $replace);
@@ -2338,6 +2370,7 @@
          * @param string $search
          * @param string $replace
          * @return string
+         * @throws IdiormStringException
          */
         public function replace_outside_quotes($search, $replace) {
             $this->search = $search;
@@ -2351,6 +2384,7 @@
          * @author Jeff Roberson <ridgerunner@fluxbb.org>
          * @link http://stackoverflow.com/a/13370709/461813 StackOverflow answer
          * @return string
+         * @throws IdiormStringException
          */
         protected function _str_replace_outside_quotes(){
             $re_valid = '/
@@ -2438,7 +2472,7 @@
         public function as_array() {
             return $this->get_results();
         }
-        
+
         /**
          * Get the number of records in the result set
          * @return int
@@ -2473,7 +2507,7 @@
         public function offsetGet($offset) {
             return $this->_results[$offset];
         }
-        
+
         /**
          * ArrayAccess
          * @param int|string $offset
@@ -2516,6 +2550,7 @@
          * @param string $method
          * @param array $params
          * @return \IdiormResultSet
+         * @throws IdiormMethodMissingException
          */
         public function __call($method, $params = array()) {
             foreach($this->_results as $model) {
