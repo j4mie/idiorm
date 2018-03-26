@@ -876,6 +876,7 @@
          * Internal method to add an unquoted expression to the set
          * of columns returned by the SELECT query. The second optional
          * argument is the alias to return the expression as.
+         * @return $this
          */
         protected function _add_result_column($expr, $alias=null) {
             if (!is_null($alias)) {
@@ -918,6 +919,7 @@
          * Add an unquoted expression to the list of columns returned
          * by the SELECT query. The second optional argument is
          * the alias to return the column as.
+         * @return $this
          */
         public function select_expr($expr, $alias=null) {
             return $this->_add_result_column($expr, $alias);
@@ -1123,6 +1125,7 @@
 
         /**
          * Internal method to add a HAVING condition to the query
+         * @return $this
          */
         protected function _add_having($fragment, $values=array()) {
             return $this->_add_condition('having', $fragment, $values);
@@ -1130,6 +1133,7 @@
 
         /**
          * Internal method to add a HAVING condition to the query
+         * @return $this
          */
         protected function _add_simple_having($column_name, $separator, $value) {
             return $this->_add_simple_condition('having', $column_name, $separator, $value);
@@ -1137,6 +1141,7 @@
 
         /**
          * Internal method to add a HAVING clause with multiple values (like IN and NOT IN)
+         * @return $this
          */
         public function _add_having_placeholder($column_name, $separator, $values) {
             if (!is_array($column_name)) {
@@ -1144,30 +1149,30 @@
             } else {
                 $data = $column_name;
             }
-            $result = $this;
             foreach ($data as $key => $val) {
-                $column = $result->_quote_identifier($key);
-                $placeholders = $result->_create_placeholders($val);
-                $result = $result->_add_having("{$column} {$separator} ({$placeholders})", $val);
+                $column = $this->_quote_identifier($key);
+                $placeholders = $this->_create_placeholders($val);
+                $this->_add_having("{$column} {$separator} ({$placeholders})", $val);
             }
-            return $result;
+            return $this;
         }
 
         /**
          * Internal method to add a HAVING clause with no parameters(like IS NULL and IS NOT NULL)
+         * @return $this
          */
         public function _add_having_no_value($column_name, $operator) {
             $conditions = (is_array($column_name)) ? $column_name : array($column_name);
-            $result = $this;
             foreach($conditions as $column) {
                 $column = $this->_quote_identifier($column);
-                $result = $result->_add_having("{$column} {$operator}");
+                $this->_add_having("{$column} {$operator}");
             }
-            return $result;
+            return $this;
         }
 
         /**
          * Internal method to add a WHERE condition to the query
+         * @return $this
          */
         protected function _add_where($fragment, $values=array()) {
             return $this->_add_condition('where', $fragment, $values);
@@ -1175,6 +1180,7 @@
 
         /**
          * Internal method to add a WHERE condition to the query
+         * @return $this
          */
         protected function _add_simple_where($column_name, $separator, $value) {
             return $this->_add_simple_condition('where', $column_name, $separator, $value);
@@ -1182,6 +1188,7 @@
 
         /**
          * Add a WHERE clause with multiple values (like IN and NOT IN)
+         * @return $this
          */
         public function _add_where_placeholder($column_name, $separator, $values) {
             if (!is_array($column_name)) {
@@ -1189,40 +1196,40 @@
             } else {
                 $data = $column_name;
             }
-            $result = $this;
             foreach ($data as $key => $val) {
-                $column = $result->_quote_identifier($key);
-                $placeholders = $result->_create_placeholders($val);
-                $result = $result->_add_where("{$column} {$separator} ({$placeholders})", $val);
+                $column = $this->_quote_identifier($key);
+                $placeholders = $this->_create_placeholders($val);
+                $this->_add_where("{$column} {$separator} ({$placeholders})", $val);
             }
-            return $result;
+            return $this;
         }
 
         /**
          * Add a WHERE clause with no parameters(like IS NULL and IS NOT NULL)
+         * @return $this
          */
         public function _add_where_no_value($column_name, $operator) {
             $conditions = (is_array($column_name)) ? $column_name : array($column_name);
-            $result = $this;
             foreach($conditions as $column) {
                 $column = $this->_quote_identifier($column);
-                $result = $result->_add_where("{$column} {$operator}");
+                $this->_add_where("{$column} {$operator}");
             }
-            return $result;
+            return $this;
         }
 
         /**
          * Internal method to add a HAVING or WHERE condition to the query
+         * @return $this
          */
         protected function _add_condition($type, $fragment, $values=array()) {
             $conditions_class_property_name = "_{$type}_conditions";
             if (!is_array($values)) {
                 $values = array($values);
             }
-            array_push($this->$conditions_class_property_name, array(
+            $this->$conditions_class_property_name[] = array(
                 static::CONDITION_FRAGMENT => $fragment,
                 static::CONDITION_VALUES => $values,
-            ));
+            );
             return $this;
         }
 
@@ -1233,25 +1240,24 @@
          * of the call to _quote_identifier
          *
          * If column_name is an associative array, it will add a condition for each column
+         * @return $this
          */
         protected function _add_simple_condition($type, $column_name, $separator, $value) {
             $multiple = is_array($column_name) ? $column_name : array($column_name => $value);
-            $result = $this;
-
             foreach($multiple as $key => $val) {
                 // Add the table name in case of ambiguous columns
-                if (count($result->_join_sources) > 0 && strpos($key, '.') === false) {
-                    $table = $result->_table_name;
-                    if (!is_null($result->_table_alias)) {
-                        $table = $result->_table_alias;
+                if (count($this->_join_sources) > 0 && strpos($key, '.') === false) {
+                    $table = $this->_table_name;
+                    if (!is_null($this->_table_alias)) {
+                        $table = $this->_table_alias;
                     }
 
                     $key = "{$table}.{$key}";
                 }
-                $key = $result->_quote_identifier($key);
-                $result = $result->_add_condition($type, "{$key} {$separator} ?", $val);
+                $key = $this->_quote_identifier($key);
+                $this->_add_condition($type, "{$key} {$separator} ?", $val);
             }
-            return $result;
+            return $this;
         }
 
         /**
@@ -1292,6 +1298,7 @@
         /**
          * Helper method that filters an array containing compound column/value
          * arrays.
+         * @return array
          */
         protected function _get_compound_id_column_values_array($values) {
             $filtered = array();
@@ -1309,6 +1316,7 @@
          *
          * If you use an array in $column_name, a new clause will be
          * added for each element. In this case, $value is ignored.
+         * @return $this
          */
         public function where($column_name, $value=null) {
             return $this->where_equal($column_name, $value);
@@ -1317,6 +1325,7 @@
         /**
          * More explicitly named version of for the where() method.
          * Can be used if preferred.
+         * @return $this
          */
         public function where_equal($column_name, $value=null) {
             return $this->_add_simple_where($column_name, '=', $value);
@@ -1324,6 +1333,7 @@
 
         /**
          * Add a WHERE column != value clause to your query.
+         * @return $this
          */
         public function where_not_equal($column_name, $value=null) {
             return $this->_add_simple_where($column_name, '!=', $value);
@@ -1334,6 +1344,7 @@
          *
          * If primary key is compound, only the columns that
          * belong to they key will be used for the query
+         * @return $this
          */
         public function where_id_is($id) {
             return (is_array($this->_get_id_column_name())) ?
@@ -1350,6 +1361,7 @@
          * it can be overriden for any or every column using the second parameter.
          *
          * Each condition will be ORed together when added to the final query.
+         * @return $this
          */
         public function where_any_is($values, $operator='=') {
             $data = array();
@@ -1383,6 +1395,7 @@
          *
          * If primary key is compound, only the columns that
          * belong to they key will be used for the query
+         * @return $this
          */
         public function where_id_in($ids) {
             return (is_array($this->_get_id_column_name())) ?
@@ -1392,6 +1405,7 @@
 
         /**
          * Add a WHERE ... LIKE clause to your query.
+         * @return $this
          */
         public function where_like($column_name, $value=null) {
             return $this->_add_simple_where($column_name, 'LIKE', $value);
@@ -1399,6 +1413,7 @@
 
         /**
          * Add where WHERE ... NOT LIKE clause to your query.
+         * @return $this
          */
         public function where_not_like($column_name, $value=null) {
             return $this->_add_simple_where($column_name, 'NOT LIKE', $value);
@@ -1406,6 +1421,7 @@
 
         /**
          * Add a WHERE ... > clause to your query
+         * @return $this
          */
         public function where_gt($column_name, $value=null) {
             return $this->_add_simple_where($column_name, '>', $value);
@@ -1413,6 +1429,7 @@
 
         /**
          * Add a WHERE ... < clause to your query
+         * @return $this
          */
         public function where_lt($column_name, $value=null) {
             return $this->_add_simple_where($column_name, '<', $value);
@@ -1420,6 +1437,7 @@
 
         /**
          * Add a WHERE ... >= clause to your query
+         * @return $this
          */
         public function where_gte($column_name, $value=null) {
             return $this->_add_simple_where($column_name, '>=', $value);
@@ -1427,6 +1445,7 @@
 
         /**
          * Add a WHERE ... <= clause to your query
+         * @return $this
          */
         public function where_lte($column_name, $value=null) {
             return $this->_add_simple_where($column_name, '<=', $value);
@@ -1434,6 +1453,7 @@
 
         /**
          * Add a WHERE ... IN clause to your query
+         * @return $this
          */
         public function where_in($column_name, $values) {
             return $this->_add_where_placeholder($column_name, 'IN', $values);
@@ -1441,6 +1461,7 @@
 
         /**
          * Add a WHERE ... NOT IN clause to your query
+         * @return $this
          */
         public function where_not_in($column_name, $values) {
             return $this->_add_where_placeholder($column_name, 'NOT IN', $values);
@@ -1448,6 +1469,7 @@
 
         /**
          * Add a WHERE column IS NULL clause to your query
+         * @return $this
          */
         public function where_null($column_name) {
             return $this->_add_where_no_value($column_name, "IS NULL");
@@ -1455,6 +1477,7 @@
 
         /**
          * Add a WHERE column IS NOT NULL clause to your query
+         * @return $this
          */
         public function where_not_null($column_name) {
             return $this->_add_where_no_value($column_name, "IS NOT NULL");
@@ -1464,6 +1487,7 @@
          * Add a raw WHERE clause to the query. The clause should
          * contain question mark placeholders, which will be bound
          * to the parameters supplied in the second argument.
+         * @return $this
          */
         public function where_raw($clause, $parameters=array()) {
             return $this->_add_where($clause, $parameters);
@@ -1471,6 +1495,7 @@
 
         /**
          * Add a LIMIT to the query
+         * @return $this
          */
         public function limit($limit) {
             $this->_limit = $limit;
@@ -1479,6 +1504,7 @@
 
         /**
          * Add an OFFSET to the query
+         * @return $this
          */
         public function offset($offset) {
             $this->_offset = $offset;
@@ -1487,6 +1513,7 @@
 
         /**
          * Add an ORDER BY clause to the query
+         * @return $this
          */
         protected function _add_order_by($column_name, $ordering) {
             $column_name = $this->_quote_identifier($column_name);
@@ -1496,6 +1523,7 @@
 
         /**
          * Add an ORDER BY column DESC clause
+         * @return $this
          */
         public function order_by_desc($column_name) {
             return $this->_add_order_by($column_name, 'DESC');
@@ -1503,6 +1531,7 @@
 
         /**
          * Add an ORDER BY column ASC clause
+         * @return $this
          */
         public function order_by_asc($column_name) {
             return $this->_add_order_by($column_name, 'ASC');
@@ -1510,6 +1539,7 @@
 
         /**
          * Add an unquoted expression as an ORDER BY clause
+         * @return $this
          */
         public function order_by_expr($clause) {
             $this->_order_by[] = $clause;
@@ -1518,6 +1548,7 @@
 
         /**
          * Add a column to the list of columns to GROUP BY
+         * @return $this
          */
         public function group_by($column_name) {
             $column_name = $this->_quote_identifier($column_name);
@@ -1527,6 +1558,7 @@
 
         /**
          * Add an unquoted expression to the list of columns to GROUP BY
+         * @return $this
          */
         public function group_by_expr($expr) {
             $this->_group_by[] = $expr;
@@ -1541,6 +1573,7 @@
          *
          * If you use an array in $column_name, a new clause will be
          * added for each element. In this case, $value is ignored.
+         * @return $this
          */
         public function having($column_name, $value=null) {
             return $this->having_equal($column_name, $value);
@@ -1549,6 +1582,7 @@
         /**
          * More explicitly named version of for the having() method.
          * Can be used if preferred.
+         * @return $this
          */
         public function having_equal($column_name, $value=null) {
             return $this->_add_simple_having($column_name, '=', $value);
@@ -1556,6 +1590,7 @@
 
         /**
          * Add a HAVING column != value clause to your query.
+         * @return $this
          */
         public function having_not_equal($column_name, $value=null) {
             return $this->_add_simple_having($column_name, '!=', $value);
@@ -1566,6 +1601,7 @@
          *
          * If primary key is compound, only the columns that
          * belong to they key will be used for the query
+         * @return $this
          */
         public function having_id_is($id) {
             return (is_array($this->_get_id_column_name())) ?
@@ -1575,6 +1611,7 @@
 
         /**
          * Add a HAVING ... LIKE clause to your query.
+         * @return $this
          */
         public function having_like($column_name, $value=null) {
             return $this->_add_simple_having($column_name, 'LIKE', $value);
@@ -1582,6 +1619,7 @@
 
         /**
          * Add where HAVING ... NOT LIKE clause to your query.
+         * @return $this
          */
         public function having_not_like($column_name, $value=null) {
             return $this->_add_simple_having($column_name, 'NOT LIKE', $value);
@@ -1589,6 +1627,7 @@
 
         /**
          * Add a HAVING ... > clause to your query
+         * @return $this
          */
         public function having_gt($column_name, $value=null) {
             return $this->_add_simple_having($column_name, '>', $value);
@@ -1596,6 +1635,7 @@
 
         /**
          * Add a HAVING ... < clause to your query
+         * @return $this
          */
         public function having_lt($column_name, $value=null) {
             return $this->_add_simple_having($column_name, '<', $value);
@@ -1603,6 +1643,7 @@
 
         /**
          * Add a HAVING ... >= clause to your query
+         * @return $this
          */
         public function having_gte($column_name, $value=null) {
             return $this->_add_simple_having($column_name, '>=', $value);
@@ -1610,6 +1651,7 @@
 
         /**
          * Add a HAVING ... <= clause to your query
+         * @return $this
          */
         public function having_lte($column_name, $value=null) {
             return $this->_add_simple_having($column_name, '<=', $value);
@@ -1617,6 +1659,7 @@
 
         /**
          * Add a HAVING ... IN clause to your query
+         * @return $this
          */
         public function having_in($column_name, $values=null) {
             return $this->_add_having_placeholder($column_name, 'IN', $values);
@@ -1666,7 +1709,7 @@
 
             // Build and return the full SELECT statement by concatenating
             // the results of calling each separate builder method.
-            return $this->_join_if_not_empty(" ", array(
+            return $this->_join_if_not_empty(' ', array(
                 $this->_build_select_start(),
                 $this->_build_join(),
                 $this->_build_where(),
@@ -1683,7 +1726,7 @@
          */
         protected function _build_select_start() {
             $fragment = 'SELECT ';
-            $result_columns = join(', ', $this->_result_columns);
+            $result_columns = implode(', ', $this->_result_columns);
 
             if (!is_null($this->_limit) &&
                 static::$_config[$this->_connection_name]['limit_clause_style'] === static::LIMIT_STYLE_TOP_N) {
@@ -1791,10 +1834,10 @@
         protected function _build_offset() {
             if (!is_null($this->_offset)) {
                 $clause = 'OFFSET';
-                if (static::get_db($this->_connection_name)->getAttribute(PDO::ATTR_DRIVER_NAME) == 'firebird') {
+                if (static::get_db($this->_connection_name)->getAttribute(PDO::ATTR_DRIVER_NAME) === 'firebird') {
                     $clause = 'TO';
                 }
-                return "$clause " . $this->_offset;
+                return $clause . ' ' . $this->_offset;
             }
             return '';
         }
@@ -1813,18 +1856,19 @@
                     $filtered_pieces[] = $piece;
                 }
             }
-            return join($glue, $filtered_pieces);
+            return implode($glue, $filtered_pieces);
         }
 
         /**
          * Quote a string that is used as an identifier
          * (table names, column names etc). This method can
          * also deal with dot-separated identifiers eg table.column
+         * @return string
          */
         protected function _quote_one_identifier($identifier) {
             $parts = explode('.', $identifier);
             $parts = array_map(array($this, '_quote_identifier_part'), $parts);
-            return join('.', $parts);
+            return implode('.', $parts);
         }
 
         /**
@@ -1832,14 +1876,13 @@
          * (table names, column names etc) or an array containing
          * multiple identifiers. This method can also deal with
          * dot-separated identifiers eg table.column
+         * @return string
          */
         protected function _quote_identifier($identifier) {
             if (is_array($identifier)) {
-                $result = array_map(array($this, '_quote_one_identifier'), $identifier);
-                return join(', ', $result);
-            } else {
-                return $this->_quote_one_identifier($identifier);
+                return implode(', ', array_map(array($this, '_quote_one_identifier'), $identifier));
             }
+            return $this->_quote_one_identifier($identifier);
         }
 
         /**
