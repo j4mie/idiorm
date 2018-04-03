@@ -835,6 +835,7 @@
          * instance of the class from an associative array of data.
          * This will usually be called only from inside the class,
          * but it's public in case you need to call it directly.
+          * @return $this
          */
         public function hydrate($data=array()) {
             $this->_data = $data;
@@ -844,6 +845,7 @@
         /**
          * Force the ORM to flag all the fields in the $data array
          * as "dirty" and therefore update them when save() is called.
+         * @return $this
          */
         public function force_all_dirty() {
             $this->_dirty_fields = $this->_data;
@@ -856,6 +858,7 @@
          * used, the parameters should be an array of values which will
          * be bound to the placeholders in the query. If this method
          * is called, all other query building methods will be ignored.
+         * @return $this
          */
         public function raw_query($query, $parameters = array()) {
             $this->_is_raw_query = true;
@@ -866,6 +869,7 @@
 
         /**
          * Add an alias for the main table to be used in SELECT queries
+         * @return $this
          */
         public function table_alias($alias) {
             $this->_table_alias = $alias;
@@ -909,6 +913,7 @@
          * Add a column to the list of columns returned by the SELECT
          * query. This defaults to '*'. The second optional argument is
          * the alias to return the column as.
+         * @return $this
          */
         public function select($column, $alias=null) {
             $column = $this->_quote_identifier($column);
@@ -937,7 +942,7 @@
          * @example select_many('column', 'column2', 'column3');
          * @example select_many(array('column', 'column2', 'column3'), 'column4', 'column5');
          *
-         * @return \ORM
+         * @return $this
          */
         public function select_many() {
             $columns = func_get_args();
@@ -965,7 +970,7 @@
          * @example select_many_expr('column', 'column2', 'column3')
          * @example select_many_expr(array('column', 'column2', 'column3'), 'column4', 'column5')
          *
-         * @return \ORM
+         * @return $this
          */
         public function select_many_expr() {
             $columns = func_get_args();
@@ -1012,6 +1017,7 @@
 
         /**
          * Add a DISTINCT keyword before the list of columns in the SELECT query
+         * @return $this
          */
         public function distinct() {
             $this->_distinct = true;
@@ -1039,6 +1045,7 @@
          * ON `user`.`id` = `profile`.`user_id`
          *
          * The final (optional) argument specifies an alias for the joined table.
+         * @return $this
          */
         protected function _add_join_source($join_operator, $table, $constraint, $table_alias=null) {
 
@@ -1066,6 +1073,7 @@
 
         /**
          * Add a RAW JOIN source to the query
+         * @return $this
          */
         public function raw_join($table, $constraint, $table_alias, $parameters = array()) {
             // Add table alias if present
@@ -1090,6 +1098,7 @@
 
         /**
          * Add a simple JOIN source to the query
+         * @return $this
          */
         public function join($table, $constraint, $table_alias=null) {
             return $this->_add_join_source("", $table, $constraint, $table_alias);
@@ -1097,6 +1106,7 @@
 
         /**
          * Add an INNER JOIN souce to the query
+         * @return $this
          */
         public function inner_join($table, $constraint, $table_alias=null) {
             return $this->_add_join_source("INNER", $table, $constraint, $table_alias);
@@ -1104,6 +1114,7 @@
 
         /**
          * Add a LEFT OUTER JOIN souce to the query
+         * @return $this
          */
         public function left_outer_join($table, $constraint, $table_alias=null) {
             return $this->_add_join_source("LEFT OUTER", $table, $constraint, $table_alias);
@@ -1111,6 +1122,7 @@
 
         /**
          * Add an RIGHT OUTER JOIN souce to the query
+         * @return $this
          */
         public function right_outer_join($table, $constraint, $table_alias=null) {
             return $this->_add_join_source("RIGHT OUTER", $table, $constraint, $table_alias);
@@ -1118,6 +1130,7 @@
 
         /**
          * Add an FULL OUTER JOIN souce to the query
+         * @return $this
          */
         public function full_outer_join($table, $constraint, $table_alias=null) {
             return $this->_add_join_source("FULL OUTER", $table, $constraint, $table_alias);
