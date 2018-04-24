@@ -41,20 +41,20 @@
      * This documentation exposes these methods to doc generators and IDEs.
      * @see http://www.php-fig.org/psr/psr-1/
      *
-     * @method static array|string getConfig($key = null, $connection_name = self::DEFAULT_CONNECTION)
+     * @method static array|string getConfig($key = null, $connection_name = ORM::DEFAULT_CONNECTION)
      * @method static null resetConfig()
-     * @method static \ORM forTable($table_name, $connection_name = self::DEFAULT_CONNECTION)
-     * @method static null setDb($db, $connection_name = self::DEFAULT_CONNECTION)
+     * @method static self forTable($table_name, $connection_name = ORM::DEFAULT_CONNECTION)
+     * @method static null setDb($db, $connection_name = ORM::DEFAULT_CONNECTION)
      * @method static null resetDb()
      * @method static null setupLimitClauseStyle($connection_name)
-     * @method static \PDO getDb($connection_name = self::DEFAULT_CONNECTION)
+     * @method static \PDO getDb($connection_name = ORM::DEFAULT_CONNECTION)
      * @method static bool rawExecute($query, $parameters = array())
      * @method static \PDOStatement getLastStatement()
      * @method static string getLastQuery($connection_name = null)
-     * @method static array getQueryLog($connection_name = self::DEFAULT_CONNECTION)
+     * @method static array getQueryLog($connection_name = ORM::DEFAULT_CONNECTION)
      * @method array getConnectionNames()
      * @method $this useIdColumn($id_column)
-     * @method \ORM|bool findOne($id=null)
+     * @method self|bool findOne($id=null)
      * @method array|\IdiormResultSet findMany()
      * @method \IdiormResultSet findResultSet()
      * @method array findArray()
@@ -63,8 +63,8 @@
      * @method $this tableAlias($alias)
      * @method int countNullIdColumns()
      * @method $this selectExpr($expr, $alias=null)
-     * @method \ORM selectMany($values)
-     * @method \ORM selectManyExpr($values)
+     * @method self selectMany($values)
+     * @method self selectManyExpr($values)
      * @method $this rawJoin($table, $constraint, $table_alias, $parameters = array())
      * @method $this innerJoin($table, $constraint, $table_alias=null)
      * @method $this leftOuterJoin($table, $constraint, $table_alias=null)
@@ -105,7 +105,7 @@
      * @method $this havingNull($column_name)
      * @method $this havingNotNull($column_name)
      * @method $this havingRaw($clause, $parameters=array())
-     * @method static this clearCache($table_name = null, $connection_name = self::DEFAULT_CONNECTION)
+     * @method static clearCache($table_name = null, $connection_name = ORM::DEFAULT_CONNECTION)
      * @method array asArray()
      * @method bool setExpr($key, $value = null)
      * @method bool isDirty($key)
@@ -153,7 +153,7 @@
         // Map of configuration settings
         protected static $_config = array();
 
-        // Map of database connections, instances of the PDO class
+        /** @var PDO[] Map of database connections, instances of the PDO class */
         protected static $_db = array();
 
         // Last query run, only populated if logging is enabled
@@ -165,7 +165,7 @@
         // Query cache, only used if query caching is enabled
         protected static $_query_cache = array();
 
-        // Reference to previously used PDOStatement object to enable low-level access, if needed
+        /** @var PDOStatement Reference to previously used PDOStatement object to enable low-level access, if needed */
         protected static $_last_statement = null;
 
         // --------------------------- //
@@ -258,22 +258,22 @@
          * @param string $connection_name Which connection to use
          */
         public static function configure($key, $value = null, $connection_name = self::DEFAULT_CONNECTION) {
-            self::_setup_db_config($connection_name); //ensures at least default config is set
+            static::_setup_db_config($connection_name); //ensures at least default config is set
 
             if (is_array($key)) {
                 // Shortcut: If only one array argument is passed,
                 // assume it's an array of configuration settings
                 foreach ($key as $conf_key => $conf_value) {
-                    self::configure($conf_key, $conf_value, $connection_name);
+                    static::configure($conf_key, $conf_value, $connection_name);
                 }
             } else {
                 if (is_null($value)) {
-                    // Shortcut: If only one string argument is passed, 
+                    // Shortcut: If only one string argument is passed,
                     // assume it's a connection string
                     $value = $key;
                     $key = 'connection_string';
                 }
-                self::$_config[$connection_name][$key] = $value;
+                static::$_config[$connection_name][$key] = $value;
             }
         }
 
@@ -281,12 +281,13 @@
          * Retrieve configuration options by key, or as whole array.
          * @param string $key
          * @param string $connection_name Which connection to use
+         * @return mixed
          */
         public static function get_config($key = null, $connection_name = self::DEFAULT_CONNECTION) {
             if ($key) {
-                return self::$_config[$connection_name][$key];
+                return static::$_config[$connection_name][$key];
             } else {
-                return self::$_config[$connection_name];
+                return static::$_config[$connection_name];
             }
         }
 
@@ -294,9 +295,9 @@
          * Delete all configs in _config array.
          */
         public static function reset_config() {
-            self::$_config = array();
+            static::$_config = array();
         }
-        
+
         /**
          * Despite its slightly odd name, this is actually the factory
          * method used to acquire instances of the class. It is named
@@ -305,11 +306,11 @@
          * this will normally be the first method called in a chain.
          * @param string $table_name
          * @param string $connection_name Which connection to use
-         * @return ORM
+         * @return static
          */
         public static function for_table($table_name, $connection_name = self::DEFAULT_CONNECTION) {
-            self::_setup_db($connection_name);
-            return new self($table_name, array(), $connection_name);
+            static::_setup_db($connection_name);
+            return new static($table_name, array(), $connection_name);
         }
 
         /**
@@ -317,19 +318,18 @@
          * @param string $connection_name Which connection to use
          */
         protected static function _setup_db($connection_name = self::DEFAULT_CONNECTION) {
-            if (!array_key_exists($connection_name, self::$_db) ||
-                !is_object(self::$_db[$connection_name])) {
-                self::_setup_db_config($connection_name);
+            if (!array_key_exists($connection_name, static::$_db) || !is_object(static::$_db[$connection_name])) {
+                static::_setup_db_config($connection_name);
 
                 $db = new PDO(
-                    self::$_config[$connection_name]['connection_string'],
-                    self::$_config[$connection_name]['username'],
-                    self::$_config[$connection_name]['password'],
-                    self::$_config[$connection_name]['driver_options']
+                    static::$_config[$connection_name]['connection_string'],
+                    static::$_config[$connection_name]['username'],
+                    static::$_config[$connection_name]['password'],
+                    static::$_config[$connection_name]['driver_options']
                 );
 
-                $db->setAttribute(PDO::ATTR_ERRMODE, self::$_config[$connection_name]['error_mode']);
-                self::set_db($db, $connection_name);
+                $db->setAttribute(PDO::ATTR_ERRMODE, static::$_config[$connection_name]['error_mode']);
+                static::set_db($db, $connection_name);
             }
         }
 
@@ -338,8 +338,8 @@
         * @param string $connection_name Which connection to use
         */
         protected static function _setup_db_config($connection_name) {
-            if (!array_key_exists($connection_name, self::$_config)) {
-                self::$_config[$connection_name] = self::$_default_config;
+            if (!array_key_exists($connection_name, static::$_config)) {
+                static::$_config[$connection_name] = static::$_default_config;
             }
         }
 
@@ -352,11 +352,11 @@
          * @param string $connection_name Which connection to use
          */
         public static function set_db($db, $connection_name = self::DEFAULT_CONNECTION) {
-            self::_setup_db_config($connection_name);
-            self::$_db[$connection_name] = $db;
-            if(!is_null(self::$_db[$connection_name])) {
-                self::_setup_identifier_quote_character($connection_name);
-                self::_setup_limit_clause_style($connection_name);
+            static::_setup_db_config($connection_name);
+            static::$_db[$connection_name] = $db;
+            if(!is_null(static::$_db[$connection_name])) {
+                static::_setup_identifier_quote_character($connection_name);
+                static::_setup_limit_clause_style($connection_name);
             }
         }
 
@@ -364,7 +364,7 @@
          * Delete all registered PDO objects in _db array.
          */
         public static function reset_db() {
-            self::$_db = array();
+            static::$_db = array();
         }
 
         /**
@@ -375,22 +375,22 @@
          * @param string $connection_name Which connection to use
          */
         protected static function _setup_identifier_quote_character($connection_name) {
-            if (is_null(self::$_config[$connection_name]['identifier_quote_character'])) {
-                self::$_config[$connection_name]['identifier_quote_character'] =
-                    self::_detect_identifier_quote_character($connection_name);
+            if (is_null(static::$_config[$connection_name]['identifier_quote_character'])) {
+                static::$_config[$connection_name]['identifier_quote_character'] =
+                    static::_detect_identifier_quote_character($connection_name);
             }
         }
 
         /**
          * Detect and initialise the limit clause style ("SELECT TOP 5" /
-         * "... LIMIT 5"). If this has been specified manually using 
+         * "... LIMIT 5"). If this has been specified manually using
          * ORM::configure('limit_clause_style', 'top'), this will do nothing.
          * @param string $connection_name Which connection to use
          */
         public static function _setup_limit_clause_style($connection_name) {
-            if (is_null(self::$_config[$connection_name]['limit_clause_style'])) {
-                self::$_config[$connection_name]['limit_clause_style'] =
-                    self::_detect_limit_clause_style($connection_name);
+            if (is_null(static::$_config[$connection_name]['limit_clause_style'])) {
+                static::$_config[$connection_name]['limit_clause_style'] =
+                    static::_detect_limit_clause_style($connection_name);
             }
         }
 
@@ -401,7 +401,7 @@
          * @return string
          */
         protected static function _detect_identifier_quote_character($connection_name) {
-            switch(self::get_db($connection_name)->getAttribute(PDO::ATTR_DRIVER_NAME)) {
+            switch(static::get_db($connection_name)->getAttribute(PDO::ATTR_DRIVER_NAME)) {
                 case 'pgsql':
                 case 'sqlsrv':
                 case 'dblib':
@@ -424,13 +424,13 @@
          * @return string Limit clause style keyword/constant
          */
         protected static function _detect_limit_clause_style($connection_name) {
-            switch(self::get_db($connection_name)->getAttribute(PDO::ATTR_DRIVER_NAME)) {
+            switch(static::get_db($connection_name)->getAttribute(PDO::ATTR_DRIVER_NAME)) {
                 case 'sqlsrv':
                 case 'dblib':
                 case 'mssql':
-                    return ORM::LIMIT_STYLE_TOP_N;
+                    return static::LIMIT_STYLE_TOP_N;
                 default:
-                    return ORM::LIMIT_STYLE_LIMIT;
+                    return static::LIMIT_STYLE_LIMIT;
             }
         }
 
@@ -443,8 +443,8 @@
          * @return PDO
          */
         public static function get_db($connection_name = self::DEFAULT_CONNECTION) {
-            self::_setup_db($connection_name); // required in case this is called before Idiorm is instantiated
-            return self::$_db[$connection_name];
+            static::_setup_db($connection_name); // required in case this is called before Idiorm is instantiated
+            return static::$_db[$connection_name];
         }
 
         /**
@@ -454,13 +454,14 @@
          * @example raw_execute('SELECT `name`, AVG(`order`) FROM `customer` GROUP BY `name` HAVING AVG(`order`) > 10')
          * @example raw_execute('INSERT OR REPLACE INTO `widget` (`id`, `name`) SELECT `id`, `name` FROM `other_table`')
          * @param string $query The raw SQL query
-         * @param array  $parameters Optional bound parameters
+         * @param array $parameters Optional bound parameters
          * @param string $connection_name Which connection to use
          * @return bool Success
+         * @throws IdiormStringException
          */
         public static function raw_execute($query, $parameters = array(), $connection_name = self::DEFAULT_CONNECTION) {
-            self::_setup_db($connection_name);
-            return self::_execute($query, $parameters, $connection_name);
+            static::_setup_db($connection_name);
+            return static::_execute($query, $parameters, $connection_name);
         }
 
         /**
@@ -469,21 +470,23 @@
          * @return PDOStatement
          */
         public static function get_last_statement() {
-            return self::$_last_statement;
+            return static::$_last_statement;
         }
 
-       /**
-        * Internal helper method for executing statments. Logs queries, and
-        * stores statement object in ::_last_statment, accessible publicly
-        * through ::get_last_statement()
-        * @param string $query
-        * @param array $parameters An array of parameters to be bound in to the query
-        * @param string $connection_name Which connection to use
-        * @return bool Response of PDOStatement::execute()
-        */
+        /**
+         * Internal helper method for executing statments. Logs queries, and
+         * stores statement object in ::_last_statment, accessible publicly
+         * through ::get_last_statement()
+         * @param string $query
+         * @param array $parameters An array of parameters to be bound in to the query
+         * @param string $connection_name Which connection to use
+         * @return bool Response of PDOStatement::execute()
+         * @throws IdiormStringException
+         */
         protected static function _execute($query, $parameters = array(), $connection_name = self::DEFAULT_CONNECTION) {
-            $statement = self::get_db($connection_name)->prepare($query);
-            self::$_last_statement = $statement;
+            if (static::$_last_statement) static::$_last_statement = null;
+            $statement = static::get_db($connection_name)->prepare($query);
+            static::$_last_statement = $statement;
             $time = microtime(true);
 
             foreach ($parameters as $key => &$param) {
@@ -501,7 +504,7 @@
             }
 
             $q = $statement->execute();
-            self::_log_query($query, $parameters, $connection_name, (microtime(true)-$time));
+            static::_log_query($query, $parameters, $connection_name, (microtime(true)-$time));
 
             return $q;
         }
@@ -517,24 +520,25 @@
          * @param string $query
          * @param array $parameters An array of parameters to be bound in to the query
          * @param string $connection_name Which connection to use
-		 * @param float $query_time Query time
+         * @param float $query_time Query time
          * @return bool
+         * @throws IdiormStringException
          */
         protected static function _log_query($query, $parameters, $connection_name, $query_time) {
             // If logging is not enabled, do nothing
-            if (!self::$_config[$connection_name]['logging']) {
+            if (!static::$_config[$connection_name]['logging']) {
                 return false;
             }
 
-            if (!isset(self::$_query_log[$connection_name])) {
-                self::$_query_log[$connection_name] = array();
+            if (!isset(static::$_query_log[$connection_name])) {
+                static::$_query_log[$connection_name] = array();
             }
 
             if (empty($parameters)) {
                 $bound_query = $query;
             } else {
                 // Escape the parameters
-                $parameters = array_map(array(self::get_db($connection_name), 'quote'), $parameters);
+                $parameters = array_map(array(static::get_db($connection_name), 'quote'), $parameters);
 
                 if (array_values($parameters) === $parameters) {
                     // ? placeholders
@@ -559,15 +563,15 @@
                 }
             }
 
-            self::$_last_query = $bound_query;
-            self::$_query_log[$connection_name][] = $bound_query;
-            
-            
-            if(is_callable(self::$_config[$connection_name]['logger'])){
-                $logger = self::$_config[$connection_name]['logger'];
+            static::$_last_query = $bound_query;
+            static::$_query_log[$connection_name][] = $bound_query;
+
+
+            if(is_callable(static::$_config[$connection_name]['logger'])){
+                $logger = static::$_config[$connection_name]['logger'];
                 $logger($bound_query, $query_time);
             }
-            
+
             return true;
         }
 
@@ -581,13 +585,13 @@
          */
         public static function get_last_query($connection_name = null) {
             if ($connection_name === null) {
-                return self::$_last_query;
+                return static::$_last_query;
             }
-            if (!isset(self::$_query_log[$connection_name])) {
+            if (!isset(static::$_query_log[$connection_name])) {
                 return '';
             }
 
-            return end(self::$_query_log[$connection_name]);
+            return end(static::$_query_log[$connection_name]);
         }
 
         /**
@@ -596,10 +600,11 @@
          * Only works if the 'logging' config option is
          * set to true. Otherwise, returned array will be empty.
          * @param string $connection_name Which connection to use
+         * @return array
          */
         public static function get_query_log($connection_name = self::DEFAULT_CONNECTION) {
-            if (isset(self::$_query_log[$connection_name])) {
-                return self::$_query_log[$connection_name];
+            if (isset(static::$_query_log[$connection_name])) {
+                return static::$_query_log[$connection_name];
             }
             return array();
         }
@@ -609,7 +614,7 @@
          * @return array
          */
         public static function get_connection_names() {
-            return array_keys(self::$_db);
+            return array_keys(static::$_db);
         }
 
         // ------------------------ //
@@ -625,7 +630,7 @@
             $this->_data = $data;
 
             $this->_connection_name = $connection_name;
-            self::_setup_db_config($connection_name);
+            static::_setup_db_config($connection_name);
         }
 
         /**
@@ -635,8 +640,10 @@
          * the instance. If so, all fields will be flagged as
          * dirty so all will be saved to the database when
          * save() is called.
+         * @param array $data
+         * @return $this
          */
-        public function create($data=null) {
+        public function create($data = null) {
             $this->_is_new = true;
             if (!is_null($data)) {
                 return $this->hydrate($data)->force_all_dirty();
@@ -662,7 +669,7 @@
          * array of data fetched from the database)
          */
         protected function _create_instance_from_row($row) {
-            $instance = self::for_table($this->_table_name, $this->_connection_name);
+            $instance = static::for_table($this->_table_name, $this->_connection_name);
             $instance->use_id_column($this->_instance_id_column);
             $instance->hydrate($row);
             return $instance;
@@ -676,8 +683,11 @@
          * As a shortcut, you may supply an ID as a parameter
          * to this method. This will perform a primary key
          * lookup on the table.
+         * @param int|string $id
+         * @return self|false
+         * @throws IdiormStringException
          */
-        public function find_one($id=null) {
+        public function find_one($id = null) {
             if (!is_null($id)) {
                 $this->where_id_is($id);
             }
@@ -697,9 +707,10 @@
          * of instances of the ORM class, or an empty array if
          * no rows were returned.
          * @return array|\IdiormResultSet
+         * @throws IdiormStringException
          */
         public function find_many() {
-            if(self::$_config[$this->_connection_name]['return_result_sets']) {
+            if(static::$_config[$this->_connection_name]['return_result_sets']) {
                 return $this->find_result_set();
             }
             return $this->_find_many();
@@ -711,6 +722,7 @@
          * of instances of the ORM class, or an empty array if
          * no rows were returned.
          * @return array
+         * @throws IdiormStringException
          */
         protected function _find_many() {
             $rows = $this->_run();
@@ -722,6 +734,7 @@
          * from your query, and execute it. Will return a result set object
          * containing instances of the ORM class.
          * @return \IdiormResultSet
+         * @throws IdiormStringException
          */
         public function find_result_set() {
             return new IdiormResultSet($this->_find_many());
@@ -732,15 +745,17 @@
          * from your query, and execute it. Will return an array,
          * or an empty array if no rows were returned.
          * @return array
+         * @throws IdiormStringException
          */
         public function find_array() {
-            return $this->_run(); 
+            return $this->_run();
         }
 
         /**
          * Tell the ORM that you wish to execute a COUNT query.
          * Will return an integer representing the number of
          * rows returned.
+         * @throws IdiormStringException
          */
         public function count($column = '*') {
             return $this->_call_aggregate_db_function(__FUNCTION__, $column);
@@ -748,7 +763,8 @@
 
         /**
          * Tell the ORM that you wish to execute a MAX query.
-         * Will return the max value of the choosen column.
+         * Will return the max value of the chosen column.
+         * @throws IdiormStringException
          */
         public function max($column)  {
             return $this->_call_aggregate_db_function(__FUNCTION__, $column);
@@ -756,7 +772,8 @@
 
         /**
          * Tell the ORM that you wish to execute a MIN query.
-         * Will return the min value of the choosen column.
+         * Will return the min value of the chosen column.
+         * @throws IdiormStringException
          */
         public function min($column)  {
             return $this->_call_aggregate_db_function(__FUNCTION__, $column);
@@ -764,7 +781,8 @@
 
         /**
          * Tell the ORM that you wish to execute a AVG query.
-         * Will return the average value of the choosen column.
+         * Will return the average value of the chosen column.
+         * @throws IdiormStringException
          */
         public function avg($column)  {
             return $this->_call_aggregate_db_function(__FUNCTION__, $column);
@@ -772,7 +790,8 @@
 
         /**
          * Tell the ORM that you wish to execute a SUM query.
-         * Will return the sum of the choosen column.
+         * Will return the sum of the chosen column.
+         * @throws IdiormStringException
          */
         public function sum($column)  {
             return $this->_call_aggregate_db_function(__FUNCTION__, $column);
@@ -783,6 +802,7 @@
          * @param string $sql_function The aggregate function to call eg. MIN, COUNT, etc
          * @param string $column The column to execute the aggregate query against
          * @return int
+         * @throws IdiormStringException
          */
         protected function _call_aggregate_db_function($sql_function, $column) {
             $alias = strtolower($sql_function);
@@ -815,6 +835,7 @@
          * instance of the class from an associative array of data.
          * This will usually be called only from inside the class,
          * but it's public in case you need to call it directly.
+          * @return $this
          */
         public function hydrate($data=array()) {
             $this->_data = $data;
@@ -824,6 +845,7 @@
         /**
          * Force the ORM to flag all the fields in the $data array
          * as "dirty" and therefore update them when save() is called.
+         * @return $this
          */
         public function force_all_dirty() {
             $this->_dirty_fields = $this->_data;
@@ -836,6 +858,7 @@
          * used, the parameters should be an array of values which will
          * be bound to the placeholders in the query. If this method
          * is called, all other query building methods will be ignored.
+         * @return $this
          */
         public function raw_query($query, $parameters = array()) {
             $this->_is_raw_query = true;
@@ -846,6 +869,7 @@
 
         /**
          * Add an alias for the main table to be used in SELECT queries
+         * @return $this
          */
         public function table_alias($alias) {
             $this->_table_alias = $alias;
@@ -856,6 +880,7 @@
          * Internal method to add an unquoted expression to the set
          * of columns returned by the SELECT query. The second optional
          * argument is the alias to return the expression as.
+         * @return $this
          */
         protected function _add_result_column($expr, $alias=null) {
             if (!is_null($alias)) {
@@ -874,6 +899,7 @@
         /**
          * Counts the number of columns that belong to the primary
          * key and their value is null.
+         * @throws Exception
          */
         public function count_null_id_columns() {
             if (is_array($this->_get_id_column_name())) {
@@ -887,6 +913,7 @@
          * Add a column to the list of columns returned by the SELECT
          * query. This defaults to '*'. The second optional argument is
          * the alias to return the column as.
+         * @return $this
          */
         public function select($column, $alias=null) {
             $column = $this->_quote_identifier($column);
@@ -897,6 +924,7 @@
          * Add an unquoted expression to the list of columns returned
          * by the SELECT query. The second optional argument is
          * the alias to return the column as.
+         * @return $this
          */
         public function select_expr($expr, $alias=null) {
             return $this->_add_result_column($expr, $alias);
@@ -906,15 +934,15 @@
          * Add columns to the list of columns returned by the SELECT
          * query. This defaults to '*'. Many columns can be supplied
          * as either an array or as a list of parameters to the method.
-         * 
+         *
          * Note that the alias must not be numeric - if you want a
          * numeric alias then prepend it with some alpha chars. eg. a1
-         * 
+         *
          * @example select_many(array('alias' => 'column', 'column2', 'alias2' => 'column3'), 'column4', 'column5');
          * @example select_many('column', 'column2', 'column3');
          * @example select_many(array('column', 'column2', 'column3'), 'column4', 'column5');
-         * 
-         * @return \ORM
+         *
+         * @return $this
          */
         public function select_many() {
             $columns = func_get_args();
@@ -932,17 +960,17 @@
 
         /**
          * Add an unquoted expression to the list of columns returned
-         * by the SELECT query. Many columns can be supplied as either 
+         * by the SELECT query. Many columns can be supplied as either
          * an array or as a list of parameters to the method.
-         * 
+         *
          * Note that the alias must not be numeric - if you want a
          * numeric alias then prepend it with some alpha chars. eg. a1
-         * 
+         *
          * @example select_many_expr(array('alias' => 'column', 'column2', 'alias2' => 'column3'), 'column4', 'column5')
          * @example select_many_expr('column', 'column2', 'column3')
          * @example select_many_expr(array('column', 'column2', 'column3'), 'column4', 'column5')
-         * 
-         * @return \ORM
+         *
+         * @return $this
          */
         public function select_many_expr() {
             $columns = func_get_args();
@@ -961,11 +989,11 @@
         /**
          * Take a column specification for the select many methods and convert it
          * into a normalised array of columns and aliases.
-         * 
+         *
          * It is designed to turn the following styles into a normalised array:
-         * 
+         *
          * array(array('alias' => 'column', 'column2', 'alias2' => 'column3'), 'column4', 'column5'))
-         * 
+         *
          * @param array $columns
          * @return array
          */
@@ -989,6 +1017,7 @@
 
         /**
          * Add a DISTINCT keyword before the list of columns in the SELECT query
+         * @return $this
          */
         public function distinct() {
             $this->_distinct = true;
@@ -1016,6 +1045,7 @@
          * ON `user`.`id` = `profile`.`user_id`
          *
          * The final (optional) argument specifies an alias for the joined table.
+         * @return $this
          */
         protected function _add_join_source($join_operator, $table, $constraint, $table_alias=null) {
 
@@ -1043,6 +1073,7 @@
 
         /**
          * Add a RAW JOIN source to the query
+         * @return $this
          */
         public function raw_join($table, $constraint, $table_alias, $parameters = array()) {
             // Add table alias if present
@@ -1067,6 +1098,7 @@
 
         /**
          * Add a simple JOIN source to the query
+         * @return $this
          */
         public function join($table, $constraint, $table_alias=null) {
             return $this->_add_join_source("", $table, $constraint, $table_alias);
@@ -1074,6 +1106,7 @@
 
         /**
          * Add an INNER JOIN souce to the query
+         * @return $this
          */
         public function inner_join($table, $constraint, $table_alias=null) {
             return $this->_add_join_source("INNER", $table, $constraint, $table_alias);
@@ -1081,6 +1114,7 @@
 
         /**
          * Add a LEFT OUTER JOIN souce to the query
+         * @return $this
          */
         public function left_outer_join($table, $constraint, $table_alias=null) {
             return $this->_add_join_source("LEFT OUTER", $table, $constraint, $table_alias);
@@ -1088,6 +1122,7 @@
 
         /**
          * Add an RIGHT OUTER JOIN souce to the query
+         * @return $this
          */
         public function right_outer_join($table, $constraint, $table_alias=null) {
             return $this->_add_join_source("RIGHT OUTER", $table, $constraint, $table_alias);
@@ -1095,6 +1130,7 @@
 
         /**
          * Add an FULL OUTER JOIN souce to the query
+         * @return $this
          */
         public function full_outer_join($table, $constraint, $table_alias=null) {
             return $this->_add_join_source("FULL OUTER", $table, $constraint, $table_alias);
@@ -1102,6 +1138,7 @@
 
         /**
          * Internal method to add a HAVING condition to the query
+         * @return $this
          */
         protected function _add_having($fragment, $values=array()) {
             return $this->_add_condition('having', $fragment, $values);
@@ -1109,6 +1146,7 @@
 
         /**
          * Internal method to add a HAVING condition to the query
+         * @return $this
          */
         protected function _add_simple_having($column_name, $separator, $value) {
             return $this->_add_simple_condition('having', $column_name, $separator, $value);
@@ -1116,6 +1154,7 @@
 
         /**
          * Internal method to add a HAVING clause with multiple values (like IN and NOT IN)
+         * @return $this
          */
         public function _add_having_placeholder($column_name, $separator, $values) {
             if (!is_array($column_name)) {
@@ -1123,30 +1162,30 @@
             } else {
                 $data = $column_name;
             }
-            $result = $this;
             foreach ($data as $key => $val) {
-                $column = $result->_quote_identifier($key);
-                $placeholders = $result->_create_placeholders($val);
-                $result = $result->_add_having("{$column} {$separator} ({$placeholders})", $val);    
+                $column = $this->_quote_identifier($key);
+                $placeholders = $this->_create_placeholders($val);
+                $this->_add_having("{$column} {$separator} ({$placeholders})", $val);
             }
-            return $result;
+            return $this;
         }
 
         /**
          * Internal method to add a HAVING clause with no parameters(like IS NULL and IS NOT NULL)
+         * @return $this
          */
         public function _add_having_no_value($column_name, $operator) {
             $conditions = (is_array($column_name)) ? $column_name : array($column_name);
-            $result = $this;
             foreach($conditions as $column) {
                 $column = $this->_quote_identifier($column);
-                $result = $result->_add_having("{$column} {$operator}");
+                $this->_add_having("{$column} {$operator}");
             }
-            return $result;
+            return $this;
         }
 
         /**
          * Internal method to add a WHERE condition to the query
+         * @return $this
          */
         protected function _add_where($fragment, $values=array()) {
             return $this->_add_condition('where', $fragment, $values);
@@ -1154,6 +1193,7 @@
 
         /**
          * Internal method to add a WHERE condition to the query
+         * @return $this
          */
         protected function _add_simple_where($column_name, $separator, $value) {
             return $this->_add_simple_condition('where', $column_name, $separator, $value);
@@ -1161,6 +1201,7 @@
 
         /**
          * Add a WHERE clause with multiple values (like IN and NOT IN)
+         * @return $this
          */
         public function _add_where_placeholder($column_name, $separator, $values) {
             if (!is_array($column_name)) {
@@ -1168,90 +1209,90 @@
             } else {
                 $data = $column_name;
             }
-            $result = $this;
             foreach ($data as $key => $val) {
-                $column = $result->_quote_identifier($key);
-                $placeholders = $result->_create_placeholders($val);
-                $result = $result->_add_where("{$column} {$separator} ({$placeholders})", $val);    
+                $column = $this->_quote_identifier($key);
+                $placeholders = $this->_create_placeholders($val);
+                $this->_add_where("{$column} {$separator} ({$placeholders})", $val);
             }
-            return $result;
+            return $this;
         }
 
         /**
          * Add a WHERE clause with no parameters(like IS NULL and IS NOT NULL)
+         * @return $this
          */
         public function _add_where_no_value($column_name, $operator) {
             $conditions = (is_array($column_name)) ? $column_name : array($column_name);
-            $result = $this;
             foreach($conditions as $column) {
                 $column = $this->_quote_identifier($column);
-                $result = $result->_add_where("{$column} {$operator}");
+                $this->_add_where("{$column} {$operator}");
             }
-            return $result;
+            return $this;
         }
 
         /**
          * Internal method to add a HAVING or WHERE condition to the query
+         * @return $this
          */
         protected function _add_condition($type, $fragment, $values=array()) {
             $conditions_class_property_name = "_{$type}_conditions";
             if (!is_array($values)) {
                 $values = array($values);
             }
-            array_push($this->$conditions_class_property_name, array(
-                self::CONDITION_FRAGMENT => $fragment,
-                self::CONDITION_VALUES => $values,
-            ));
+            $this->$conditions_class_property_name[] = array(
+                static::CONDITION_FRAGMENT => $fragment,
+                static::CONDITION_VALUES => $values,
+            );
             return $this;
         }
 
-       /**
+        /**
          * Helper method to compile a simple COLUMN SEPARATOR VALUE
          * style HAVING or WHERE condition into a string and value ready to
          * be passed to the _add_condition method. Avoids duplication
          * of the call to _quote_identifier
          *
          * If column_name is an associative array, it will add a condition for each column
+         * @return $this
          */
         protected function _add_simple_condition($type, $column_name, $separator, $value) {
             $multiple = is_array($column_name) ? $column_name : array($column_name => $value);
-            $result = $this;
-
             foreach($multiple as $key => $val) {
                 // Add the table name in case of ambiguous columns
-                if (count($result->_join_sources) > 0 && strpos($key, '.') === false) {
-                    $table = $result->_table_name;
-                    if (!is_null($result->_table_alias)) {
-                        $table = $result->_table_alias;
+                if (count($this->_join_sources) > 0 && strpos($key, '.') === false) {
+                    $table = $this->_table_name;
+                    if (!is_null($this->_table_alias)) {
+                        $table = $this->_table_alias;
                     }
 
                     $key = "{$table}.{$key}";
                 }
-                $key = $result->_quote_identifier($key);
-                $result = $result->_add_condition($type, "{$key} {$separator} ?", $val);
+                $key = $this->_quote_identifier($key);
+                $this->_add_condition($type, "{$key} {$separator} ?", $val);
             }
-            return $result;
-        } 
+            return $this;
+        }
 
         /**
          * Return a string containing the given number of question marks,
          * separated by commas. Eg "?, ?, ?"
+         * @param array $fields
+         * @return string
          */
         protected function _create_placeholders($fields) {
-            if(!empty($fields)) {
-                $db_fields = array();
-                foreach($fields as $key => $value) {
-                    // Process expression fields directly into the query
-                    if(array_key_exists($key, $this->_expr_fields)) {
-                        $db_fields[] = $value;
-                    } else {
-                        $db_fields[] = '?';
-                    }
+            if(empty($fields)) return '';
+            $db_fields = array();
+            foreach($fields as $key => $value) {
+                // Process expression fields directly into the query
+                if(array_key_exists($key, $this->_expr_fields)) {
+                    $db_fields[] = $value;
+                } else {
+                    $db_fields[] = '?';
                 }
-                return implode(', ', $db_fields);
             }
+            return implode(', ', $db_fields);
         }
-        
+
         /**
          * Helper method that filters a column/value array returning only those
          * columns that belong to a compound primary key.
@@ -1267,9 +1308,10 @@
             return $filtered;
         }
 
-       /**
+        /**
          * Helper method that filters an array containing compound column/value
          * arrays.
+         * @return array
          */
         protected function _get_compound_id_column_values_array($values) {
             $filtered = array();
@@ -1287,6 +1329,7 @@
          *
          * If you use an array in $column_name, a new clause will be
          * added for each element. In this case, $value is ignored.
+         * @return $this
          */
         public function where($column_name, $value=null) {
             return $this->where_equal($column_name, $value);
@@ -1295,6 +1338,7 @@
         /**
          * More explicitly named version of for the where() method.
          * Can be used if preferred.
+         * @return $this
          */
         public function where_equal($column_name, $value=null) {
             return $this->_add_simple_where($column_name, '=', $value);
@@ -1302,6 +1346,7 @@
 
         /**
          * Add a WHERE column != value clause to your query.
+         * @return $this
          */
         public function where_not_equal($column_name, $value=null) {
             return $this->_add_simple_where($column_name, '!=', $value);
@@ -1312,6 +1357,7 @@
          *
          * If primary key is compound, only the columns that
          * belong to they key will be used for the query
+         * @return $this
          */
         public function where_id_is($id) {
             return (is_array($this->_get_id_column_name())) ?
@@ -1328,7 +1374,8 @@
          * it can be overriden for any or every column using the second parameter.
          *
          * Each condition will be ORed together when added to the final query.
-         */        
+         * @return $this
+         */
         public function where_any_is($values, $operator='=') {
             $data = array();
             $query = array("((");
@@ -1361,6 +1408,7 @@
          *
          * If primary key is compound, only the columns that
          * belong to they key will be used for the query
+         * @return $this
          */
         public function where_id_in($ids) {
             return (is_array($this->_get_id_column_name())) ?
@@ -1370,6 +1418,7 @@
 
         /**
          * Add a WHERE ... LIKE clause to your query.
+         * @return $this
          */
         public function where_like($column_name, $value=null) {
             return $this->_add_simple_where($column_name, 'LIKE', $value);
@@ -1377,6 +1426,7 @@
 
         /**
          * Add where WHERE ... NOT LIKE clause to your query.
+         * @return $this
          */
         public function where_not_like($column_name, $value=null) {
             return $this->_add_simple_where($column_name, 'NOT LIKE', $value);
@@ -1384,6 +1434,7 @@
 
         /**
          * Add a WHERE ... > clause to your query
+         * @return $this
          */
         public function where_gt($column_name, $value=null) {
             return $this->_add_simple_where($column_name, '>', $value);
@@ -1391,6 +1442,7 @@
 
         /**
          * Add a WHERE ... < clause to your query
+         * @return $this
          */
         public function where_lt($column_name, $value=null) {
             return $this->_add_simple_where($column_name, '<', $value);
@@ -1398,6 +1450,7 @@
 
         /**
          * Add a WHERE ... >= clause to your query
+         * @return $this
          */
         public function where_gte($column_name, $value=null) {
             return $this->_add_simple_where($column_name, '>=', $value);
@@ -1405,6 +1458,7 @@
 
         /**
          * Add a WHERE ... <= clause to your query
+         * @return $this
          */
         public function where_lte($column_name, $value=null) {
             return $this->_add_simple_where($column_name, '<=', $value);
@@ -1412,6 +1466,7 @@
 
         /**
          * Add a WHERE ... IN clause to your query
+         * @return $this
          */
         public function where_in($column_name, $values) {
             return $this->_add_where_placeholder($column_name, 'IN', $values);
@@ -1419,6 +1474,7 @@
 
         /**
          * Add a WHERE ... NOT IN clause to your query
+         * @return $this
          */
         public function where_not_in($column_name, $values) {
             return $this->_add_where_placeholder($column_name, 'NOT IN', $values);
@@ -1426,6 +1482,7 @@
 
         /**
          * Add a WHERE column IS NULL clause to your query
+         * @return $this
          */
         public function where_null($column_name) {
             return $this->_add_where_no_value($column_name, "IS NULL");
@@ -1433,6 +1490,7 @@
 
         /**
          * Add a WHERE column IS NOT NULL clause to your query
+         * @return $this
          */
         public function where_not_null($column_name) {
             return $this->_add_where_no_value($column_name, "IS NOT NULL");
@@ -1442,6 +1500,7 @@
          * Add a raw WHERE clause to the query. The clause should
          * contain question mark placeholders, which will be bound
          * to the parameters supplied in the second argument.
+         * @return $this
          */
         public function where_raw($clause, $parameters=array()) {
             return $this->_add_where($clause, $parameters);
@@ -1449,6 +1508,7 @@
 
         /**
          * Add a LIMIT to the query
+         * @return $this
          */
         public function limit($limit) {
             $this->_limit = $limit;
@@ -1457,6 +1517,7 @@
 
         /**
          * Add an OFFSET to the query
+         * @return $this
          */
         public function offset($offset) {
             $this->_offset = $offset;
@@ -1465,6 +1526,7 @@
 
         /**
          * Add an ORDER BY clause to the query
+         * @return $this
          */
         protected function _add_order_by($column_name, $ordering) {
             $column_name = $this->_quote_identifier($column_name);
@@ -1474,6 +1536,7 @@
 
         /**
          * Add an ORDER BY column DESC clause
+         * @return $this
          */
         public function order_by_desc($column_name) {
             return $this->_add_order_by($column_name, 'DESC');
@@ -1481,6 +1544,7 @@
 
         /**
          * Add an ORDER BY column ASC clause
+         * @return $this
          */
         public function order_by_asc($column_name) {
             return $this->_add_order_by($column_name, 'ASC');
@@ -1488,6 +1552,7 @@
 
         /**
          * Add an unquoted expression as an ORDER BY clause
+         * @return $this
          */
         public function order_by_expr($clause) {
             $this->_order_by[] = $clause;
@@ -1496,6 +1561,7 @@
 
         /**
          * Add a column to the list of columns to GROUP BY
+         * @return $this
          */
         public function group_by($column_name) {
             $column_name = $this->_quote_identifier($column_name);
@@ -1504,7 +1570,8 @@
         }
 
         /**
-         * Add an unquoted expression to the list of columns to GROUP BY 
+         * Add an unquoted expression to the list of columns to GROUP BY
+         * @return $this
          */
         public function group_by_expr($expr) {
             $this->_group_by[] = $expr;
@@ -1519,6 +1586,7 @@
          *
          * If you use an array in $column_name, a new clause will be
          * added for each element. In this case, $value is ignored.
+         * @return $this
          */
         public function having($column_name, $value=null) {
             return $this->having_equal($column_name, $value);
@@ -1527,6 +1595,7 @@
         /**
          * More explicitly named version of for the having() method.
          * Can be used if preferred.
+         * @return $this
          */
         public function having_equal($column_name, $value=null) {
             return $this->_add_simple_having($column_name, '=', $value);
@@ -1534,6 +1603,7 @@
 
         /**
          * Add a HAVING column != value clause to your query.
+         * @return $this
          */
         public function having_not_equal($column_name, $value=null) {
             return $this->_add_simple_having($column_name, '!=', $value);
@@ -1544,6 +1614,7 @@
          *
          * If primary key is compound, only the columns that
          * belong to they key will be used for the query
+         * @return $this
          */
         public function having_id_is($id) {
             return (is_array($this->_get_id_column_name())) ?
@@ -1553,6 +1624,7 @@
 
         /**
          * Add a HAVING ... LIKE clause to your query.
+         * @return $this
          */
         public function having_like($column_name, $value=null) {
             return $this->_add_simple_having($column_name, 'LIKE', $value);
@@ -1560,6 +1632,7 @@
 
         /**
          * Add where HAVING ... NOT LIKE clause to your query.
+         * @return $this
          */
         public function having_not_like($column_name, $value=null) {
             return $this->_add_simple_having($column_name, 'NOT LIKE', $value);
@@ -1567,6 +1640,7 @@
 
         /**
          * Add a HAVING ... > clause to your query
+         * @return $this
          */
         public function having_gt($column_name, $value=null) {
             return $this->_add_simple_having($column_name, '>', $value);
@@ -1574,6 +1648,7 @@
 
         /**
          * Add a HAVING ... < clause to your query
+         * @return $this
          */
         public function having_lt($column_name, $value=null) {
             return $this->_add_simple_having($column_name, '<', $value);
@@ -1581,6 +1656,7 @@
 
         /**
          * Add a HAVING ... >= clause to your query
+         * @return $this
          */
         public function having_gte($column_name, $value=null) {
             return $this->_add_simple_having($column_name, '>=', $value);
@@ -1588,6 +1664,7 @@
 
         /**
          * Add a HAVING ... <= clause to your query
+         * @return $this
          */
         public function having_lte($column_name, $value=null) {
             return $this->_add_simple_having($column_name, '<=', $value);
@@ -1595,6 +1672,7 @@
 
         /**
          * Add a HAVING ... IN clause to your query
+         * @return $this
          */
         public function having_in($column_name, $values=null) {
             return $this->_add_having_placeholder($column_name, 'IN', $values);
@@ -1644,7 +1722,7 @@
 
             // Build and return the full SELECT statement by concatenating
             // the results of calling each separate builder method.
-            return $this->_join_if_not_empty(" ", array(
+            return $this->_join_if_not_empty(' ', array(
                 $this->_build_select_start(),
                 $this->_build_join(),
                 $this->_build_where(),
@@ -1661,10 +1739,10 @@
          */
         protected function _build_select_start() {
             $fragment = 'SELECT ';
-            $result_columns = join(', ', $this->_result_columns);
+            $result_columns = implode(', ', $this->_result_columns);
 
             if (!is_null($this->_limit) &&
-                self::$_config[$this->_connection_name]['limit_clause_style'] === ORM::LIMIT_STYLE_TOP_N) {
+                static::$_config[$this->_connection_name]['limit_clause_style'] === static::LIMIT_STYLE_TOP_N) {
                 $fragment .= "TOP {$this->_limit} ";
             }
 
@@ -1729,8 +1807,8 @@
 
             $conditions = array();
             foreach ($this->$conditions_class_property_name as $condition) {
-                $conditions[] = $condition[self::CONDITION_FRAGMENT];
-                $this->_values = array_merge($this->_values, $condition[self::CONDITION_VALUES]);
+                $conditions[] = $condition[static::CONDITION_FRAGMENT];
+                $this->_values = array_merge($this->_values, $condition[static::CONDITION_VALUES]);
             }
 
             return strtoupper($type) . " " . join(" AND ", $conditions);
@@ -1752,8 +1830,8 @@
         protected function _build_limit() {
             $fragment = '';
             if (!is_null($this->_limit) &&
-                self::$_config[$this->_connection_name]['limit_clause_style'] == ORM::LIMIT_STYLE_LIMIT) {
-                if (self::get_db($this->_connection_name)->getAttribute(PDO::ATTR_DRIVER_NAME) == 'firebird') {
+                static::$_config[$this->_connection_name]['limit_clause_style'] == static::LIMIT_STYLE_LIMIT) {
+                if (static::get_db($this->_connection_name)->getAttribute(PDO::ATTR_DRIVER_NAME) == 'firebird') {
                     $fragment = 'ROWS';
                 } else {
                     $fragment = 'LIMIT';
@@ -1769,10 +1847,10 @@
         protected function _build_offset() {
             if (!is_null($this->_offset)) {
                 $clause = 'OFFSET';
-                if (self::get_db($this->_connection_name)->getAttribute(PDO::ATTR_DRIVER_NAME) == 'firebird') {
+                if (static::get_db($this->_connection_name)->getAttribute(PDO::ATTR_DRIVER_NAME) === 'firebird') {
                     $clause = 'TO';
                 }
-                return "$clause " . $this->_offset;
+                return $clause . ' ' . $this->_offset;
             }
             return '';
         }
@@ -1791,18 +1869,19 @@
                     $filtered_pieces[] = $piece;
                 }
             }
-            return join($glue, $filtered_pieces);
+            return implode($glue, $filtered_pieces);
         }
 
         /**
          * Quote a string that is used as an identifier
          * (table names, column names etc). This method can
          * also deal with dot-separated identifiers eg table.column
+         * @return string
          */
         protected function _quote_one_identifier($identifier) {
             $parts = explode('.', $identifier);
             $parts = array_map(array($this, '_quote_identifier_part'), $parts);
-            return join('.', $parts);
+            return implode('.', $parts);
         }
 
         /**
@@ -1810,14 +1889,13 @@
          * (table names, column names etc) or an array containing
          * multiple identifiers. This method can also deal with
          * dot-separated identifiers eg table.column
+         * @return string
          */
         protected function _quote_identifier($identifier) {
             if (is_array($identifier)) {
-                $result = array_map(array($this, '_quote_one_identifier'), $identifier);
-                return join(', ', $result);
-            } else {
-                return $this->_quote_one_identifier($identifier);
+                return implode(', ', array_map(array($this, '_quote_one_identifier'), $identifier));
             }
+            return $this->_quote_one_identifier($identifier);
         }
 
         /**
@@ -1830,7 +1908,7 @@
                 return $part;
             }
 
-            $quote_character = self::$_config[$this->_connection_name]['identifier_quote_character'];
+            $quote_character = static::$_config[$this->_connection_name]['identifier_quote_character'];
             // double up any identifier quotes to escape them
             return $quote_character .
                    str_replace($quote_character,
@@ -1843,8 +1921,8 @@
          * Create a cache key for the given query and parameters.
          */
         protected static function _create_cache_key($query, $parameters, $table_name = null, $connection_name = self::DEFAULT_CONNECTION) {
-            if(isset(self::$_config[$connection_name]['create_cache_key']) and is_callable(self::$_config[$connection_name]['create_cache_key'])){
-                return call_user_func_array(self::$_config[$connection_name]['create_cache_key'], array($query, $parameters, $table_name, $connection_name));
+            if(isset(static::$_config[$connection_name]['create_cache_key']) and is_callable(static::$_config[$connection_name]['create_cache_key'])){
+                return call_user_func_array(static::$_config[$connection_name]['create_cache_key'], array($query, $parameters, $table_name, $connection_name));
             }
             $parameter_string = join(',', $parameters);
             $key = $query . ':' . $parameter_string;
@@ -1856,10 +1934,10 @@
          * is cached for the key, return the value. Otherwise, return false.
          */
         protected static function _check_query_cache($cache_key, $table_name = null, $connection_name = self::DEFAULT_CONNECTION) {
-            if(isset(self::$_config[$connection_name]['check_query_cache']) and is_callable(self::$_config[$connection_name]['check_query_cache'])){
-                return call_user_func_array(self::$_config[$connection_name]['check_query_cache'], array($cache_key, $table_name, $connection_name));
-            } elseif (isset(self::$_query_cache[$connection_name][$cache_key])) {
-                return self::$_query_cache[$connection_name][$cache_key];
+            if(isset(static::$_config[$connection_name]['check_query_cache']) and is_callable(static::$_config[$connection_name]['check_query_cache'])){
+                return call_user_func_array(static::$_config[$connection_name]['check_query_cache'], array($cache_key, $table_name, $connection_name));
+            } elseif (isset(static::$_query_cache[$connection_name][$cache_key])) {
+                return static::$_query_cache[$connection_name][$cache_key];
             }
             return false;
         }
@@ -1868,9 +1946,9 @@
          * Clear the query cache
          */
         public static function clear_cache($table_name = null, $connection_name = self::DEFAULT_CONNECTION) {
-            self::$_query_cache = array();
-            if(isset(self::$_config[$connection_name]['clear_cache']) and is_callable(self::$_config[$connection_name]['clear_cache'])){
-                return call_user_func_array(self::$_config[$connection_name]['clear_cache'], array($table_name, $connection_name));
+            static::$_query_cache = array();
+            if(isset(static::$_config[$connection_name]['clear_cache']) and is_callable(static::$_config[$connection_name]['clear_cache'])){
+                call_user_func_array(static::$_config[$connection_name]['clear_cache'], array($table_name, $connection_name));
             }
         }
 
@@ -1878,25 +1956,27 @@
          * Add the given value to the query cache.
          */
         protected static function _cache_query_result($cache_key, $value, $table_name = null, $connection_name = self::DEFAULT_CONNECTION) {
-            if(isset(self::$_config[$connection_name]['cache_query_result']) and is_callable(self::$_config[$connection_name]['cache_query_result'])){
-                return call_user_func_array(self::$_config[$connection_name]['cache_query_result'], array($cache_key, $value, $table_name, $connection_name));
-            } elseif (!isset(self::$_query_cache[$connection_name])) {
-                self::$_query_cache[$connection_name] = array();
+            if(isset(static::$_config[$connection_name]['cache_query_result']) and is_callable(static::$_config[$connection_name]['cache_query_result'])){
+                call_user_func_array(static::$_config[$connection_name]['cache_query_result'], array($cache_key, $value, $table_name, $connection_name));
+                return;
+            } elseif (!isset(static::$_query_cache[$connection_name])) {
+                static::$_query_cache[$connection_name] = array();
             }
-            self::$_query_cache[$connection_name][$cache_key] = $value;
+            static::$_query_cache[$connection_name][$cache_key] = $value;
         }
 
         /**
          * Execute the SELECT query that has been built up by chaining methods
          * on this class. Return an array of rows as associative arrays.
+         * @throws IdiormStringException
          */
         protected function _run() {
             $query = $this->_build_select();
-            $caching_enabled = self::$_config[$this->_connection_name]['caching'];
+            $caching_enabled = static::$_config[$this->_connection_name]['caching'];
 
             if ($caching_enabled) {
-                $cache_key = self::_create_cache_key($query, $this->_values, $this->_table_name, $this->_connection_name);
-                $cached_result = self::_check_query_cache($cache_key, $this->_table_name, $this->_connection_name);
+                $cache_key = static::_create_cache_key($query, $this->_values, $this->_table_name, $this->_connection_name);
+                $cached_result = static::_check_query_cache($cache_key, $this->_table_name, $this->_connection_name);
 
                 if ($cached_result !== false) {
                     $this->_reset_idiorm_state();
@@ -1904,8 +1984,8 @@
                 }
             }
 
-            self::_execute($query, $this->_values, $this->_connection_name);
-            $statement = self::get_last_statement();
+            static::_execute($query, $this->_values, $this->_connection_name);
+            $statement = static::get_last_statement();
 
             $rows = array();
             while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
@@ -1913,7 +1993,7 @@
             }
 
             if ($caching_enabled) {
-                self::_cache_query_result($cache_key, $rows, $this->_table_name, $this->_connection_name);
+                static::_cache_query_result($cache_key, $rows, $this->_table_name, $this->_connection_name);
             }
 
             $this->_reset_idiorm_state();
@@ -1970,14 +2050,15 @@
             if (!is_null($this->_instance_id_column)) {
                 return $this->_instance_id_column;
             }
-            if (isset(self::$_config[$this->_connection_name]['id_column_overrides'][$this->_table_name])) {
-                return self::$_config[$this->_connection_name]['id_column_overrides'][$this->_table_name];
+            if (isset(static::$_config[$this->_connection_name]['id_column_overrides'][$this->_table_name])) {
+                return static::$_config[$this->_connection_name]['id_column_overrides'][$this->_table_name];
             }
-            return self::$_config[$this->_connection_name]['id_column'];
+            return static::$_config[$this->_connection_name]['id_column'];
         }
 
         /**
          * Get the primary key ID of this object.
+         * @throws Exception
          */
         public function id($disallow_null = false) {
             $id = $this->get($this->_get_id_column_name());
@@ -2003,6 +2084,7 @@
          * as the first parameter and leave out the second parameter.
          * Flags the properties as 'dirty' so they will be saved to the
          * database when save() is called.
+         * @return $this
          */
         public function set($key, $value = null) {
             return $this->_set_orm_property($key, $value);
@@ -2013,9 +2095,10 @@
          * To set multiple properties at once, pass an associative array
          * as the first parameter and leave out the second parameter.
          * Flags the properties as 'dirty' so they will be saved to the
-         * database when save() is called. 
+         * database when save() is called.
          * @param string|array $key
          * @param string|null $value
+         * @return $this
          */
         public function set_expr($key, $value = null) {
             return $this->_set_orm_property($key, $value, true);
@@ -2026,6 +2109,7 @@
          * @param string|array $key
          * @param string|null $value
          * @param bool $raw Whether this value should be treated as raw or not
+         * @return $this
          */
         protected function _set_orm_property($key, $value = null, $expr = false) {
             if (!is_array($key)) {
@@ -2062,10 +2146,9 @@
         /**
          * Save any fields which have been modified on this object
          * to the database.
+         * @throws Exception
          */
         public function save() {
-            $query = array();
-
             // remove any expression fields as they are already baked into the query
             $values = array_values(array_diff_key($this->_dirty_fields, $this->_expr_fields));
 
@@ -2085,20 +2168,20 @@
                 $query = $this->_build_insert();
             }
 
-            $success = self::_execute($query, $values, $this->_connection_name);
-            $caching_auto_clear_enabled = self::$_config[$this->_connection_name]['caching_auto_clear'];
+            $success = static::_execute($query, $values, $this->_connection_name);
+            $caching_auto_clear_enabled = static::$_config[$this->_connection_name]['caching_auto_clear'];
             if($caching_auto_clear_enabled){
-                self::clear_cache($this->_table_name, $this->_connection_name);
+                static::clear_cache($this->_table_name, $this->_connection_name);
             }
             // If we've just inserted a new record, set the ID of this object
             if ($this->_is_new) {
                 $this->_is_new = false;
                 if ($this->count_null_id_columns() != 0) {
-                    $db = self::get_db($this->_connection_name);
+                    $db = static::get_db($this->_connection_name);
                     if($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql') {
                         // it may return several columns if a compound primary
                         // key is used
-                        $row = self::get_last_statement()->fetch(PDO::FETCH_ASSOC);
+                        $row = static::get_last_statement()->fetch(PDO::FETCH_ASSOC);
                         foreach($row as $key => $value) {
                             $this->_data[$key] = $value;
                         }
@@ -2169,7 +2252,7 @@
             $placeholders = $this->_create_placeholders($this->_dirty_fields);
             $query[] = "({$placeholders})";
 
-            if (self::get_db($this->_connection_name)->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql') {
+            if (static::get_db($this->_connection_name)->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql') {
                 $query[] = 'RETURNING ' . $this->_quote_identifier($this->_get_id_column_name());
             }
 
@@ -2178,6 +2261,7 @@
 
         /**
          * Delete this record from the database
+         * @throws Exception
          */
         public function delete() {
             $query = array(
@@ -2185,11 +2269,12 @@
                 $this->_quote_identifier($this->_table_name)
             );
             $this->_add_id_column_conditions($query);
-            return self::_execute(join(" ", $query), is_array($this->id(true)) ? array_values($this->id(true)) : array($this->id(true)), $this->_connection_name);
+            return static::_execute(join(" ", $query), is_array($this->id(true)) ? array_values($this->id(true)) : array($this->id(true)), $this->_connection_name);
         }
 
         /**
          * Delete many records from the database
+         * @throws IdiormStringException
          */
         public function delete_many() {
             // Build and return the full DELETE statement by concatenating
@@ -2200,7 +2285,7 @@
                 $this->_build_where(),
             ));
 
-            return self::_execute($query, $this->_values, $this->_connection_name);
+            return static::_execute($query, $this->_values, $this->_connection_name);
         }
 
         // --------------------- //
@@ -2249,15 +2334,16 @@
 
         /**
          * Magic method to capture calls to undefined class methods.
-         * In this case we are attempting to convert camel case formatted 
+         * In this case we are attempting to convert camel case formatted
          * methods into underscore formatted methods.
          *
-         * This allows us to call ORM methods using camel case and remain 
+         * This allows us to call ORM methods using camel case and remain
          * backwards compatible.
-         * 
-         * @param  string   $name
-         * @param  array    $arguments
-         * @return ORM
+         *
+         * @param  string $name
+         * @param  array $arguments
+         * @return mixed
+         * @throws IdiormMethodMissingException
          */
         public function __call($name, $arguments)
         {
@@ -2271,22 +2357,22 @@
         }
 
         /**
-         * Magic method to capture calls to undefined static class methods. 
-         * In this case we are attempting to convert camel case formatted 
+         * Magic method to capture calls to undefined static class methods.
+         * In this case we are attempting to convert camel case formatted
          * methods into underscore formatted methods.
          *
-         * This allows us to call ORM methods using camel case and remain 
+         * This allows us to call ORM methods using camel case and remain
          * backwards compatible.
-         * 
+         *
          * @param  string   $name
          * @param  array    $arguments
-         * @return ORM
+         * @return mixed
          */
         public static function __callStatic($name, $arguments)
         {
             $method = strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $name));
 
-            return call_user_func_array(array('ORM', $method), $arguments);
+            return call_user_func_array(array('static', $method), $arguments);
         }
     }
 
@@ -2306,10 +2392,10 @@
         /**
          * Get an easy to use instance of the class
          * @param string $subject
-         * @return \self
+         * @return static
          */
         public static function value($subject) {
-            return new self($subject);
+            return new static($subject);
         }
 
         /**
@@ -2319,9 +2405,10 @@
          * @param string $replace
          * @param string $subject
          * @return string
+         * @throws IdiormStringException
          */
         public static function str_replace_outside_quotes($search, $replace, $subject) {
-            return self::value($subject)->replace_outside_quotes($search, $replace);
+            return static::value($subject)->replace_outside_quotes($search, $replace);
         }
 
         /**
@@ -2338,6 +2425,7 @@
          * @param string $search
          * @param string $replace
          * @return string
+         * @throws IdiormStringException
          */
         public function replace_outside_quotes($search, $replace) {
             $this->search = $search;
@@ -2351,6 +2439,7 @@
          * @author Jeff Roberson <ridgerunner@fluxbb.org>
          * @link http://stackoverflow.com/a/13370709/461813 StackOverflow answer
          * @return string
+         * @throws IdiormStringException
          */
         protected function _str_replace_outside_quotes(){
             $re_valid = '/
@@ -2438,7 +2527,7 @@
         public function as_array() {
             return $this->get_results();
         }
-        
+
         /**
          * Get the number of records in the result set
          * @return int
@@ -2473,7 +2562,7 @@
         public function offsetGet($offset) {
             return $this->_results[$offset];
         }
-        
+
         /**
          * ArrayAccess
          * @param int|string $offset
@@ -2516,6 +2605,7 @@
          * @param string $method
          * @param array $params
          * @return \IdiormResultSet
+         * @throws IdiormMethodMissingException
          */
         public function __call($method, $params = array()) {
             foreach($this->_results as $model) {
