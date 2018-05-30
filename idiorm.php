@@ -361,9 +361,11 @@
         }
 
         /**
-         * Delete all registered PDO objects in _db array.
+         * Close and delete all registered PDO objects in _db array.
          */
         public static function reset_db() {
+            self::$_db = null;
+
             self::$_db = array();
         }
 
