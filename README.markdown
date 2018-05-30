@@ -85,9 +85,13 @@ is a Docker setup in `./test/docker_for_php52` - check the readme in there for m
 
 Changelog
 ---------
+#### 1.5.6 - released 2018-05-31
+
+* Assign `null` to `self::$_db` on `reset_db()` to ensure PDO closes the connections [[bleakgadfly](https://github.com/bleakgadfly)] - [issue #338](https://github.com/j4mie/idiorm/issues/338)
+
 #### 1.5.5 - released 2018-01-05
 
-* Add a docker setup for testing with PHP 5.2 (uses PHPUnit 3.6.12, which is the last version released compatible with PHP 5.2) [Treffynnon](https://github.com/treffynnon)
+* Add a docker setup for testing with PHP 5.2 (uses PHPUnit 3.6.12, which is the last version released compatible with PHP 5.2) [[Treffynnon](https://github.com/treffynnon)]
 
 #### 1.5.4 - released 2018-01-04
 
