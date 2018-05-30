@@ -87,7 +87,7 @@ Changelog
 ---------
 #### 1.5.6 - released 2018-05-31
 
-* Assign `null` to `self::$_db` on `reset_db()` to ensure PDO closes the connections #338 [[bleakgadfly](https://github.com/bleakgadfly)] - [issue #338](https://github.com/j4mie/idiorm/issues/338)
+* Assign `null` to `self::$_db` on `reset_db()` to ensure PDO closes the connections [[bleakgadfly](https://github.com/bleakgadfly)] - [issue #338](https://github.com/j4mie/idiorm/issues/338)
 
 #### 1.5.5 - released 2018-01-05
 
