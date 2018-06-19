@@ -495,6 +495,8 @@
                     $type = PDO::PARAM_BOOL;
                 } else if (is_int($param)) {
                     $type = PDO::PARAM_INT;
+                } else if (is_resource($param) && get_resource_type($param) === "stream") {
+                    $type = PDO::PARAM_LOB;
                 } else {
                     $type = PDO::PARAM_STR;
                 }
