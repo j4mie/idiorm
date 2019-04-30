@@ -1264,7 +1264,9 @@
         protected function _get_compound_id_column_values($value) {
             $filtered = array();
             foreach($this->_get_id_column_name() as $key) {
-                $filtered[$key] = isset($value[$key]) ? $value[$key] : null;
+				if(isset($value[$key])) {
+					$filtered[$key] = $value[$key];
+				}
             }
             return $filtered;
         }
