@@ -32,7 +32,7 @@ class CacheTest53 extends PHPUnit_Framework_TestCase {
             $phpunit->assertEquals(true, is_array($parameters));
             $phpunit->assertEquals(true, is_string($connection));
             $phpunit->assertEquals('widget', $table_name);
-            $parameter_string = join(',', $parameters);
+            $parameter_string = implode($parameters, ',');
             $key = $query . ':' . $parameter_string;
             $my_key = 'some-prefix'.crc32($key);
             return $my_key;
