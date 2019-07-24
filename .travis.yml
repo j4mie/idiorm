@@ -6,6 +6,8 @@ php:
   - 7.3
   - 7.4snapshot
 matrix:
+  allow_failures:
+    - php: 7.4snapshot
   include:
     - php: 5.2
       dist: precise
@@ -18,7 +20,7 @@ matrix:
     - php: 5.6
       dist: trusty
 before_install: |
-  if [ ${TRAVIS_PHP_VERSION:0:3} == "5.3" ]; then
+  if [ ${TRAVIS_PHP_VERSION:0:3} == "5.2" ]; then
     pecl install phar
   fi
 install: |
@@ -36,7 +38,11 @@ install: |
     composer require phpunit/phpunit 6 --dev --no-update
     composer install
   fi
-  if [ ${TRAVIS_PHP_VERSION:0:1} == "7" ]; then
+  if [ ${TRAVIS_PHP_VERSION:0:3} == "7.1" ] || [ ${TRAVIS_PHP_VERSION:0:3} == "7.2" ] || [ ${TRAVIS_PHP_VERSION:0:3} == "7.3" ]; then
+    composer install
+  fi
+  if [ ${TRAVIS_PHP_VERSION:0:3} == "7.4" ]; then
+    composer require phpunit/phpunit 8 --dev --no-update
     composer install
   fi
 script: |
