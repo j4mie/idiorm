@@ -3,8 +3,11 @@
 require_once dirname(__FILE__) . '/../idiorm.php';
 
 // ugly workaround for modern phpunit to support old php versions
-class PHPUnit_Framework_TestCase extends \PHPUnit\Framework\TestCase
-{
+
+if (class_exists('\PHPUnit\Framework\TestCase')) {
+	class PHPUnit_Framework_TestCase extends \PHPUnit\Framework\TestCase
+	{
+	}
 }
 
 /**
