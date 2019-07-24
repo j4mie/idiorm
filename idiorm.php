@@ -1355,7 +1355,7 @@
                 }
             }
             $query[] = "))";
-            return $this->where_raw(join($query, ' '), $data);
+            return $this->where_raw(implode(' ', $query), $data);
         }
 
         /**
@@ -1663,7 +1663,7 @@
          */
         protected function _build_select_start() {
             $fragment = 'SELECT ';
-            $result_columns = join(', ', $this->_result_columns);
+            $result_columns = implode($this->_result_columns, ', ');
 
             if (!is_null($this->_limit) &&
                 self::$_config[$this->_connection_name]['limit_clause_style'] === ORM::LIMIT_STYLE_TOP_N) {
@@ -1690,7 +1690,7 @@
                 return '';
             }
 
-            return join(" ", $this->_join_sources);
+            return implode($this->_join_sources, ' ');
         }
 
         /**
@@ -1714,7 +1714,7 @@
             if (count($this->_group_by) === 0) {
                 return '';
             }
-            return "GROUP BY " . join(", ", $this->_group_by);
+            return "GROUP BY " . implode($this->_group_by, ', ');
         }
 
         /**
@@ -1735,7 +1735,7 @@
                 $this->_values = array_merge($this->_values, $condition[self::CONDITION_VALUES]);
             }
 
-            return strtoupper($type) . " " . join(" AND ", $conditions);
+            return strtoupper($type) . " " . implode($conditions, ' AND ');
         }
 
         /**
@@ -1745,7 +1745,7 @@
             if (count($this->_order_by) === 0) {
                 return '';
             }
-            return "ORDER BY " . join(", ", $this->_order_by);
+            return "ORDER BY " . implode($this->_order_by, ', ');
         }
 
         /**
@@ -1793,7 +1793,7 @@
                     $filtered_pieces[] = $piece;
                 }
             }
-            return join($glue, $filtered_pieces);
+            return implode($filtered_pieces, $glue);
         }
 
         /**
@@ -1804,7 +1804,7 @@
         protected function _quote_one_identifier($identifier) {
             $parts = explode('.', $identifier);
             $parts = array_map(array($this, '_quote_identifier_part'), $parts);
-            return join('.', $parts);
+            return implode($parts, '.');
         }
 
         /**
@@ -1816,7 +1816,7 @@
         protected function _quote_identifier($identifier) {
             if (is_array($identifier)) {
                 $result = array_map(array($this, '_quote_one_identifier'), $identifier);
-                return join(', ', $result);
+                return implode($result, ', ');
             } else {
                 return $this->_quote_one_identifier($identifier);
             }
@@ -1848,7 +1848,7 @@
             if(isset(self::$_config[$connection_name]['create_cache_key']) and is_callable(self::$_config[$connection_name]['create_cache_key'])){
                 return call_user_func_array(self::$_config[$connection_name]['create_cache_key'], array($query, $parameters, $table_name, $connection_name));
             }
-            $parameter_string = join(',', $parameters);
+            $parameter_string = implode($parameters, ',');
             $key = $query . ':' . $parameter_string;
             return sha1($key);
         }
@@ -2153,9 +2153,9 @@
                 }
                 $field_list[] = "{$this->_quote_identifier($key)} = $value";
             }
-            $query[] = join(", ", $field_list);
+            $query[] = implode($field_list, ', ');
             $this->_add_id_column_conditions($query);
-            return join(" ", $query);
+            return implode($query, ' ');
         }
 
         /**
@@ -2165,7 +2165,7 @@
             $query[] = "INSERT INTO";
             $query[] = $this->_quote_identifier($this->_table_name);
             $field_list = array_map(array($this, '_quote_identifier'), array_keys($this->_dirty_fields));
-            $query[] = "(" . join(", ", $field_list) . ")";
+            $query[] = "(" . implode($field_list, ', ') . ")";
             $query[] = "VALUES";
 
             $placeholders = $this->_create_placeholders($this->_dirty_fields);
@@ -2175,7 +2175,7 @@
                 $query[] = 'RETURNING ' . $this->_quote_identifier($this->_get_id_column_name());
             }
 
-            return join(" ", $query);
+            return implode($query, ' ');
         }
 
         /**
@@ -2187,7 +2187,7 @@
                 $this->_quote_identifier($this->_table_name)
             );
             $this->_add_id_column_conditions($query);
-            return self::_execute(join(" ", $query), is_array($this->id(true)) ? array_values($this->id(true)) : array($this->id(true)), $this->_connection_name);
+            return self::_execute(implode($query, ' '), is_array($this->id(true)) ? array_values($this->id(true)) : array($this->id(true)), $this->_connection_name);
         }
 
         /**
