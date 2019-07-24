@@ -31,10 +31,10 @@ install: |
   if [ ${TRAVIS_PHP_VERSION:0:3} == "5.3" ] || [ ${TRAVIS_PHP_VERSION:0:3} == "5.4" ] || [ ${TRAVIS_PHP_VERSION:0:3} == "5.5" ] || [ ${TRAVIS_PHP_VERSION:0:3} == "5.6" ]; then
     composer require phpunit/phpunit 4.8 --dev --no-update
     composer install
-  if
+  fi
   if [ ${TRAVIS_PHP_VERSION:0:1} == "7" ]; then
     composer install
-  if
+  fi
 script: |
   if [ ${TRAVIS_PHP_VERSION:0:3} == "5.2" ]; then
     $X/phpunit --colors --coverage-text
