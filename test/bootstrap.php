@@ -5,11 +5,9 @@ require_once dirname(__FILE__) . '/../idiorm.php';
 /**
  * Ugly workaround for modern phpunit to support old php versions
  */
-try {
-	if (class_exists('\PHPUnit\Framework\TestCase')) {
-	   class PHPUnit_Framework_TestCase extends \PHPUnit\Framework\TestCase {}
-	}
-} catch(Exception $exception ) {}
+if (phpversion() > '5.3.0') {
+	include_once('bootstrap.compat.php');
+}
 
 /**
  *
