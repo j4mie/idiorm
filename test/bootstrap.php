@@ -5,7 +5,7 @@ require_once dirname(__FILE__) . '/../idiorm.php';
 /**
  * Ugly workaround for modern phpunit to support old php versions
  */
-if (class_exists('\PHPUnit\Framework\TestCase')) {
+if (class_exists('\PHPUnit\Framework\TestCase') && version_compare(PHP_VERSION, '5.3') >= 0) {
 	class PHPUnit_Framework_TestCase extends \PHPUnit\Framework\TestCase
 	{
 	}
