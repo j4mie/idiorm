@@ -1355,7 +1355,7 @@
                 }
             }
             $query[] = "))";
-            return $this->where_raw(join($query, ' '), $data);
+            return $this->where_raw(join(' ', $query), $data);
         }
 
         /**
