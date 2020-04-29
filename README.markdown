@@ -6,11 +6,11 @@ Idiorm
 [http://j4mie.github.com/idiormandparis/](http://j4mie.github.com/idiormandparis/)
 
 ---
-### Feature complete
+### Feature/API complete
 
-Idiorm is now considered to be feature complete as of version 1.5.0. Whilst it will continue to be maintained with bug fixes there will be no further new features added from this point on.
+Idiorm is now considered to be feature complete as of version 1.5.0. Whilst it will continue to be maintained with bug fixes there will be no further new features added from this point on. This means that if a pull request makes breaking changes to the API or requires anything other than a patch version bump of the library then it will not be merged.
 
-**Please do not submit feature requests or pull requests adding new features as they will be closed without ceremony.**
+**Please do not submit feature requests or API breaking changes as they will be closed without ceremony.**
 
 ---
 
@@ -85,6 +85,11 @@ is a Docker setup in `./test/docker_for_php52` - check the readme in there for m
 
 Changelog
 ---------
+
+#### 1.5.7 - released 2020-04-29
+
+* Fix argument order in call to join() [[CatalinFrancu](https://github.com/CatalinFrancu)] - [issue #357](https://github.com/j4mie/idiorm/pull/357)
+
 #### 1.5.6 - released 2018-05-31
 
 * Assign `null` to `self::$_db` on `reset_db()` to ensure PDO closes the connections [[bleakgadfly](https://github.com/bleakgadfly)] - [issue #338](https://github.com/j4mie/idiorm/issues/338)
