@@ -128,6 +128,13 @@
         const LIMIT_STYLE_TOP_N = "top";
         const LIMIT_STYLE_LIMIT = "limit";
 
+        // Internal Types
+        const TYPE_BOOL = 'boolean';
+        const TYPE_INT = 'integer';
+        const TYPE_FLOAT = 'float';
+        const TYPE_STRING = 'string';
+        const TYPE_TIME = 'time';
+
         // ------------------------ //
         // --- CLASS PROPERTIES --- //
         // ------------------------ //
@@ -148,6 +155,7 @@
             'caching' => false,
             'caching_auto_clear' => false,
             'return_result_sets' => false,
+            'column_casts' => array(),
         );
 
         // Map of configuration settings
@@ -1909,8 +1917,29 @@
             self::_execute($query, $this->_values, $this->_connection_name);
             $statement = self::get_last_statement();
 
+			$type_casting = self::$_config[$this->_connection_name]['column_casts'];
             $rows = array();
             while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
+                /**
+                 * Convert sql string to php type
+                 */
+                if (count($type_casting) > 0) {
+                    foreach($type_casting AS $col => $type) {
+                        if (isset($row[$col])) {
+                            switch($type){
+                                case self::TYPE_BOOL:
+                                case self::TYPE_INT:
+                                case self::TYPE_FLOAT:
+                                case self::TYPE_STRING:
+                                    settype($row[$col], $type);
+                                    break;
+                                case self::TYPE_TIME:
+                                    $row[$col] = new DateTime($row[$col]);
+                            }
+                        }
+                    }
+                }
+
                 $rows[] = $row;
             }
 
