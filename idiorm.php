@@ -268,7 +268,7 @@
                 }
             } else {
                 if (is_null($value)) {
-                    // Shortcut: If only one string argument is passed, 
+                    // Shortcut: If only one string argument is passed,
                     // assume it's a connection string
                     $value = $key;
                     $key = 'connection_string';
@@ -296,7 +296,7 @@
         public static function reset_config() {
             self::$_config = array();
         }
-        
+
         /**
          * Despite its slightly odd name, this is actually the factory
          * method used to acquire instances of the class. It is named
@@ -333,10 +333,10 @@
             }
         }
 
-       /**
-        * Ensures configuration (multiple connections) is at least set to default.
-        * @param string $connection_name Which connection to use
-        */
+        /**
+         * Ensures configuration (multiple connections) is at least set to default.
+         * @param string $connection_name Which connection to use
+         */
         protected static function _setup_db_config($connection_name) {
             if (!array_key_exists($connection_name, self::$_config)) {
                 self::$_config[$connection_name] = self::$_default_config;
@@ -385,7 +385,7 @@
 
         /**
          * Detect and initialise the limit clause style ("SELECT TOP 5" /
-         * "... LIMIT 5"). If this has been specified manually using 
+         * "... LIMIT 5"). If this has been specified manually using
          * ORM::configure('limit_clause_style', 'top'), this will do nothing.
          * @param string $connection_name Which connection to use
          */
@@ -474,15 +474,15 @@
             return self::$_last_statement;
         }
 
-       /**
-        * Internal helper method for executing statments. Logs queries, and
-        * stores statement object in ::_last_statment, accessible publicly
-        * through ::get_last_statement()
-        * @param string $query
-        * @param array $parameters An array of parameters to be bound in to the query
-        * @param string $connection_name Which connection to use
-        * @return bool Response of PDOStatement::execute()
-        */
+        /**
+         * Internal helper method for executing statments. Logs queries, and
+         * stores statement object in ::_last_statment, accessible publicly
+         * through ::get_last_statement()
+         * @param string $query
+         * @param array $parameters An array of parameters to be bound in to the query
+         * @param string $connection_name Which connection to use
+         * @return bool Response of PDOStatement::execute()
+         */
         protected static function _execute($query, $parameters = array(), $connection_name = self::DEFAULT_CONNECTION) {
             $statement = self::get_db($connection_name)->prepare($query);
             self::$_last_statement = $statement;
@@ -519,7 +519,7 @@
          * @param string $query
          * @param array $parameters An array of parameters to be bound in to the query
          * @param string $connection_name Which connection to use
-		 * @param float $query_time Query time
+         * @param float $query_time Query time
          * @return bool
          */
         protected static function _log_query($query, $parameters, $connection_name, $query_time) {
@@ -563,13 +563,13 @@
 
             self::$_last_query = $bound_query;
             self::$_query_log[$connection_name][] = $bound_query;
-            
-            
+
+
             if(is_callable(self::$_config[$connection_name]['logger'])){
                 $logger = self::$_config[$connection_name]['logger'];
                 $logger($bound_query, $query_time);
             }
-            
+
             return true;
         }
 
@@ -736,7 +736,7 @@
          * @return array
          */
         public function find_array() {
-            return $this->_run(); 
+            return $this->_run();
         }
 
         /**
@@ -812,7 +812,7 @@
             return $return_value;
         }
 
-         /**
+        /**
          * This method can be called to hydrate (populate) this
          * instance of the class from an associative array of data.
          * This will usually be called only from inside the class,
@@ -908,14 +908,14 @@
          * Add columns to the list of columns returned by the SELECT
          * query. This defaults to '*'. Many columns can be supplied
          * as either an array or as a list of parameters to the method.
-         * 
+         *
          * Note that the alias must not be numeric - if you want a
          * numeric alias then prepend it with some alpha chars. eg. a1
-         * 
+         *
          * @example select_many(array('alias' => 'column', 'column2', 'alias2' => 'column3'), 'column4', 'column5');
          * @example select_many('column', 'column2', 'column3');
          * @example select_many(array('column', 'column2', 'column3'), 'column4', 'column5');
-         * 
+         *
          * @return \ORM
          */
         public function select_many() {
@@ -934,16 +934,16 @@
 
         /**
          * Add an unquoted expression to the list of columns returned
-         * by the SELECT query. Many columns can be supplied as either 
+         * by the SELECT query. Many columns can be supplied as either
          * an array or as a list of parameters to the method.
-         * 
+         *
          * Note that the alias must not be numeric - if you want a
          * numeric alias then prepend it with some alpha chars. eg. a1
-         * 
+         *
          * @example select_many_expr(array('alias' => 'column', 'column2', 'alias2' => 'column3'), 'column4', 'column5')
          * @example select_many_expr('column', 'column2', 'column3')
          * @example select_many_expr(array('column', 'column2', 'column3'), 'column4', 'column5')
-         * 
+         *
          * @return \ORM
          */
         public function select_many_expr() {
@@ -963,11 +963,11 @@
         /**
          * Take a column specification for the select many methods and convert it
          * into a normalised array of columns and aliases.
-         * 
+         *
          * It is designed to turn the following styles into a normalised array:
-         * 
+         *
          * array(array('alias' => 'column', 'column2', 'alias2' => 'column3'), 'column4', 'column5'))
-         * 
+         *
          * @param array $columns
          * @return array
          */
@@ -1129,7 +1129,7 @@
             foreach ($data as $key => $val) {
                 $column = $result->_quote_identifier($key);
                 $placeholders = $result->_create_placeholders($val);
-                $result = $result->_add_having("{$column} {$separator} ({$placeholders})", $val);    
+                $result = $result->_add_having("{$column} {$separator} ({$placeholders})", $val);
             }
             return $result;
         }
@@ -1174,7 +1174,7 @@
             foreach ($data as $key => $val) {
                 $column = $result->_quote_identifier($key);
                 $placeholders = $result->_create_placeholders($val);
-                $result = $result->_add_where("{$column} {$separator} ({$placeholders})", $val);    
+                $result = $result->_add_where("{$column} {$separator} ({$placeholders})", $val);
             }
             return $result;
         }
@@ -1207,7 +1207,7 @@
             return $this;
         }
 
-       /**
+        /**
          * Helper method to compile a simple COLUMN SEPARATOR VALUE
          * style HAVING or WHERE condition into a string and value ready to
          * be passed to the _add_condition method. Avoids duplication
@@ -1233,7 +1233,7 @@
                 $result = $result->_add_condition($type, "{$key} {$separator} ?", $val);
             }
             return $result;
-        } 
+        }
 
         /**
          * Return a string containing the given number of question marks,
@@ -1253,7 +1253,7 @@
                 return implode(', ', $db_fields);
             }
         }
-        
+
         /**
          * Helper method that filters a column/value array returning only those
          * columns that belong to a compound primary key.
@@ -1269,7 +1269,7 @@
             return $filtered;
         }
 
-       /**
+        /**
          * Helper method that filters an array containing compound column/value
          * arrays.
          */
@@ -1330,7 +1330,7 @@
          * it can be overriden for any or every column using the second parameter.
          *
          * Each condition will be ORed together when added to the final query.
-         */        
+         */
         public function where_any_is($values, $operator='=') {
             $data = array();
             $query = array("((");
@@ -1506,7 +1506,7 @@
         }
 
         /**
-         * Add an unquoted expression to the list of columns to GROUP BY 
+         * Add an unquoted expression to the list of columns to GROUP BY
          */
         public function group_by_expr($expr) {
             $this->_group_by[] = $expr;
@@ -1835,10 +1835,10 @@
             $quote_character = self::$_config[$this->_connection_name]['identifier_quote_character'];
             // double up any identifier quotes to escape them
             return $quote_character .
-                   str_replace($quote_character,
-                               $quote_character . $quote_character,
-                               $part
-                   ) . $quote_character;
+                str_replace($quote_character,
+                    $quote_character . $quote_character,
+                    $part
+                ) . $quote_character;
         }
 
         /**
@@ -2015,7 +2015,7 @@
          * To set multiple properties at once, pass an associative array
          * as the first parameter and leave out the second parameter.
          * Flags the properties as 'dirty' so they will be saved to the
-         * database when save() is called. 
+         * database when save() is called.
          * @param string|array $key
          * @param string|null $value
          */
@@ -2209,24 +2209,28 @@
         // ---  ArrayAccess  --- //
         // --------------------- //
 
-        public function offsetExists($key) {
-            return array_key_exists($key, $this->_data);
+        #[\ReturnTypeWillChange]
+        public function offsetExists($offset) {
+            return array_key_exists($offset, $this->_data);
         }
 
-        public function offsetGet($key) {
-            return $this->get($key);
+        #[\ReturnTypeWillChange]
+        public function offsetGet($offset) {
+            return $this->get($offset);
         }
 
-        public function offsetSet($key, $value) {
-            if(is_null($key)) {
+        #[\ReturnTypeWillChange]
+        public function offsetSet($offset, $value) {
+            if(is_null($offset)) {
                 throw new InvalidArgumentException('You must specify a key/array index.');
             }
-            $this->set($key, $value);
+            $this->set($offset, $value);
         }
 
-        public function offsetUnset($key) {
-            unset($this->_data[$key]);
-            unset($this->_dirty_fields[$key]);
+        #[\ReturnTypeWillChange]
+        public function offsetUnset($offset) {
+            unset($this->_data[$offset]);
+            unset($this->_dirty_fields[$offset]);
         }
 
         // --------------------- //
@@ -2251,12 +2255,12 @@
 
         /**
          * Magic method to capture calls to undefined class methods.
-         * In this case we are attempting to convert camel case formatted 
+         * In this case we are attempting to convert camel case formatted
          * methods into underscore formatted methods.
          *
-         * This allows us to call ORM methods using camel case and remain 
+         * This allows us to call ORM methods using camel case and remain
          * backwards compatible.
-         * 
+         *
          * @param  string   $name
          * @param  array    $arguments
          * @return ORM
@@ -2273,13 +2277,13 @@
         }
 
         /**
-         * Magic method to capture calls to undefined static class methods. 
-         * In this case we are attempting to convert camel case formatted 
+         * Magic method to capture calls to undefined static class methods.
+         * In this case we are attempting to convert camel case formatted
          * methods into underscore formatted methods.
          *
-         * This allows us to call ORM methods using camel case and remain 
+         * This allows us to call ORM methods using camel case and remain
          * backwards compatible.
-         * 
+         *
          * @param  string   $name
          * @param  array    $arguments
          * @return ORM
@@ -2440,11 +2444,12 @@
         public function as_array() {
             return $this->get_results();
         }
-        
+
         /**
          * Get the number of records in the result set
          * @return int
          */
+        #[\ReturnTypeWillChange]
         public function count() {
             return count($this->_results);
         }
@@ -2454,6 +2459,7 @@
          * over the result set.
          * @return \ArrayIterator
          */
+        #[\ReturnTypeWillChange]
         public function getIterator() {
             return new ArrayIterator($this->_results);
         }
@@ -2463,6 +2469,7 @@
          * @param int|string $offset
          * @return bool
          */
+        #[\ReturnTypeWillChange]
         public function offsetExists($offset) {
             return isset($this->_results[$offset]);
         }
@@ -2472,25 +2479,36 @@
          * @param int|string $offset
          * @return mixed
          */
+        #[\ReturnTypeWillChange]
         public function offsetGet($offset) {
             return $this->_results[$offset];
         }
-        
+
         /**
          * ArrayAccess
-         * @param int|string $offset
+         * @param mixed $offset
          * @param mixed $value
          */
+        #[\ReturnTypeWillChange]
         public function offsetSet($offset, $value) {
             $this->_results[$offset] = $value;
         }
 
         /**
          * ArrayAccess
-         * @param int|string $offset
+         * @param mixed $offset
          */
+        #[\ReturnTypeWillChange]
         public function offsetUnset($offset) {
             unset($this->_results[$offset]);
+        }
+
+        public function __serialize() {
+            return $this->serialize();
+        }
+
+        public function __unserialize($data) {
+            $this->unserialize($data);
         }
 
         /**
