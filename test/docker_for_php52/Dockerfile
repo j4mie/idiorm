@@ -4,6 +4,7 @@ FROM ubuntu:12.04
 
 RUN mkdir /php && \
     cd /php && \
+    sed -i "s#archive.ubuntu.com#old-releases.ubuntu.com#g" /etc/apt/sources.list && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
         autoconf binutils build-essential bzip2 ca-certificates \
