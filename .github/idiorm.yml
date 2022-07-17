@@ -1,0 +1,24 @@
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: treffynnon/php5.2cli:latest
+
+jobs:
+  test-idiorm:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@69f6fc9d46f2f8bf0d5491e4aabe0bb8c6a4678a
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+    - name: Pull docker image
+        script: |
+          docker pull ${{ steps.meta.outputs.tags }}
