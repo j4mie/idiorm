@@ -26,8 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-versions: ['5.4', '5.6', '7.0', '7.1', '7.4', '8.0', '8.1']
-        phpunit-versions: ['latest']
+        php-versions: ['5.4', '5.6', '7.0', '7.1', '7.4']
 
     name: PHP ${{ matrix.php-versions }}
 
@@ -40,7 +39,7 @@ jobs:
         with:
           php-version: ${{ matrix.php-versions }}
           coverage: xdebug
-          tools: php-cs-fixer, phpunit:${{ matrix.phpunit-versions }}, composer
+          tools: composer
 
       - name: Setup problem matchers for PHPUnit
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
