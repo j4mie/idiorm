@@ -18,3 +18,5 @@ jobs:
       - name: Pull docker image
         run: docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
+      - name: Run PHPUnit tests
+        run: docker run -t -v $(realpath ./):/tmp/idiorm --rm ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} /root/phpunit -c /tmp/idiorm/phpunit.xml
