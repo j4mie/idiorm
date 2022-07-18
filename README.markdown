@@ -3,7 +3,7 @@ Idiorm
 
 [![idiorm master branch](https://github.com/j4mie/idiorm/actions/workflows/idiorm-workflow.yml/badge.svg?branch=master)](https://github.com/j4mie/idiorm/actions?query=branch%3Amaster) [![Latest Stable Version](https://poser.pugx.org/j4mie/idiorm/v/stable.png)](https://packagist.org/packages/j4mie/idiorm) [![Total Downloads](https://poser.pugx.org/j4mie/idiorm/downloads.png)](https://packagist.org/packages/j4mie/idiorm) [![Code Climate](https://codeclimate.com/github/j4mie/idiorm/badges/gpa.svg)](https://codeclimate.com/github/j4mie/idiorm)
 
-[http://j4mie.github.com/idiormandparis/](http://j4mie.github.com/idiormandparis/)
+[http://j4mie.github.io/idiormandparis/](http://j4mie.github.io/idiormandparis/)
 
 ---
 ### Feature/API complete
