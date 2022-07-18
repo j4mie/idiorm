@@ -50,5 +50,9 @@ jobs:
       - name: Setup problem matchers for PHPUnit
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
+      - name: Add PHP 8 return types
+        if: ${{ matrix.php-versions >= '8.0' }}
+        run: sed -i 's#setUp()#setUp(): void#' test/*.php && sed -i 's#tearDown()#tearDown(): void#' test/*.php
+
       - name: Run phpunit tests
         run: composer run-script test -- --colors --coverage-text
