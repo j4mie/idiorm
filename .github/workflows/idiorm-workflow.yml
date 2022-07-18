@@ -2,7 +2,7 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: treffynnon/php5.2cli:latest
 
-on: [push, pull_request]
+on: push
 
 jobs:
   test-idiorm-with-php5-2:
