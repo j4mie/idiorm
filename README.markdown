@@ -3,7 +3,7 @@ Idiorm
 
 [![idiorm master branch](https://github.com/j4mie/idiorm/actions/workflows/idiorm-workflow.yml/badge.svg?branch=master)](https://github.com/j4mie/idiorm/actions?query=branch%3Amaster) [![Latest Stable Version](https://poser.pugx.org/j4mie/idiorm/v/stable.png)](https://packagist.org/packages/j4mie/idiorm) [![Total Downloads](https://poser.pugx.org/j4mie/idiorm/downloads.png)](https://packagist.org/packages/j4mie/idiorm) [![Code Climate](https://codeclimate.com/github/j4mie/idiorm/badges/gpa.svg)](https://codeclimate.com/github/j4mie/idiorm)
 
-[http://j4mie.github.io/idiormandparis/](http://j4mie.github.io/idiormandparis/)
+[https://j4mie.github.io/idiormandparis/](https://j4mie.github.io/idiormandparis/)
 
 ---
 ### Feature/API complete
@@ -18,17 +18,17 @@ A lightweight nearly-zero-configuration object-relational mapper and fluent quer
 
 Tested on PHP 5.2.0+ - may work on earlier versions with PDO and the correct database drivers.
 
-Released under a [BSD license](http://en.wikipedia.org/wiki/BSD_licenses).
+Released under a [BSD license](https://en.wikipedia.org/wiki/BSD_licenses).
 
-**See Also: [Paris](http://github.com/j4mie/paris), an Active Record implementation built on top of Idiorm.**
+**See Also: [Paris](https://github.com/j4mie/paris), an Active Record implementation built on top of Idiorm.**
 
 Features
 --------
 
 * Makes simple queries and simple CRUD operations completely painless.
 * Gets out of the way when more complex SQL is required.
-* Built on top of [PDO](http://php.net/pdo).
-* Uses [prepared statements](http://uk.php.net/manual/en/pdo.prepared-statements.php) throughout to protect against [SQL injection](http://en.wikipedia.org/wiki/SQL_injection) attacks.
+* Built on top of [PDO](https://php.net/pdo).
+* Uses [prepared statements](https://uk.php.net/manual/en/pdo.prepared-statements.php) throughout to protect against [SQL injection](https://en.wikipedia.org/wiki/SQL_injection) attacks.
 * Requires no model classes, no XML configuration and no code generation: works out of the box, given only a connection string.
 * Consists of one main class called `ORM`. Additional classes are prefixed with `Idiorm`. Minimal global namespace pollution.
 * Database agnostic. Currently supports SQLite, MySQL, Firebird and PostgreSQL. May support others, please give it a try!
@@ -39,11 +39,11 @@ Features
 Documentation
 -------------
 
-The documentation is hosted on Read the Docs: [idiorm.rtfd.org](http://idiorm.rtfd.org)
+The documentation is hosted on Read the Docs: [idiorm.rtfd.org](https://idiorm.rtfd.org)
 
 ### Building the Docs ###
 
-You will need to install [Sphinx](http://sphinx-doc.org/) and then in the docs folder run:
+You will need to install [Sphinx](https://sphinx-doc.org/) and then in the docs folder run:
 
     make html
 
