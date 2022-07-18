@@ -3,7 +3,7 @@
     "type": "library",
     "description": "A lightweight nearly-zero-configuration object-relational mapper and fluent query builder for PHP5",
     "keywords": ["idiorm", "orm", "query builder"],
-    "homepage": "http://j4mie.github.com/idiormandparis",
+    "homepage": "https://j4mie.github.io/idiormandparis",
     "support": {
         "issues": "https://github.com/j4mie/idiorm/issues",
         "source": "https://github.com/j4mie/idiorm"
@@ -18,7 +18,7 @@
         {
             "name": "Simon Holywell",
             "email": "treffynnon@php.net",
-            "homepage": "http://simonholywell.com",
+            "homepage": "https://www.simonholywell.com",
             "role": "Maintainer"
         },
         {
