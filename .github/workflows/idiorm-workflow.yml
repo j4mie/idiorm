@@ -1,6 +1,3 @@
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: treffynnon/php5.2cli:latest
 
 on: push
 
@@ -10,6 +7,10 @@ jobs:
     permissions:
       contents: read
       packages: read
+
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: treffynnon/php5.2cli:latest
 
     name: 'PHP 5.2'
     steps:

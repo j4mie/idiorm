@@ -125,6 +125,9 @@ class MockMsSqlPDO extends MockPDO {
     
 }
 
+/**
+ * Alias the test case class so that these same tests can run against PHPUnit >4
+ */
 if (!class_exists('PHPUnit_Framework_TestCase')) {
     class_alias('\PHPUnit\Framework\TestCase', 'PHPUnit_Framework_TestCase');
 }
