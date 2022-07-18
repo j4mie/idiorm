@@ -12,6 +12,8 @@ Idiorm is now considered to be feature complete as of version 1.5.0. Whilst it w
 
 **Please do not submit feature requests or API breaking changes as they will be closed without ceremony.**
 
+For further information on the state of this project please see https://github.com/j4mie/idiorm/issues/360
+
 ---
 
 A lightweight nearly-zero-configuration object-relational mapper and fluent query builder for PHP5 and above.
