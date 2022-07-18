@@ -1,0 +1,51 @@
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: treffynnon/php5.2cli:latest
+
+on: [push, pull_request]
+
+jobs:
+  test-idiorm-with-php5-2:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+
+    name: 'PHP 5.2'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Pull docker image
+        run: docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: Run PHPUnit tests
+        run: docker run -t -v $(realpath ./):/tmp/idiorm --rm ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} /root/phpunit -c /tmp/idiorm/phpunit.xml
+
+  test-idiorm-against-php-matrix:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-versions: ['5.4', '5.6', '7.0', '7.1', '7.4']
+
+    name: PHP ${{ matrix.php-versions }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          coverage: xdebug
+          tools: composer
+
+      - name: Setup problem matchers for PHPUnit
+        run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
+
+      - name: Install composer deps
+        run: composer install --no-progress --prefer-dist --optimize-autoloader
+
+      - name: Run phpunit tests
+        run: composer run-script test -- --colors --coverage-text
