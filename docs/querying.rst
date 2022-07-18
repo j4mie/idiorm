@@ -2,7 +2,7 @@ Querying
 ========
 
 Idiorm provides a `*fluent
-interface* <http://en.wikipedia.org/wiki/Fluent_interface>`_ to enable
+interface* <https://en.wikipedia.org/wiki/Fluent_interface>`_ to enable
 simple queries to be built without writing a single character of SQL. If
 you've used `jQuery <http://jquery.com>`_ at all, you'll be familiar
 with the concept of a fluent interface. It just means that you can
