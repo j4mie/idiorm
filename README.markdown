@@ -6,11 +6,30 @@ Idiorm
 [https://j4mie.github.io/idiormandparis/](https://j4mie.github.io/idiormandparis/)
 
 ---
-### Feature/API complete
 
-Idiorm is now considered to be feature complete as of version 1.5.0. Whilst it will continue to be maintained with bug fixes there will be no further new features added from this point on. This means that if a pull request makes breaking changes to the API or requires anything other than a patch version bump of the library then it will not be merged.
+### In maintenance only mode
+
+Idiorm and Paris are now considered to be feature complete as of version 1.5.0. Whilst they will continue to be maintained with bug fixes there will be no further new features added from this point on. This means that if a pull request makes breaking changes to the API or requires anything other than a patch version bump of the library then it will not be merged.
 
 **Please do not submit feature requests or API breaking changes as they will be closed without ceremony.**
+
+### Should I use Idiorm/Paris?
+
+#### If you're starting a new project
+
+It is not recommended that you use either Idiorm or Paris in new projects.
+
+I recommend that you use the [Eloquent database library](https://github.com/illuminate/database) from [Laravel](https://laravel.com) as Taylor based it on Idiorm when he wrote it.
+This means that many of the same ideas are present there, but it is more actively maintained and has a more modern code style.
+
+#### If you have existing projects based on Idiorm or Paris
+
+You can continue to use both projects as they will continue to receive security patches and bug fixes.
+It is important to note that future versions of PHP may not be supported if changes they require would break backwards compatibility.
+
+At this point you can either use another database library such as Eloquent from Laravel (see If you're starting a new project above) or you could decide to fork Idiorm and/or Paris to patch them with your own modifications.
+
+### But, why?
 
 For further information on the state of this project please see https://github.com/j4mie/idiorm/issues/360
 
