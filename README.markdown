@@ -89,7 +89,7 @@ Changelog
 #### 1.5.8 - released 2022-07-18
 
 * Update to support PHP 8.1 [[edlerd](https://github.com/edlerd) and [aaronpk](https://github.com/aaronpk)] - [issue #370](https://github.com/j4mie/idiorm/pull/370) and [issue #372](https://github.com/j4mie/idiorm/pull/372)
-* GitHub actions used to perform unit testing/CI [[Treffynnon](https://github.com/treffynnon)]
+* GitHub actions used to perform unit testing/CI [[Treffynnon](https://github.com/treffynnon) and [yan12125](https://github.com/yan12125)]
 
 #### 1.5.7 - released 2020-04-29
 
