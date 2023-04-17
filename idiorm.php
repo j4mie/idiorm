@@ -2101,8 +2101,10 @@
                         // it may return several columns if a compound primary
                         // key is used
                         $row = self::get_last_statement()->fetch(PDO::FETCH_ASSOC);
-                        foreach($row as $key => $value) {
-                            $this->_data[$key] = $value;
+                        if(is_array($row)) {
+                            foreach($row as $key => $value) {
+                                $this->_data[$key] = $value;
+                            }
                         }
                     } else {
                         $column = $this->_get_id_column_name();
