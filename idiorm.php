@@ -536,7 +536,15 @@
                 $bound_query = $query;
             } else {
                 // Escape the parameters
-                $parameters = array_map(array(self::get_db($connection_name), 'quote'), $parameters);
+                foreach ($parameters as &$parameter) {
+                    if (is_string($parameter) === true) {
+                        $parameter = [self::get_db($connection_name), "quote"]($parameter);
+                    } else if (is_bool($parameter) === true) {
+                        $parameter = $parameter === true ? 'TRUE' : 'FALSE';
+                    } else if ($parameter === null) {
+                        $parameter = 'NULL';
+                    }
+                }
 
                 if (array_values($parameters) === $parameters) {
                     // ? placeholders
