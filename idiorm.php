@@ -537,7 +537,7 @@
             } else {
                 // Escape the parameters
                 foreach ($parameters as &$parameter) {
-                    if (is_string($parameters) === true) {
+                    if (is_string($parameter) === true) {
                         $parameter = [self::get_db($connection_name), "quote"]($parameter);
                     } else if (is_bool($parameter) === true) {
                         $parameter = $parameter === true ? 'TRUE' : 'FALSE';
